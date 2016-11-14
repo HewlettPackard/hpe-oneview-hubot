@@ -1,0 +1,44 @@
+{
+  "name": "hubot-oneview",
+  "description": "Hubot script that interfaces with the Hewlett Packard Enterprise OneView RESTful API",
+  "version": "0.0.0",
+  "author": "Hewlett Packard Enterprise <>",
+  "license": "MIT",
+  "keywords": "hubot, hubot-scripts, oneview, hewlett packard enterprise",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/HewlettPackard/hpe-oneview-hubot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HewlettPackard/hpe-oneview-hubot/issues"
+  },
+  "dependencies": {
+    "amqp": "^0.2.6",
+    "fuzzyset.js": "0.0.1",
+    "nlp_compromise": "^6.5.0",
+    "request": "^2.75.0",
+    "request-promise": "^4.1.1",
+    "d3": "^4.2.7",
+    "jsdom": "^9.8.0",
+    "svg2png": "^4.0.0"
+  },
+  "peerDependencies": {
+    "hubot": "2.x"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-function-bind": "^6.8.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-register": "^6.18.0",
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-task-listing": "^1.0.1",
+    "gulp-util": "^3.0.7",
+    "hubot": "2.x",
+    "hubot-test-helper": "^1.3.0"
+  },
+  "main": "dist/oneview.js",
+  "scripts": {
+    "prepublish": "gulp build"
+  }
+}

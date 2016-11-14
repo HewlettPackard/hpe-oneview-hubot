@@ -1,0 +1,9 @@
+{
+  "applianceIp": "0.0.0.0",
+  "apiVersion": 300,
+  "userName": "admin",
+  "password": "password",
+  "notificationsFilters": [{"severity": "Critical"}],
+  "pollingInterval": 30,
+  "readOnly": true
+}

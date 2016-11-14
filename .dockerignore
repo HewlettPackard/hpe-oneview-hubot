@@ -1,0 +1,15 @@
+Dockerfile
+.dockerignore
+.git/**
+.gitignore
+**.swp
+**~
+docker_run.sh
+
+# From .gitignore:
+node_modules
+.DS_Store*
+.hubot_history
+~*.pptx
+npm-debug.log
+dist/**
