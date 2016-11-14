@@ -21,6 +21,6 @@ if [ ! -d ./hubot/ ]; then
 fi
 cp ./hubot/oneview-configuration.json $STARTDIR/local-configuration.json
 cd $STARTDIR
-docker run -it --rm -e "PARMS=$*" -e "HUBOT_NAME=$HUBOT_NAME" -e "HUBOT_SLACK_TOKEN=$HUBOT_SLACK_TOKEN" -v $(pwd):/home/docker/hpe-oneview-hubot hub.docker.com/jesseolsen/hpe-oneview-hubot:latest
+docker run -it --rm -e "PARMS=$*" -e "HUBOT_NAME=$HUBOT_NAME" -e "HUBOT_SLACK_TOKEN=$HUBOT_SLACK_TOKEN" -v $(pwd):/home/docker/hpe-oneview-hubot docker.io/jesseolsen/hpe-oneview-hubot:latest
 rm ./local-configuration.json
 
