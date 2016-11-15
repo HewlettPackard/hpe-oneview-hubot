@@ -1,9 +1,9 @@
 #!/bin/bash
-if [ ! -d /home/docker/oneview-hubot/node_modules ]; then
-  cp -rf /home/docker/oneview-hubot-org/node_modules/ /home/docker/oneview-hubot/
+if [ ! -d /home/docker/hpe-oneview-hubot/node_modules ]; then
+  cp -rf /home/docker/hpe-oneview-hubot-org/node_modules/ /home/docker/hpe-oneview-hubot/
 fi
 
-cd /home/docker/oneview-hubot
+cd /home/docker/hpe-oneview-hubot
 gulp watch &
 
 sleep 5
@@ -15,19 +15,19 @@ unset HTTPS_PROXY
 unset http_proxy
 unset https_proxy
 
-jq -s add /home/docker/oneview-hubot/oneview-configuration.json /home/docker/oneview-hubot/local-configuration.json > /home/docker/hubot/oneview-configuration.json
+jq -s add /home/docker/hpe-oneview-hubot/oneview-configuration.json /home/docker/hpe-oneview-hubot/local-configuration.json > /home/docker/hubot/oneview-configuration.json
 
-echo "## LOCAL (~/hubot/oneview-configuration.json) ################################"
-cat /home/docker/oneview-hubot/local-configuration.json
-echo "##############################################################################"
+echo "## LOCAL (~/hubot/hpe-oneview-configuration.json) ##---------------------"
+cat /home/docker/hpe-oneview-hubot/local-configuration.json
+echo "-------------------------------------------------------------------------"
 echo ""
-echo "## GIT_REPO (/home/docker/oneview-hubot/oneview-configuration.json) ##########"
-cat /home/docker/oneview-hubot/oneview-configuration.json
-echo "##############################################################################"
+echo "## GIT_REPO (/home/docker/hpe-oneview-hubot/oneview-configuration.json) #"
+cat /home/docker/hpe-oneview-hubot/oneview-configuration.json
+echo "-------------------------------------------------------------------------"
 echo ""
-echo "## MERGED (js -s add LOCAL GIT_REPO) #########################################"
+echo "## MERGED (js -s add LOCAL GIT_REPO) ##----------------------------------"
 cat /home/docker/hubot/oneview-configuration.json
-echo "##############################################################################"
+echo "-------------------------------------------------------------------------"
 echo ""
 echo "##################################################################"
 echo " HUBOT_NAME: ${HUBOT_NAME}"

@@ -10,7 +10,7 @@ RUN useradd -ms /bin/bash docker
 
 ###############################################################################
 USER docker
-COPY . /home/docker/oneview-hubot-org/
+COPY . /home/docker/hpe-oneview-hubot-org/
 RUN mkdir -p /home/docker/hubot/node_modules
 RUN chmod 777 /home/docker/hubot/
 RUN chmod 777 /home/docker/hubot/node_modules
@@ -29,10 +29,9 @@ ENV HTTP_PROXY http://$PROXY
 ENV HTTPS_PROXY http://$PROXY
 
 # Steps from:
-# https://github.hpe.com/daniel-t-reed/oneview-hubot/wiki/Getting-Started
+# https://github.com/HewlettPackard/hpe-oneview-hubot/wiki/Getting-Started
 
 # 1. Clone repo
-
 
 # 2. Install node.js + npm (etc.)
 RUN apt-get update && apt-get install -y \
@@ -111,7 +110,7 @@ USER root
 
 # 4. Install gulp (etc.)
 
-WORKDIR /home/docker/oneview-hubot-org
+WORKDIR /home/docker/hpe-oneview-hubot-org
 
 ENV http_proxy http://$PROXY
 ENV https_proxy http://$PROXY
