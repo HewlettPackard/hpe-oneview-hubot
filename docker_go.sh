@@ -12,8 +12,11 @@ cd /home/docker/hubot
 
 unset HTTP_PROXY
 unset HTTPS_PROXY
+unset NO_PROXY
+
 unset http_proxy
 unset https_proxy
+unset no_proxy
 
 jq -s add /home/docker/hpe-oneview-hubot/oneview-configuration.json /home/docker/hpe-oneview-hubot/local-configuration.json > /home/docker/hubot/oneview-configuration.json
 
