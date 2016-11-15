@@ -71,15 +71,19 @@ export default class ResourceTransforms {
   }
 
   error(msg, error) {
-    try {
-      let err = JSON.stringify(error, null, '  ');
-      if (err === '{}') {
-        this.provider.text(msg, stacktrace(error));
-      } else {
-        this.provider.text(msg, err);
+    if (error && error.errorName == 'UserException') {
+      this.provider.text(msg, error.toMessage());
+    } else {
+      try {
+        let err = JSON.stringify(error, null, '  ');
+        if (err === '{}') {
+          this.provider.text(msg, stacktrace(error));
+        } else {
+          this.provider.text(msg, err);
+        }
+      } catch (err) {
+        console.log("Transform error in error handler", err);
       }
-    } catch (err) {
-      console.log("Transform error in error handler", err);
     }
   }
 
