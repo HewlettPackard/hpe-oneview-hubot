@@ -6,7 +6,7 @@ fi
 cd /home/docker/hpe-oneview-hubot
 gulp watch &
 
-sleep 5
+sleep 25
 
 cd /home/docker/hubot
 
