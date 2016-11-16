@@ -21,15 +21,15 @@ THE SOFTWARE.
 */
 
 import Listener from './base-listener';
+import UserException from '../oneview-sdk/user-exception';
 
-export default class ServerProfilesListener extends Listener {
+export default class ServerProfileTemplateListener extends Listener {
   constructor(robot, client, transform, serverHardware, serverProfiles) {
     super(robot, client, transform);
     this.serverHardware = serverHardware;
     this.serverProfiles = serverProfiles;
 
     //these regexs are a little messy still
-
     this.respond(/(?:get|list|show) all (?:server profile ){0,1}templates\.$/i, ::this.ListServerProfileTemplates);
     this.respond(/(?:get|list|show) available (?:hardware|targets) for (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.GetAvailableTargets);
     this.respond(/(?:get|list|show) profile[s]{0,1} (?:using|deployed from|deployed by) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.GetDeployedProfiles);
@@ -82,24 +82,30 @@ export default class ServerProfilesListener extends Listener {
     this.__getAvailableTargets__(msg.templateId, (spt) => { template = spt; }).then((targets) => {
       var i = -1;
       return targets.filter((t) => {
-        i++;
-        return i < msg.count;
+        if (t.powerState === 'Off') {
+          i++;
+          return i < msg.count
+        }
       });
     }).then((targets) => {
-      return this.transform.send(msg, targets, 'Alright, I am going to increase the capacity of ' + this.transform.hyperlink(template.hyperlink, template.name) + ' by ' + this.transform.makePlural(targets.length, 'profile') + '.\n' +
-                                        'For each server listed below, I will perform the following operations:\n' +
-                    this.transform.list('Create a profile using this template\n' +
-                                        'Power on the profile') + "\n" +
-                                        "These operations will take a long time.  Grab a coffee.  I will let you know when I'm finished.").then(() => {
-        return Promise.allSettled(targets.map((target) => {
-          let startMessage = false;
-          return this.client.ServerProfileTemplates.deployProfile(template.uri, target.uri, template.name + ' - ' + target.name).feedback((res) => {
-            console.log(res);
-          }).then((profile) => {
-            return this.serverHardware.PowerOnHardware(profile.serverHardwareUri, msg, true);
-          });
-        }));
-      });
+      if (targets && targets.length > 0) {
+        return this.transform.send(msg, targets, 'Alright, I am going to increase the capacity of ' + this.transform.hyperlink(template.hyperlink, template.name) + ' by ' + this.transform.makePlural(targets.length, 'profile') + '.\n' +
+                                          'For each server listed below, I will perform the following operations:\n' +
+                      this.transform.list('Create a profile using this template\n' +
+                                          'Power on the profile') + "\n" +
+                                          "These operations will take a long time.  Grab a coffee.  I will let you know when I'm finished.").then(() => {
+          return Promise.allSettled(targets.map((target) => {
+            let startMessage = false;
+            return this.client.ServerProfileTemplates.deployProfile(template.uri, target.uri, template.name + ' - ' + target.name).feedback((res) => {
+              console.log(res);
+            }).then((profile) => {
+              return this.serverHardware.PowerOnHardware(profile.serverHardwareUri, msg, true);
+            });
+          }));
+        });
+      } else {
+        throw new UserException('Oops there are no servers available for ' + template.name + '. It appears there are no matching servers that are not powered off or do not already have profiles.', 'Try checking the power state of the matching servers.');
+      }
     }).then(() => {
       return this.client.ServerProfileTemplates.getProfilesUsingTemplate(msg.templateId).then((profiles) => {
         return this.transform.send(msg, profiles, 'Yo ' + msg.message.user.name + ', I just finished deploying those profiles.  Now there ' + this.transform.isAre(profiles.length, 'profile') + ' using ' + this.transform.hyperlink(template.hyperlink, template.name));
