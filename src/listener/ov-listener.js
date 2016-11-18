@@ -47,7 +47,7 @@ export default function(robot, client) {
     }).then((resource) => {
       let checkedMessage = filter.check(message);
       if (typeof checkedMessage !== 'undefined' && checkedMessage.length > 0) {
-        transform.messageRoom('clean-room', resource.resource);
+        transform.messageRoom(client.notificationsRoom, resource.resource);
       }
     }).catch((err) => {
       console.log(err);

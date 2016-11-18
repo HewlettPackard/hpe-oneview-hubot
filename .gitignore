@@ -4,3 +4,4 @@ node_modules
 ~*.pptx
 npm-debug.log
 dist/**
+local-configuration.json

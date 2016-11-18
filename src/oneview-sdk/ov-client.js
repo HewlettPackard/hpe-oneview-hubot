@@ -29,7 +29,8 @@ import ServerProfileTemplates from './server-profile-templates';
 import notifications from './notifications';
 
 export default class OVClient {
-  constructor(applianceIp, apiVersion, pollingInterval, readOnly, robot) {
+  constructor(applianceIp, apiVersion, pollingInterval, readOnly,
+    notificationsRoom, robot) {
     this.host = applianceIp;
     this.connection = new connection(applianceIp, apiVersion, readOnly);
     this.pollingInterval = pollingInterval;
@@ -37,6 +38,10 @@ export default class OVClient {
     this.server_profiles = new serverprofiles(this);
     this.serverProfileTemplates = new ServerProfileTemplates(this);
     this.notifications = new notifications(applianceIp, this.connection, robot);
+    this.notificationsRoom = notificationsRoom;
+    if (this.notificationsRoom === undefined) {
+      this.notificationsRoom = 'clean-room';
+    }
   }
 
   login(credentials, reconnect) {
