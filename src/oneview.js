@@ -36,7 +36,8 @@ const main = (robot) => {
   console.log('Initializing OneView');
   const client = new ovClient(oneview_config.applianceIp,
     oneview_config.apiVersion, oneview_config.pollingInterval,
-    oneview_config.readOnly, robot);
+    oneview_config.readOnly, oneview_config.notificationsRoom,
+    robot);
   client.login({'userName': oneview_config.userName,
       'password': oneview_config.password}, false).then(() => {
     console.log('Logged into OV appliance.')

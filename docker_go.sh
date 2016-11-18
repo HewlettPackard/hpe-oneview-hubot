@@ -4,19 +4,9 @@ if [ ! -d /home/docker/hpe-oneview-hubot/node_modules ]; then
 fi
 
 cd /home/docker/hpe-oneview-hubot
-gulp watch &
-
-sleep 25
+gulp build
 
 cd /home/docker/hubot
-
-unset HTTP_PROXY
-unset HTTPS_PROXY
-unset NO_PROXY
-
-unset http_proxy
-unset https_proxy
-unset no_proxy
 
 jq -s add /home/docker/hpe-oneview-hubot/oneview-configuration.json /home/docker/hpe-oneview-hubot/local-configuration.json > /home/docker/hubot/oneview-configuration.json
 
@@ -40,11 +30,10 @@ echo " "
 echo " Once you see: Connected to SCMB, waiting for messages..."
 echo " Test hubot with:"
 echo " [ENTER] (to see prompt...)"
-echo " ${HUBOT_NAME}> @${HUBOT_NAME} list all server hardware"
-echo " To exit:"
-echo " exit (or ^C)"
-echo " [ENTER] (or ^C)"
-echo " exit"
+echo " ${HUBOT_NAME}> @${HUBOT_NAME} list all hardware"
+echo " TO EXIT: ^C (or exit), [ENTER], exit"
+echo " - OR -"
+echo " TO RESTART after code changes: ^C, [ENTER], /go.sh"
 echo "##################################################################"
 
 bin/hubot --name $HUBOT_NAME $PARMS

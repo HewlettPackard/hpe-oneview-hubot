@@ -1,4 +1,20 @@
 #!/bin/bash
+echo "NOTE: Add -a slack to ./docker_run.sh to run in slack..."
+
+if [ -z "$HUBOT_NAME" ];
+then
+  echo "export HUBOT_NAME before continuing."
+  echo "e.g."
+  echo "export HUBOT_NAME=my-bot"
+  echo "but use your own name."
+  echo ""
+  echo "Also, so you don't have to set it next time,"
+  echo "you may want to add that to your"
+  echo "~/.bashrc or ~/.bash_profile file"
+  echo "or for Windows, set it in your environment variables."
+  echo "Have a great day!"
+  exit
+fi
 
 STARTDIR=$(pwd)
 
