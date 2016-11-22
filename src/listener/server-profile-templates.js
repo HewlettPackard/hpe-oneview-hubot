@@ -32,15 +32,24 @@ export default class ServerProfileTemplateListener extends Listener {
 
     this.switchBoard = new Conversation(robot);
 
+    this.title = "Server Profile Template (spt)";
+    this.capabilities = [];
     //these regexs are a little messy still
     this.respond(/(?:get|list|show) all (?:server profile ){0,1}templates\.$/i, ::this.ListServerProfileTemplates);
+    this.capabilities.push(this.indent + "Show all (server) profile templates (e.g. show all templates).");
     this.respond(/(?:get|list|show) available (?:hardware|targets) for (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.GetAvailableTargets);
+    this.capabilities.push(this.indent + "Show available targets for a server profile template (e.g. show available targets for 12325dd7-2108-481a-b1ef-4bfa4e69dabc).");
     this.respond(/(?:get|list|show) profile[s]{0,1} (?:using|deployed from|deployed by) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.GetDeployedProfiles);
+    this.capabilities.push(this.indent + "Show profile(s) using a server profile template (e.g. show profile using 12325dd7-2108-481a-b1ef-4bfa4e69dabc).");
     this.respond(/(?:deploy|create) (:<count>\d+) profile[s]{0,1} (?:from|for|using) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.DeployProfiles);
-    this.respond(/(?:flex)(?: the)? (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i, ::this.DeployProfiles);
+    this.capabilities.push(this.indent + "Create profile(s) using a server profile template (e.g. create profile for 12325dd7-2108-481a-b1ef-4bfa4e69dabc).");
+    this.respond(/(?:flex|grow)(?: the)? (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i, ::this.DeployProfiles);
+    this.capabilities.push(this.indent + "Flex/grow a server profile template by a given amount (e.g. grow 12325dd7-2108-481a-b1ef-4bfa4e69dabc by 4 profiles).");
     this.respond(/(?:undeploy|remove) (:<count>\d+) profile[s]{0,1} (?:from|that were deployed from|that were using) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.UnDeployProfiles);
     this.respond(/(?:undeploy|remove) (:<count>\d+) server[s]{0,1} (?:from|that were deployed from|that were using) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.UnDeployProfiles);
+    this.capabilities.push(this.indent + "Remove a number of profiles/servers from a profile template (e.g. remove 2 profiles from 12325dd7-2108-481a-b1ef-4bfa4e69dabc).");
     this.respond(/(?:fix)(?: all)? compliance(?: issues)? for (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*?)\.$/i, ::this.FixCompliance);
+    this.capabilities.push(this.indent + "Fix compliance for a profile template (e.g. fix compliance for 12325dd7-2108-481a-b1ef-4bfa4e69dabc).");
   }
 
   __getAvailableTargets__(id, target) {

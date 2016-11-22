@@ -30,13 +30,19 @@ export default class ServerHardwareListener extends Listener {
 
     this.switchBoard = new Conversation(robot);
 
+    this.title = "Server hardware (sh)";
+    this.capabilities = [];
     // Using a negative look-ahead on the string /rest/server-profiles to prevent
     // this listener to responding to power events on server profiles
     this.respond(/(?:will you |can you |please ){0,1}(?:turn|power) on (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?)(?: please){0,1}\.$/i, ::this.PowerOn);
     this.respond(/(?:will you |can you |please ){0,1}(?:turn|power) off (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?)(?: please){0,1}\.$/i, ::this.PowerOff);
+    this.capabilities.push(this.indent + "Power on/off a specific (server) hardware (e.g. turn on 12325dd7-2108-481a-b1ef-4bfa4e69dabc).");
     this.respond(/(?:get|list|show) all (?:server ){0,1}hardware\.$/i, ::this.ListServerHardware);
+    this.capabilities.push(this.indent + "List all (server) hardware (e.g. list all hardware).");
     this.respond(/(?:get|list|show) (?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, ::this.ListServerHardwareUtilization);
+    this.capabilities.push(this.indent + "List a server hardware utilization (e.g. list 12325dd7-2108-481a-b1ef-4bfa4e69dabc utilization).");
     this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
+    this.capabilities.push(this.indent + "List a server profile (e.g. list 12325dd7-2108-481a-b1ef-4bfa4e69dabc).");
   }
 
   PowerOnHardware(id, msg, suppress) {
