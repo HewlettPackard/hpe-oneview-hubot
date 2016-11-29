@@ -30,8 +30,8 @@ export default class OneViewBrain {
       if (res && res.members) {
         for (var i = 0; i < res.members.length; i++) {
           const sh = res.members[i];
-          Lexer.addNamedDevice(sh.name, sh.uri);
-          Lexer.addNamedDevice(sh.serialNumber, sh.uri);
+          Lexer.addNamedDevice(sh.name, sh.uri, 'name');
+          Lexer.addNamedDevice(sh.serialNumber, sh.uri, 'serialNumber');
           robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber}});
         }
       }
@@ -41,9 +41,9 @@ export default class OneViewBrain {
       if (res && res.members) {
         for (var i = 0; i < res.members.length; i++) {
           const sp = res.members[i];
-          Lexer.addNamedDevice(sp.name, sp.uri);
+          Lexer.addNamedDevice(sp.name, sp.uri, 'name');
           if (sp.serialNumberType === 'Virtual') {
-            Lexer.addNamedDevice(sp.serialNumber, sp.uri);
+            Lexer.addNamedDevice(sp.serialNumber, sp.uri, 'serialNumber');
           }
           //robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber}});
         }
@@ -54,7 +54,7 @@ export default class OneViewBrain {
       if (res && res.members) {
         for (var i = 0; i < res.members.length; i++) {
           const spt = res.members[i];
-          Lexer.addNamedDevice(spt.name, spt.uri);
+          Lexer.addNamedDevice(spt.name, spt.uri, 'name');
           //robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber}});
         }
       }
@@ -64,12 +64,16 @@ export default class OneViewBrain {
       if (message) {
         if (message.changeType.toLowerCase() === 'created' && (message.resource.type.toLowerCase().includes('serverprofile')
         || message.resource.type.toLowerCase().includes('server-hardware'))) {
-          Lexer.addNamedDevice(message.resource.name, message.resource.uri);
+          Lexer.addNamedDevice(message.resource.name, message.resource.uri, 'name');
           console.log('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
           if (message.resource.serialNumberType === 'Virtual' && !message.resource.type.toLowerCase().includes('template')) {
-            Lexer.addNamedDevice(message.resource.serialNumber, message.resource.uri);
+            Lexer.addNamedDevice(message.resource.serialNumber, message.resource.uri, 'serialNumber');
             console.log('Adding named device ' + message.resource.serialNumber + ' ' + message.resource.uri);
           }
+        }
+
+        if (message.changeType.toLowerCase() === 'updated' && message.resource.type.toLowerCase().includes('serverprofile')) {
+          Lexer.updateNamedDevice(message.resource.name, message.resource.uri);
         }
       }
     });
