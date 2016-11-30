@@ -53,10 +53,10 @@ export default class Lexer {
     // }
   }
 
-  addNamedDevice(search, replacement) {
+  addNamedDevice(search, replacement, type) {
     const tSearch = search.trim();
 
-    this.__addNamedDevice__(tSearch, replacement);
+    this.__addNamedDevice__(tSearch, replacement, type);
 
     if (bladeName.test(tSearch)) {//We know blades conform to a specific naming pattern so we can get really accurate fuzzy search results by mapping some explicit typographic errors to the correct value
       this.__addFuzzyLookup__(tSearch.replace(bladeName, '$1$2, bay $3'), tSearch);
@@ -77,8 +77,18 @@ export default class Lexer {
     }
   }
 
-  __addNamedDevice__(key, replacement) {
-    this.namedDevices.push({search:new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement});
+  updateNamedDevice(search, replacement) {
+    const tSearch = search.trim();
+    this.namedDevices.forEach((namedDevice) => {
+      if (namedDevice.replacement === replacement && namedDevice.name !== search && namedDevice.type === 'name') {
+        console.log('Updating resource name for ' + namedDevice.replacement + ' from ' + namedDevice.name + ' to ' + search);
+        namedDevice.search = new RegExp('\\b' + tSearch + '\\b', 'ig');;
+        namedDevice.name = tSearch;
+      }
+    });
+  }
+  __addNamedDevice__(key, replacement, type) {
+    this.namedDevices.push({search:new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement, type: type, name: key});
   }
 
   __addFuzzyLookup__(key, mapped) {
