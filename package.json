@@ -14,12 +14,13 @@
   },
   "dependencies": {
     "amqp": "^0.2.6",
+    "d3": "^4.2.7",
     "fuzzyset.js": "0.0.1",
+    "hubot-conversation": "^1.1.1",
+    "jsdom": "^9.8.0",
     "nlp_compromise": "^6.5.0",
     "request": "^2.75.0",
     "request-promise": "^4.1.1",
-    "d3": "^4.2.7",
-    "jsdom": "^9.8.0",
     "svg2png": "^4.0.0"
   },
   "peerDependencies": {

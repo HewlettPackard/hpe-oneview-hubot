@@ -22,10 +22,13 @@ THE SOFTWARE.
 
 import Listener from './base-listener';
 import MetricToPng from '../charting/chart';
+const Conversation = require('hubot-conversation');
 
 export default class ServerHardwareListener extends Listener {
   constructor(robot, client, transform) {
     super(robot, client, transform);
+
+    this.switchBoard = new Conversation(robot);
 
     // Using a negative look-ahead on the string /rest/server-profiles to prevent
     // this listener to responding to power events on server profiles
@@ -44,7 +47,7 @@ export default class ServerHardwareListener extends Listener {
     return this.client.ServerHardware.setPowerState(id, "On").feedback((res) => {
       if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
         startMessage = true;
-        this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering on " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + ", this may take some time.");
+        this.transform.text(msg, "I am powering on " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + ", this may take some time.");
       }
     }).then((res) => {
       if (!suppress) {
@@ -74,14 +77,34 @@ export default class ServerHardwareListener extends Listener {
     if(this.client.connection.isReadOnly()) {
       return this.transform.text(msg, "Not so fast...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
     }
-    this.PowerOnHardware(msg.serverId, msg).catch(this.error(msg));
+
+    let dialog = this.switchBoard.startDialog(msg);
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade.  Are you sure you want to do this? (yes/no)");
+
+    dialog.addChoice(/yes/i, (msg2) => {
+      this.PowerOnHardware(msg.serverId, msg).catch(this.error(msg));
+    });
+
+    dialog.addChoice(/no/i, (msg3) => {
+      return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't do that.");
+    });
   }
 
   PowerOff(msg) {
     if(this.client.connection.isReadOnly()) {
       return this.transform.text(msg, "I don't think I should be doing that if you are in readOnly mode...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
     }
-    this.PowerOffHardware(msg.serverId, msg).catch(this.error(msg));
+
+    let dialog = this.switchBoard.startDialog(msg);
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade.  Are you sure you want to do this? (yes/no)");
+
+    dialog.addChoice(/yes/i, (msg2) => {
+      this.PowerOffHardware(msg.serverId, msg).catch(this.error(msg));
+    });
+
+    dialog.addChoice(/no/i, (msg3) => {
+      return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't do that.");
+    });
   }
 
   ListServerHardware(msg) {
