@@ -12,5 +12,6 @@ COPY . /home/docker/hubot-org/
 WORKDIR /home/docker/hubot
 
 RUN npm install hubot-hipchat
+RUN npm install hubot-conversation
 
 ENTRYPOINT ["sh", "/usr/local/bin/docker_entry.sh"]
