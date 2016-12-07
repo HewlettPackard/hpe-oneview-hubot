@@ -20,8 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import SlackTransform from './transforms/slack';
+import HipChatTransform from './transforms/hipchat';
 import ShellTransform from './transforms/shell';
+import SlackTransform from './transforms/slack';
 
 //From: http://stackoverflow.com/questions/591857/how-can-i-get-a-javascript-stack-trace-when-i-throw-an-exception
 function st() {
@@ -52,6 +53,8 @@ export default class ResourceTransforms {
   constructor(robot) {
     if (robot.adapterName === 'slack') {
       this.provider = new SlackTransform();
+    } else if (robot.adapterName === 'hipchat') {
+      this.provider = new HipChatTransform();
     } else {
       this.provider = new ShellTransform();
     }

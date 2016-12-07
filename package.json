@@ -36,6 +36,7 @@
     "gulp-task-listing": "^1.0.1",
     "gulp-util": "^3.0.7",
     "hubot": "2.x",
+    "hubot-hipchat": "^2.12.0",
     "hubot-test-helper": "^1.3.0"
   },
   "main": "dist/oneview.js",
