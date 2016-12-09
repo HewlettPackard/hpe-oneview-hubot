@@ -52,8 +52,7 @@ export default class ServerProfilesListener extends Listener {
 
   ListServerProfileCompliancePreview(msg) {
     this.client.ServerProfiles.getServerProfileCompliancePreview(msg.profileId).then((res) => {
-      //TODO: Need a better way to format compliance preview than this (its just JSON), probably means custom logic in the slack transform to make an attachment object
-      return this.transform.send(msg, res, JSON.stringify(res, null, '  '));
+      return this.transform.send(msg, res);
     }).catch(this.error(msg));
   }
 

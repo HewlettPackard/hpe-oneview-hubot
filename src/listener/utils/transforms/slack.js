@@ -39,7 +39,7 @@ function AttachmentTitle(resource) {
       return 'Profile Template: ' + resource.name
     }
 
-    if (resource.type.startsWith('ServerProfile')) {
+    if (resource.type.startsWith('ServerProfile') && !resource.type.startsWith('ServerProfileCompliancePreview')) {
       return 'Profile: ' + resource.name
     }
   }
@@ -68,6 +68,7 @@ function ToAttachment(resource) {
   }
 
   let fields = [];
+  let pretext = '';
   if (resource.associatedResource && resource.associatedResource.resourceName) {
     fields.push({
       title: 'Resource',
@@ -75,15 +76,6 @@ function ToAttachment(resource) {
       value: '<' + resource.associatedResource.resourceHyperlink + '|' + resource.associatedResource.resourceName + '>'
     });
   }
-
-/*
-  if (resource.serialNumber) {
-    fields.push({
-      title: 'Serial Number',
-      short: true,
-      value: resource.serialNumber
-    });
-  }*/
 
   if (resource.type.startsWith('server-hardware')) {
     if (resource.serverProfileUri) {
@@ -108,14 +100,6 @@ function ToAttachment(resource) {
       value: resource.powerState
     });
   }
-/*
-  if (resource.uuid) {
-    fields.push({
-      title: 'UUID',
-      short: false,
-      value: resource.uuid
-    });
-  }*/
 
   // add description here for SCMs
   if (resource.type.startsWith('AlertResource') && resource.description) {
@@ -126,6 +110,28 @@ function ToAttachment(resource) {
     });
   }
 
+  if (resource.type.startsWith('ServerProfileCompliancePreview') && resource.automaticUpdates || resource.manualUpdates) {
+    pretext = 'The preview of manual and automatic updates required to make the server profile consistent with its template.'
+    if (resource.automaticUpdates && Object.prototype.toString.call(resource.automaticUpdates) === '[object Array]' ) {
+      resource.automaticUpdates.forEach(function(automaticUpdate) {
+        fields.push({
+          title: 'Auto',
+          short: false,
+          value: automaticUpdate
+        });
+      });
+    }
+    if (resource.manualUpdates && Object.prototype.toString.call(resource.manualUpdates) === '[object Array]' ) {
+      resource.manualUpdates.forEach(function(manualUpdate) {
+        fields.push({
+          title: 'Manual',
+          short: false,
+          value: manualUpdate
+        });
+      });
+    }
+  }
+
   return {
     title: AttachmentTitle(resource),
     title_link: resource.hyperlink,
@@ -133,7 +139,7 @@ function ToAttachment(resource) {
     //fallback: TODO: Describe object as text,
     fields: fields,
     text: '',
-    pretext: '',
+    pretext: pretext,
   };
 }
 
