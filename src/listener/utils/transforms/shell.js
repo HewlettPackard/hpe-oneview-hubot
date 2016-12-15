@@ -42,7 +42,7 @@ export default class ShellTransform {
     }
     msg.send(JSON.stringify(resource, null, '  '));
   }
-
+  
   messageRoom(robot, room, resource, text) {
     if (text) {
       robot.messageRoom(room, text);
@@ -51,5 +51,24 @@ export default class ShellTransform {
     if (resource) {
       robot.messageRoom(room, JSON.stringify(resource, null, '  '));
     }
+  }
+
+  error(msg, err) {
+    let userError = "Oh no there was a problem.\n\n";
+    if (err.error.details) {
+      userError = userError.concat(err.error.details).concat("\n");
+    }
+    if (err.error.message) {
+      userError = userError.concat(err.error.message).concat("\n");
+    }
+    if (err.error.recommendedActions && Object.prototype.toString.call(err.error.recommendedActions) === '[object Array]') {
+      err.error.recommendedActions.forEach(function(recommendedAction) {
+        userError = userError.concat(recommendedAction).concat("\n");
+      });
+    }
+    if (err.error.errorCode) {
+      userError = userError.concat("\nOneView error code: ").concat(err.error.errorCode);
+    }
+    msg.send(userError);
   }
 }

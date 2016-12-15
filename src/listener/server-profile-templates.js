@@ -56,7 +56,9 @@ export default class ServerProfileTemplateListener extends Listener {
       } else {
         return this.transform.text(msg, 'There are no server templates deployed');
       }
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   GetAvailableTargets(msg) {
@@ -67,21 +69,25 @@ export default class ServerProfileTemplateListener extends Listener {
       } else {
         return this.transform.text(msg, 'There are no servers available for ' + this.transform.hyperlink(template.hyperlink, template.name));
       }
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   GetDeployedProfiles(msg) {
     var template = null;
     this.client.ServerProfileTemplates.getProfilesUsingTemplate(msg.templateId, (spt) => { template = spt; }).then((profiles) => {
       return this.transform.send(msg, profiles, 'There ' + this.transform.isAre(profiles.length,  'profile') + ' using ' + this.transform.hyperlink(template.hyperlink, template.name));
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   DeployProfiles(msg) {
     if(this.client.connection.isReadOnly()) {
       return this.transform.text(msg, "Hold on a sec...  You'll have to set readOnly mode to false in your config file first if you want to do that...   ");
     }
-        
+
     let dialog = this.switchBoard.startDialog(msg);
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy " + this.transform.makePlural(msg.count, 'profile') + ".  Are you sure you want to do this? (yes/no)");
 
@@ -118,7 +124,9 @@ export default class ServerProfileTemplateListener extends Listener {
         return this.client.ServerProfileTemplates.getProfilesUsingTemplate(msg.templateId).then((profiles) => {
           return this.transform.send(msg, profiles, 'Yo ' + msg.message.user.name + ', I just finished deploying those profiles.  Now there ' + this.transform.isAre(profiles.length, 'profile') + ' using ' + this.transform.hyperlink(template.hyperlink, template.name));
         });
-      }).catch(this.error(msg));
+      }).catch((err) => {
+        return this.transform.error(msg, err);
+      });
     });
 
     dialog.addChoice(/no/i, (msg3) => {
@@ -161,7 +169,9 @@ export default class ServerProfileTemplateListener extends Listener {
         return this.client.ServerProfileTemplates.getProfilesUsingTemplate(msg.templateId).then((profiles) => {
           return this.transform.send(msg, profiles, msg.message.user.name + ', I just wrapped up removing those profiles.  There are now ' + this.transform.makePlural(profiles.length, 'profile') + ' using ' + this.transform.hyperlink(template.hyperlink, template.name));
         });
-      }).catch(this.error(msg));
+      }).catch((err) => {
+        return this.transform.error(msg, err);
+      });
     });
 
     dialog.addChoice(/no/i, (msg3) => {
@@ -203,7 +213,9 @@ export default class ServerProfileTemplateListener extends Listener {
             return this.transform.send(msg, profiles, msg.message.user.name + ', I finished bringing ' + this.transform.makePlural(profiles.length, 'profile') + ' into compliance with ' + this.transform.hyperlink(template.hyperlink, template.name));
           });
         }
-      }).catch(this.error(msg));
+      }).catch((err) => {
+        return this.transform.error(msg, err);
+      });
     });
 
     dialog.addChoice(/no/i, (msg3) => {

@@ -41,19 +41,25 @@ export default class ServerProfilesListener extends Listener {
   ListServerProfiles(msg) {
     this.client.ServerProfiles.getAllServerProfiles().then((res) => {
       return this.transform.send(msg, res, (res.members && res.members.length == 0 ? 'There are no profiles.' : ''));
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   ListServerProfile(msg) {
     this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
       return this.transform.send(msg, res);
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   ListServerProfileCompliancePreview(msg) {
     this.client.ServerProfiles.getServerProfileCompliancePreview(msg.profileId).then((res) => {
       return this.transform.send(msg, res);
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   MakeServerProfileCompliant(profileId, msg, suppress) {
@@ -71,7 +77,9 @@ export default class ServerProfilesListener extends Listener {
   }
 
   HandleServerCompliantMessage(msg) {
-    this.MakeServerProfileCompliant(msg.profileId, msg).catch(this.error(msg));
+    this.MakeServerProfileCompliant(msg.profileId, msg).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   PowerOnServerProfile(msg) {
@@ -85,7 +93,9 @@ export default class ServerProfilesListener extends Listener {
     dialog.addChoice(/yes/i, (msg2) => {
       this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
         return this.serverHardware.PowerOnHardware(res.serverHardwareUri, msg);
-      }).catch(this.error(msg));
+      }).catch((err) => {
+        return this.transform.error(msg, err);
+      });
 
     });
 
@@ -105,7 +115,9 @@ export default class ServerProfilesListener extends Listener {
     dialog.addChoice(/yes/i, (msg2) => {
       this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
         return this.serverHardware.PowerOffHardware(res.serverHardwareUri, msg);
-      }).catch(this.error(msg));
+      }).catch((err) => {
+        return this.transform.error(msg, err);
+      });
     });
 
     dialog.addChoice(/no/i, (msg3) => {

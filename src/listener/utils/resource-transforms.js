@@ -82,7 +82,7 @@ export default class ResourceTransforms {
         if (err === '{}') {
           this.provider.text(msg, stacktrace(error));
         } else {
-          this.provider.text(msg, err);
+          this.provider.error(msg, error);
         }
       } catch (err) {
         console.log("Transform error in error handler", err);
