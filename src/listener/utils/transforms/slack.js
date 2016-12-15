@@ -200,6 +200,9 @@ export default class SlackTransform {
 
   error(msg, err) {
     let userError = "";
+    if (err.error.errorCode) {
+      userError = userError.concat("OneView error code: ").concat(err.error.errorCode).concat("\n");
+    }
     if (err.error.details) {
       userError = userError.concat(err.error.details).concat("\n");
     }
@@ -210,9 +213,6 @@ export default class SlackTransform {
       err.error.recommendedActions.forEach(function(recommendedAction) {
         userError = userError.concat(recommendedAction).concat("\n");
       });
-    }
-    if (err.error.errorCode) {
-      userError = userError.concat("\nOneView error code: ").concat(err.error.errorCode);
     }
 
     let attachment = {
