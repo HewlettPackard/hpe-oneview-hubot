@@ -10,7 +10,7 @@ RUN useradd -ms /bin/bash docker
 
 ###############################################################################
 USER docker
-COPY . /home/docker/hpe-oneview-hubot-org/
+COPY . /home/docker/hubot-core-org/
 RUN mkdir -p /home/docker/hubot/node_modules
 RUN chmod 777 /home/docker/hubot/
 RUN chmod 777 /home/docker/hubot/node_modules
@@ -110,7 +110,7 @@ USER root
 
 # 4. Install gulp (etc.)
 
-WORKDIR /home/docker/hpe-oneview-hubot-org
+WORKDIR /home/docker/hubot-core-org
 
 ENV http_proxy http://$PROXY
 ENV https_proxy http://$PROXY
