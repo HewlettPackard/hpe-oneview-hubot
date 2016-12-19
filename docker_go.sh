@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ ! -d /home/docker/hpe-oneview-hubot/node_modules ]; then
-  cp -rf /home/docker/hpe-oneview-hubot-org/node_modules/ /home/docker/hpe-oneview-hubot/
+  cp -rf /home/docker/hubot-core-org/node_modules/ /home/docker/hpe-oneview-hubot/
 fi
 
 cd /home/docker/hpe-oneview-hubot
