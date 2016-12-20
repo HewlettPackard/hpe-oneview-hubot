@@ -33,12 +33,16 @@ export default class DeveloperListener extends Listener {
   ListRaw(msg) {
     this.client.ClientConnection.get('/rest/' + msg.category + '/' + msg.id).then((res) => {
       return this.transform.text(msg, JSON.stringify(res, null, '  '));
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   ListClean(msg) {
     this.client.ClientConnection.get('/rest/' +  msg.category + '/' + msg.id).then((res) => {
       return this.transform.send(msg, res.members || res);
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 };

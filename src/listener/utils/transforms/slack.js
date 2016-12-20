@@ -197,4 +197,35 @@ export default class SlackTransform {
 
     robot.messageRoom(room, message);
   }
+
+  error(msg, err) {
+    let userError = "";
+    if (err.error.errorCode) {
+      userError = userError.concat("OneView error code: ").concat(err.error.errorCode).concat("\n");
+    }
+    if (err.error.details) {
+      userError = userError.concat(err.error.details).concat("\n");
+    }
+    if (err.error.message) {
+      userError = userError.concat(err.error.message).concat("\n");
+    }
+    if (err.error.recommendedActions && Object.prototype.toString.call(err.error.recommendedActions) === '[object Array]') {
+      err.error.recommendedActions.forEach(function(recommendedAction) {
+        userError = userError.concat(recommendedAction).concat("\n");
+      });
+    }
+
+    let attachment = {
+      title: 'OneView Error',
+      color: '#FF454F',
+      text: userError,
+      pretext: "",
+    };
+
+    const message = {
+      text: "Oops there was a problem.",
+      attachments: [attachment]
+    };
+    msg.send(message);
+  }
 }

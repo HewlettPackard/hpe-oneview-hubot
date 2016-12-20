@@ -82,7 +82,9 @@ export default class ServerHardwareListener extends Listener {
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade.  Are you sure you want to do this? (yes/no)");
 
     dialog.addChoice(/yes/i, (msg2) => {
-      this.PowerOnHardware(msg.serverId, msg).catch(this.error(msg));
+      this.PowerOnHardware(msg.serverId, msg).catch((err) => {
+        return this.transform.error(msg, err);
+      });
     });
 
     dialog.addChoice(/no/i, (msg3) => {
@@ -99,7 +101,9 @@ export default class ServerHardwareListener extends Listener {
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade.  Are you sure you want to do this? (yes/no)");
 
     dialog.addChoice(/yes/i, (msg2) => {
-      this.PowerOffHardware(msg.serverId, msg).catch(this.error(msg));
+      this.PowerOffHardware(msg.serverId, msg).catch((err) => {
+        return this.transform.error(msg, err);
+      });
     });
 
     dialog.addChoice(/no/i, (msg3) => {
@@ -110,13 +114,17 @@ export default class ServerHardwareListener extends Listener {
   ListServerHardware(msg) {
     this.client.ServerHardware.getAllServerHardware().then((res) => {
       return this.transform.send(msg, res);
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   ListServerHardwareById(msg) {
     this.client.ServerHardware.getServerHardware(msg.serverId).then((res) => {
       return this.transform.send(msg, res);
-    }).catch(this.error(msg));
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   ListServerHardwareUtilization(msg) {
@@ -134,9 +142,15 @@ export default class ServerHardwareListener extends Listener {
           }).then(() => {
             console.log('Finished creating CPU chart.')
             resolve();
-          }).catch(this.error(msg));
-        }).catch(this.error(msg));
-      }).catch(this.error(msg));
+          }).catch((err) => {
+            return this.transform.error(msg, err);
+          });
+        }).catch((err) => {
+          return this.transform.error(msg, err);
+        });
+      }).catch((err) => {
+        return this.transform.error(msg, err);
+      });
     }); //end new promise
 
     p.then(() => {
