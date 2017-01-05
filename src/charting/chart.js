@@ -170,15 +170,15 @@ export default function MetricToPng(robot, metricName, metricList) {
 
       robot.adapter.client.web.files.upload(' ', file, (err, res) => {
         if (err) {
-          console.log('Error on Slack web upload', err);
+          robot.logger.error('Error on Slack web upload', err);
         }
         if (res.ok) {
-          console.log('Completed Slack web upload of chart.');
+          robot.logger.info('Completed Slack web upload of chart.');
         }
       });
 
     } else {
-      console.log('Adapter ' + robot.adapterName + ' does not support web file upload.');
+      robot.logger.info('Adapter ' + robot.adapterName + ' does not support web file upload.');
     }
 
     return new Promise(function(resolve, reject) {

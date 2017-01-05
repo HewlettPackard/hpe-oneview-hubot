@@ -28,19 +28,19 @@ import configLoader from './config-loader';
 
 const main = (robot) => {
   // load OneView configuration data from external file
-  let oneview_config = configLoader();
+  let oneview_config = configLoader(robot);
 
-  console.log('Initializing NLP');
+  robot.logger.info('Initializing NLP');
   nlp(robot);
 
-  console.log('Initializing OneView');
+  robot.logger.info('Initializing OneView');
   const client = new ovClient(oneview_config.applianceIp,
     oneview_config.apiVersion, oneview_config.pollingInterval,
     oneview_config.readOnly, oneview_config.notificationsRoom,
     robot);
   client.login({'userName': oneview_config.userName,
       'password': oneview_config.password}, false).then(() => {
-    console.log('Logged into OV appliance.')
+    robot.logger.info('Logged into OV appliance.')
     const brain = new ovBrain(client, robot, Lexer);
 
     ovListener(robot, client);
@@ -48,7 +48,7 @@ const main = (robot) => {
 
   //TODO: Bug #22 Not working.  Need to perform an aysnc shutdown from the SCMB
   function exitHandler(options, err) {
-    console.log('in exitHandler, calling disconnect');
+    robot.logger.debug('in exitHandler, calling disconnect');
     client.Notifications.disconnect();
   }
 

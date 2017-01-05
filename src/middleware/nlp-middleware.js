@@ -96,7 +96,7 @@ export default (robot) => {
 
     const start = Date.now();
     const resolved = lex.resolveDevices(cleanSentences).trim();
-    console.log('Took', (Date.now() - start) +"ms", "to resolve dependencies, normalized string: ", resolved);
+    robot.logger.debug('Took', (Date.now() - start) +"ms", "to resolve dependencies, normalized string: ", resolved);
 
     //TODO Normalize the first question to ### questions in the case of multiple sentences
 

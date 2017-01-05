@@ -20,11 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-export default () => {
+export default (robot) => {
     try {
       const configuration = require('../oneview-configuration.json');
       return configuration;
     } catch(err) {
-      console.log('Error reading OneView configuration file: ', err);
+      robot.logger.error('Error reading OneView configuration file: ', err);
     }
 };

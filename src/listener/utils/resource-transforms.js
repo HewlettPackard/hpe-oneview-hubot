@@ -85,7 +85,7 @@ export default class ResourceTransforms {
           this.provider.error(msg, error);
         }
       } catch (err) {
-        console.log("Transform error in error handler", err);
+        this.robot.logger.error("Transform error in error handler", err);
       }
     }
   }
@@ -95,7 +95,7 @@ export default class ResourceTransforms {
       try {
         resolve(this.provider.text(msg, addPeriod(text)));
       } catch (err) {
-        console.log("Transform error in text handler", err);
+        this.robot.logger.error("Transform error in text handler", err);
         reject(err);
       }
     });
@@ -110,7 +110,7 @@ export default class ResourceTransforms {
           resolve(this.provider.send(msg, resource, addPeriod(text)));
         }
       } catch (err) {
-        console.log("Transform error in send handler", err);
+        this.robot.logger.error("Transform error in send handler", err);
         reject(err);
       }
     });
@@ -125,7 +125,7 @@ export default class ResourceTransforms {
           resolve(this.provider.messageRoom(this.robot, room, resource, addPeriod(text)));
         }
       } catch (err) {
-        console.log("Transform error in messageRoom handler", err);
+        this.robot.logger.error("Transform error in messageRoom handler", err);
         reject(err);
       }
     });
@@ -171,5 +171,4 @@ export default class ResourceTransforms {
     return "are " + this.makePlural(count, word);
   }
 
-
-};
+}

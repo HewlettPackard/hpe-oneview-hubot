@@ -111,7 +111,7 @@ export default class ServerProfileTemplateListener extends Listener {
             return Promise.allSettled(targets.map((target) => {
               let startMessage = false;
               return this.client.ServerProfileTemplates.deployProfile(template.uri, target.uri, template.name + ' - ' + target.name).feedback((res) => {
-                console.log(res);
+                this.robot.logger.debug(res);
               }).then((profile) => {
                 return this.serverHardware.PowerOnHardware(profile.serverHardwareUri, msg, true);
               });
@@ -160,7 +160,7 @@ export default class ServerProfileTemplateListener extends Listener {
             return this.serverHardware.PowerOffHardware(profile.serverHardwareUri, msg, true).then(() => {
               let startMessage = false;
               return this.client.ServerProfiles.deleteServerProfile(profile.uri).feedback((res) => {
-                console.log(res);
+                this.robot.logger.debug(res);
               });
             });
           }));

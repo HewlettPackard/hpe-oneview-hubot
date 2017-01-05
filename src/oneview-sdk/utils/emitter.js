@@ -35,7 +35,7 @@ export class Emitter {
     try {
       this.next(arg);
     } catch(err) {
-      console.log("Error in feedback", err)
+      this.robot.logger.error("Error in feedback", err)
     }
   }
 }
