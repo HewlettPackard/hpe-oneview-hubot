@@ -31,7 +31,7 @@ import NotificationsFilter from './notifications-filter';
 export default function(robot, client) {
   const enhance = new Enhance(client.host);
   const transform = new ResourceTransforms(robot);
-  const filter = new NotificationsFilter();
+  const filter = new NotificationsFilter(robot);
 
   const dev = new DeveloperListener(robot, client, transform);
   const sh = new ServerHardwareListener(robot, client, transform);
@@ -50,7 +50,7 @@ export default function(robot, client) {
         transform.messageRoom(client.notificationsRoom, resource.resource);
       }
     }).catch((err) => {
-      console.log(err);
+      robot.logger.error(err);
     });
   });
 }

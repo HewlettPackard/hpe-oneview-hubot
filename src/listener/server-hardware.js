@@ -132,15 +132,15 @@ export default class ServerHardwareListener extends Listener {
       this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AveragePower,PeakPower,PowerCap'}).then((res) => {
         return MetricToPng(this.robot, 'Power', res.metricList);
       }).then(() => {
-        console.log('Finished creating Power chart.')
+        this.robot.logger.debug('Finished creating Power chart.')
         this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AmbientTemperature'}).then((res) => {
           return MetricToPng(this.robot, 'Temperature', res.metricList);
         }).then(() => {
-          console.log('Finished creating Temperature chart.')
+          this.robot.logger.debug('Finished creating Temperature chart.')
           this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
             return MetricToPng(this.robot, 'CPU', res.metricList);
           }).then(() => {
-            console.log('Finished creating CPU chart.')
+            this.robot.logger.debug('Finished creating CPU chart.')
             resolve();
           }).catch((err) => {
             return this.transform.error(msg, err);
@@ -154,7 +154,7 @@ export default class ServerHardwareListener extends Listener {
     }); //end new promise
 
     p.then(() => {
-      console.log('All charts finsihed.');
+      this.robot.logger.info('All charts finsihed.');
       return this.transform.send(msg, "Ok " + msg.message.user.name + " I've finished creating all of the hardware utilization charts.");
     });
   }

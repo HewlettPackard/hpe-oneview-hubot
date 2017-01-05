@@ -105,20 +105,20 @@ export default class Notifications {
   }
 
   disconnect () {
-    console.log('Disonnecting from SCMB');
+    this.robot.logger.info('Disonnecting from SCMB');
     var exchange = this.connection.exchange('scmb', {type: 'topic'});
     this.queue.unbind(exchange, alerts);
     this.queue.unbind(exchange, sp);
     this.queue.unbind(exchange, spt);
     this.queue.unbind(exchange, sh);
-    console.log('Unbound from SCMB exchanges');
+    this.robot.logger.info('Unbound from SCMB exchanges');
     this.connection.disconnect();
-    console.log('Disconnected from SCMB');
+    this.robot.logger.info('Disconnected from SCMB');
   }
 
   // pass the robot to emit messages
   __connect__() {
-    console.log('Connecting to SCMB');
+    this.robot.logger.info('Connecting to SCMB');
 
     const sslFolder = 'oneview-hubot/pem_files/' + this.restAPI.host + '/';
 
@@ -149,14 +149,14 @@ export default class Notifications {
       let connection = amqp.createConnection(options, {reconnect: true});
       this.connection = connection;
 
-      connection.on('error', function(e) {
-        console.log("SCMB connection error", e);
+      connection.on('error', (e) => {
+        this.robot.logger.error("SCMB connection error", e);
       });
 
       connection.on('ready', ::this.__ready__);
     }).catch((err) => {
-      console.log("Issue creating RabbitMQ connection, bot will not be able to push notifications")
-      console.log(err);
+      this.robot.logger.error("Issue creating RabbitMQ connection, bot will not be able to push notifications");
+      this.robot.logger.error(err);
     });
   }
 
@@ -172,7 +172,7 @@ export default class Notifications {
         queue.bind(exchange, sp);
         queue.bind(exchange, spt);
         queue.bind(exchange, sh);
-        console.log('Connected to SCMB, waiting for messages');
+        this.robot.logger.info('Connected to SCMB, waiting for messages');
 
         const emitter = new MessageEmitter(this.robot, queue);
         queue.subscribe({ack: true}, ::emitter.onMessage);

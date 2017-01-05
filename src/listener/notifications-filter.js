@@ -25,11 +25,12 @@ import configLoader from '../config-loader';
 
 export default class NotificationsFilter {
 
-  constructor() {
-    let oneview_config = configLoader();
+  constructor(robot) {
+    let oneview_config = configLoader(robot);
     const filters = oneview_config.notificationsFilters;
     this.filters = filters;
-    console.log('Configured with notification filters', this.filters);
+    this.robot = robot;
+    this.robot.logger.info('Configured with notification filters', this.filters);
   }
 
   check(message) {
@@ -49,10 +50,10 @@ export default class NotificationsFilter {
   __checkFilter__(filter, item) {
     for (let key in filter) {
       if(item[key] === undefined || item[key] != filter[key]) {
-        console.log('Message does not pass against filter ', filter);
+        this.robot.logger.info('Message does not pass against filter', filter);
         return false;
       } else {
-        console.log('Message passes against filter ', filter);
+        this.robot.logger.info('Message passes against filter', filter);
         return true;
       }
     }

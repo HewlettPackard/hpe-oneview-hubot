@@ -31,7 +31,7 @@ class NamedRegExp extends RegExp {
     while (match != null) {
       this.namedGroups.push(match[1] || '');
       if (!match[1]) {
-        console.log('Regex without named groups', rgx.source, 'use ?: to prevent capture or name groups with :<name>');
+        this.robot.logger.info('Regex without named groups', rgx.source, 'use ?: to prevent capture or name groups with :<name>');
       }
       match = namedGroups.exec(rgx.source);
     }

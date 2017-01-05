@@ -77,11 +77,11 @@ export default class Lexer {
     }
   }
 
-  updateNamedDevice(search, replacement) {
+  updateNamedDevice(robot, search, replacement) {
     const tSearch = search.trim();
     this.namedDevices.forEach((namedDevice) => {
       if (namedDevice.replacement === replacement && namedDevice.name !== search && namedDevice.type === 'name') {
-        console.log('Updating resource name for ' + namedDevice.replacement + ' from ' + namedDevice.name + ' to ' + search);
+        robot.logger.info('Updating resource name for ' + namedDevice.replacement + ' from ' + namedDevice.name + ' to ' + search);
         namedDevice.search = new RegExp('\\b' + tSearch + '\\b', 'ig');;
         namedDevice.name = tSearch;
       }
@@ -112,16 +112,6 @@ export default class Lexer {
     });
 
     return text;
-  }
-
-  __printFuzzySet__(str, res) {
-    if (res) {
-      res.forEach((r) => {
-        if (r[0] > 0.60) {
-          console.log(str, r[0], r[1])
-        }
-      });
-    }
   }
 
   /**

@@ -32,6 +32,7 @@ export default class OVClient {
   constructor(applianceIp, apiVersion, pollingInterval, readOnly,
     notificationsRoom, robot) {
     this.host = applianceIp;
+    this.robot = robot;
     this.connection = new connection(applianceIp, apiVersion, readOnly);
     this.pollingInterval = pollingInterval;
     this.server_hardware = new serverhardware(this);
@@ -101,15 +102,15 @@ export default class OVClient {
   __pollAuthToken__(credentials) {
     this.__delay__(this.pollingInterval * 60000).then(() => {
       this.__checkToken__().then((res) => {
-        console.log('Existing OV auth token is still valid.');
+        this.robot.logger.debug('Existing OV auth token is still valid.');
         this.__pollAuthToken__(credentials);
       }).catch((err) => {
-         console.log('Existing OV auth token appears to no longer be valid.  Creating new token now.');
+         this.robot.logger.info('Existing OV auth token appears to no longer be valid.  Creating new token now.');
          this.login(credentials, true);
          this.__pollAuthToken__(credentials);
        });
     }).catch((err) => {
-      console.log(err);
+      this.robot.logger.error(err);
     });
   }
 

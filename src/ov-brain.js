@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-function error(err) {
-  console.log("Error initializing the OneView brain", err);
+function error(err, robot) {
+  robot.logger.error("Error initializing the OneView brain", err);
 }
 
 export default class OneViewBrain {
@@ -35,7 +35,7 @@ export default class OneViewBrain {
           robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber}});
         }
       }
-    }).catch(error);
+    }).catch(error, robot);
 
     client.ServerProfiles.getAllServerProfiles().then((res) => {
       if (res && res.members) {
@@ -48,7 +48,7 @@ export default class OneViewBrain {
           //robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber}});
         }
       }
-    }).catch(error);
+    }).catch(error, robot);
 
     client.ServerProfileTemplates.getAllServerProfileTemplates().then((res) => {
       if (res && res.members) {
@@ -58,22 +58,22 @@ export default class OneViewBrain {
           //robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber}});
         }
       }
-    }).catch(error);
+    }).catch(error, robot);
 
     robot.on('__hpe__brain_notification__', function (message) {
       if (message) {
         if (message.changeType.toLowerCase() === 'created' && (message.resource.type.toLowerCase().includes('serverprofile')
         || message.resource.type.toLowerCase().includes('server-hardware'))) {
           Lexer.addNamedDevice(message.resource.name, message.resource.uri, 'name');
-          console.log('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
+          robot.logger.debug('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
           if (message.resource.serialNumberType === 'Virtual' && !message.resource.type.toLowerCase().includes('template')) {
             Lexer.addNamedDevice(message.resource.serialNumber, message.resource.uri, 'serialNumber');
-            console.log('Adding named device ' + message.resource.serialNumber + ' ' + message.resource.uri);
+            robot.logger.debug('Adding named device ' + message.resource.serialNumber + ' ' + message.resource.uri);
           }
         }
 
         if (message.changeType.toLowerCase() === 'updated' && message.resource.type.toLowerCase().includes('serverprofile')) {
-          Lexer.updateNamedDevice(message.resource.name, message.resource.uri);
+          Lexer.updateNamedDevice(robot, message.resource.name, message.resource.uri);
         }
       }
     });
