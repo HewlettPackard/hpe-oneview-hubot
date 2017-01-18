@@ -35,12 +35,15 @@ export default class BotListener extends Listener {
     this.serverProfiles = serverProfiles;
     this.serverProfileTemplate = serverProfileTemplate;
 
+    this.title = "bot";
+    this.capabilities = [];
+
     this.respond(/help\.$/i, ::this.ListActions);
     this.respond(/What can you do(?: for me){0,1}\.$/i, ::this.ListActions);
+    this.capabilities.push(this.indent + "Help (Show list of areas of help).");
 
     this.respond(/(:<text>[a-zA-Z][a-z A-Z]*?) help\.$/i, ::this.ListActionsFor);
-    this.capabilities += this.indent + "<text> Help (Show help in a specific area).\n";
-
+    this.capabilities.push(this.indent + "<text> Help (Show help in a specific area).");
   }
 
   ListActions(msg) {
@@ -48,12 +51,12 @@ export default class BotListener extends Listener {
   }
 
   GetActions() {
-    return "I can do lots of things.  Try:\n" +
+    return "What can I help you with today? Here's just a few things I can do:\n" +
       BULLET + this.serverProfiles.title + " help\n" +
       BULLET + this.serverProfileTemplate.title + " help\n" +
       BULLET + this.serverHardware.title + " help\n" +
 //      BULLET + this.developer.capabilitiesHeader + "\n" +
-      "Just ask";
+      "";
   }
 
   ListAllActions(msg) {
@@ -70,7 +73,7 @@ export default class BotListener extends Listener {
       this.serverHardware.capabilities.join('\n') + '\n' +
 //      this.developer.title + " commands:\n" +
 //      this.developer.capabilities +
-      "Just ask";
+      "";
   }
 
   ListActionsFor(msg) {

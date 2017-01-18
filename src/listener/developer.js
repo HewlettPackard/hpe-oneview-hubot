@@ -26,11 +26,11 @@ export default class DeveloperListener extends Listener {
   constructor(robot, client, transform) {
     super(robot, client, transform);
     this.title = "Developer";
-
+    this.capabilities = [];
     this.respond(/(?:get|list|show) \/rest\/(:<category>.*?)\/(:<id>[a-zA-Z0-9_-]*) json\.$/i, ::this.ListRaw);//Developer end point (echoes raw JSON)
-    this.capabilities += this.indent + "List /rest/category/id as json (e.g. list /rest/enclosure/12325dd7-2108-481a-b1ef-4bfa4e69dabc).\n";
+    this.capabilities.push(this.indent + "List /rest/category/id as json (e.g. list /rest/enclosure/12325dd7).");
     this.respond(/(?:get|list|show) \/rest\/(:<category>.*?)\/(:<id>[a-zA-Z0-9_-]*) clean\.$/i, ::this.ListClean);//Developer end point (echoes a clean resource)
-    this.capabilities += this.indent + "List /rest/category/id as clean resource (e.g. list rest/enclosure/12325dd7-2108-481a-b1ef-4bfa4e69dabc).\n";
+    this.capabilities.push(this.indent + "List /rest/category/id as clean resource (e.g. list rest/enclosure/12325dd7).");
   }
 
   ListRaw(msg) {

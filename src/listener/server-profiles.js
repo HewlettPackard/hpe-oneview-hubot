@@ -35,14 +35,14 @@ export default class ServerProfilesListener extends Listener {
     this.respond(/(?:get|list|show) all (?:server ){0,1}profiles\.$/i, ::this.ListServerProfiles);
     this.capabilities.push(this.indent + "Show all (server) profiles (e.g. show all profiles).");
     this.respond(/(?:get|list|show) (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerProfile);
-    this.capabilities.push(this.indent + "Show a specific (server) profile (e.g. show 12325dd7-2108-481a-b1ef-4bfa4e69dabc).");
+    this.capabilities.push(this.indent + "Show a specific (server) profile (e.g. show hadoop cluster).");
     this.respond(/(?:get|list|show) (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?) compliance(?: preview){0,1}\.$/i, ::this.ListServerProfileCompliancePreview);
-    this.capabilities.push(this.indent + "Show a specific (server) profile compliance (e.g. show 12325dd7-2108-481a-b1ef-4bfa4e69dabc compliance).");
+    this.capabilities.push(this.indent + "Show a specific (server) profile compliance (e.g. show hadoop cluster compliance).");
     this.respond(/(?:update|make) (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?) (?:compliance|compliant)\.$/i, ::this.HandleServerCompliantMessage);
-    this.capabilities.push(this.indent + "Make/update a specific (server) profile compliance (e.g. make 12325dd7-2108-481a-b1ef-4bfa4e69dabc compliant).");
+    this.capabilities.push(this.indent + "Make/update a specific (server) profile compliance (e.g. make hadoop cluster compliant).");
     this.respond(/(?:turn|power) on (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOnServerProfile);
     this.respond(/(?:turn|power) off (?:\/rest\/server-profiles\/){0,1}(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOffServerProfile);
-    this.capabilities.push(this.indent + "Power on/off a specific (server) profile (e.g. turn on 12325dd7-2108-481a-b1ef-4bfa4e69dabc).)");
+    this.capabilities.push(this.indent + "Power on/off a specific (server) profile (e.g. turn on hadoop cluster).");
   }
 
   ListServerProfiles(msg) {
