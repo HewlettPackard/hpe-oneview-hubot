@@ -26,6 +26,7 @@ import DeveloperListener from './developer';
 import ServerHardwareListener from './server-hardware';
 import ServerProfilesListener from './server-profiles';
 import ServerProfileTemplateListener from './server-profile-templates';
+import BotListener from './bot';
 import NotificationsFilter from './notifications-filter';
 
 export default function(robot, client) {
@@ -37,6 +38,9 @@ export default function(robot, client) {
   const sh = new ServerHardwareListener(robot, client, transform);
   const sp = new ServerProfilesListener(robot, client, transform, sh);
   const spt = new ServerProfileTemplateListener(robot, client, transform, sh, sp);
+
+  // LAST!!
+  const bot = new BotListener(robot, client, transform, dev, sh, sp, spt);
 
   // TODO: Bug This should not be bound here, probably want a NotificationsListener instead
   // connect to the SCMB to emit notifications

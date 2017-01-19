@@ -44,6 +44,7 @@ export default class Listener {
     this.robot = robot;
     this.client = client;
     this.transform = transform;
+    this.indent = "  ";
 
     if (! registeredMiddleware) {
       registeredMiddleware = true;

@@ -42,4 +42,3 @@ cd $STARTDIR
 docker run -it --rm -e "PARMS=$*" -e HUBOT_HIPCHAT_JID=$HUBOT_HIPCHAT_JID -e HUBOT_HIPCHAT_PASSWORD=$HUBOT_HIPCHAT_PASSWORD -e HUBOT_HIPCHAT_ROOMS=$HUBOT_HIPCHAT_ROOMS -e HUBOT_HIPCHAT_XMPP_DOMAIN=$HUBOT_HIPCHAT_XMPP_DOMAIN -e HUBOT_NAME=$HUBOT_NAME -e "HUBOT_SLACK_TOKEN=$HUBOT_SLACK_TOKEN" -e "no_proxy=$no_proxy" -v $(pwd):/home/docker/hpe-oneview-hubot docker.io/jesseolsen/hpe-oneview-hubot:latest
 
 rm ./local-configuration.json
-
