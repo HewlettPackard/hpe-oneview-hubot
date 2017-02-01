@@ -20,43 +20,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-'use strict';
-import configLoader from '../config-loader';
+import ServerProfile from './server-profile';
+import Alert from './alert';
+import ServerHardware from './server-hardware';
+import ServerProfileCompliancePreview from './server-profile-compliance-preview';
 
-export default class NotificationsFilter {
-
-  constructor(robot) {
-    let oneview_config = configLoader(robot);
-    const filters = oneview_config.notificationsFilters;
-    this.filters = filters;
-    this.robot = robot;
-    this.robot.logger.info('Configured with notification filters', this.filters);
+export function transform(oneViewResource) {
+  if (oneViewResource.type.toLowerCase().startsWith('serverprofile') && !oneViewResource.type.toLowerCase().startsWith('serverprofilecompliancepreview')) {
+    return new ServerProfile(oneViewResource);
+  } else if (oneViewResource.type.toLowerCase().startsWith('alertresource')) {
+    return new Alert(oneViewResource);
+  } else if (oneViewResource.type.toLowerCase().startsWith('serverprofiletemplate')) {
+    return new ServerProfileTemplate(oneViewResource);
+  } else if (oneViewResource.type.toLowerCase().startsWith('server-hardware')) {
+    return new ServerHardware(oneViewResource);
+  } else if (oneViewResource.type.toLowerCase().startsWith('serverprofilecompliancepreview')) {
+    return new ServerProfileCompliancePreview(oneViewResource);
   }
-
-  check(message) {
-    if (message) {
-      return [message.resource].filter(::this.__filter__);
-    }
-  }
-
-  __filter__(item) {
-    if (this.filters) {
-      for (var i=0; i < this.filters.length; i++) {
-        return this.__checkFilter__(this.filters[i], item);
-      }
-    }
-  }
-
-  __checkFilter__(filter, item) {
-    for (let key in filter) {
-      if(item[key] === undefined || item[key] != filter[key]) {
-        this.robot.logger.info('Message does not pass against filter', filter);
-        return false;
-      } else {
-        this.robot.logger.info('Message passes against filter', filter);
-        return true;
-      }
-    }
-  }
-
 }

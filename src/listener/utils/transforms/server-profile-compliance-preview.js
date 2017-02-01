@@ -20,43 +20,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-'use strict';
-import configLoader from '../config-loader';
+import Resource from './resource';
 
-export default class NotificationsFilter {
+export default class ServerProfileCompliancePreview extends Resource {
 
-  constructor(robot) {
-    let oneview_config = configLoader(robot);
-    const filters = oneview_config.notificationsFilters;
-    this.filters = filters;
-    this.robot = robot;
-    this.robot.logger.info('Configured with notification filters', this.filters);
-  }
-
-  check(message) {
-    if (message) {
-      return [message.resource].filter(::this.__filter__);
+  constructor(oneViewResource) {
+    if (oneViewResource) {
+      super(oneViewResource);
+      this.isOnlineUpdate = oneViewResource.isOnlineUpdate;
+      this.automaticUpdates = oneViewResource.automaticUpdates;
+      this.manualUpdates = oneViewResource.manualUpdates;
+      this.status = 'Warning';
+      this.pretext = 'The preview of manual and automatic updates required to make the server profile consistent with its template.';
+      this.isOnlineUpdate = oneViewResource.isOnlineUpdate;
     }
   }
 
-  __filter__(item) {
-    if (this.filters) {
-      for (var i=0; i < this.filters.length; i++) {
-        return this.__checkFilter__(this.filters[i], item);
+  buildSlackFields() {
+    let fields = [];
+    for (const field in this) {
+      if (field === 'type' || field === 'status' || field === 'pretext' || field.toLowerCase().includes('hyperlink') || !this[field]) {
+        continue;
       }
-    }
-  }
-
-  __checkFilter__(filter, item) {
-    for (let key in filter) {
-      if(item[key] === undefined || item[key] != filter[key]) {
-        this.robot.logger.info('Message does not pass against filter', filter);
-        return false;
+      let value = '';
+      if (Array.isArray(this[field])) {
+        value = this[field].join("\n");
       } else {
-        this.robot.logger.info('Message passes against filter', filter);
-        return true;
+        value = this[field];
       }
+      fields.push({
+        title: field,
+        short: false,
+        value: value
+      });
     }
+    return fields;
   }
 
+  //TODO
+  // buildHipChat() {}
 }

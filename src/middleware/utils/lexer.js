@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016 Hewlett Packard Enterprise Development LP
+(c) Copyright (2016-2017) Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,12 +35,12 @@ const bladeName = /^(\D*)(.*?), bay (\d+)$/
 const maxNgram = 10;
 const minNgram = 3;
 const fuzzySetThreshold = 0.83;//A fuzzy match that is less than this value is not considered a good enough match to replace
+const namedDevices = [];
 
 export default class Lexer {
   constructor(nlp) {
     this.nlp = nlp;
     this.lex = nlp.lexicon();
-    this.namedDevices = [];
     this.fuzzyset = FuzzySet([], true, minNgram, maxNgram);//Initialize with levenshtein, min gram size, and max gram size
     this.lookupset = {};
     this.largestDevice = 1;
@@ -79,7 +79,7 @@ export default class Lexer {
 
   updateNamedDevice(robot, search, replacement) {
     const tSearch = search.trim();
-    this.namedDevices.forEach((namedDevice) => {
+    namedDevices.forEach((namedDevice) => {
       if (namedDevice.replacement === replacement && namedDevice.name !== search && namedDevice.type === 'name') {
         robot.logger.info('Updating resource name for ' + namedDevice.replacement + ' from ' + namedDevice.name + ' to ' + search);
         namedDevice.search = new RegExp('\\b' + tSearch + '\\b', 'ig');;
@@ -87,8 +87,9 @@ export default class Lexer {
       }
     });
   }
+
   __addNamedDevice__(key, replacement, type) {
-    this.namedDevices.push({search:new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement, type: type, name: key});
+    namedDevices.push({search:new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement, type: type, name: key});
   }
 
   __addFuzzyLookup__(key, mapped) {
@@ -107,7 +108,7 @@ export default class Lexer {
       return this.__fuzzyResolve__(text);
     }).join('  ');
 
-    this.namedDevices.forEach((device) => {
+    namedDevices.forEach((device) => {
       text = text.replace(device.search, device.replacement);
     });
 
@@ -201,4 +202,14 @@ export default class Lexer {
 
     return words.map((s) => { return (s.processed ? (s.value || '') : s.str); }).filter((s) => { return s; }).join(' ') + '.';
   }
+}
+
+export function getDeviceName(uri) {
+  let deviceName = '';
+  namedDevices.forEach((namedDevice) => {
+    if (uri === namedDevice.replacement && namedDevice.type === 'name') {
+      deviceName = namedDevice.name;
+    }
+  });
+  return deviceName;
 }

@@ -20,43 +20,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-'use strict';
-import configLoader from '../config-loader';
+import Resource from './resource';
 
-export default class NotificationsFilter {
+export default class ServerProfileTemplate extends Resource {
 
-  constructor(robot) {
-    let oneview_config = configLoader(robot);
-    const filters = oneview_config.notificationsFilters;
-    this.filters = filters;
-    this.robot = robot;
-    this.robot.logger.info('Configured with notification filters', this.filters);
-  }
-
-  check(message) {
-    if (message) {
-      return [message.resource].filter(::this.__filter__);
+  constructor(oneViewResource) {
+    if (oneViewResource) {
+      super(oneViewResource);
+      this.name = oneViewResource.name;
+      this.affinity = oneViewResource.affinity;
     }
   }
 
-  __filter__(item) {
-    if (this.filters) {
-      for (var i=0; i < this.filters.length; i++) {
-        return this.__checkFilter__(this.filters[i], item);
+  buildSlackFields() {
+    let fields = [];
+    for (const field in this) {
+      if (field === 'name' || field === 'type' || field === 'status' || field.toLowerCase().includes('hyperlink') || !this[field]) {
+        continue;
       }
+      fields.push({
+        title: field,
+        short: true,
+        value: this[field]
+      });
     }
+    return fields;
   }
 
-  __checkFilter__(filter, item) {
-    for (let key in filter) {
-      if(item[key] === undefined || item[key] != filter[key]) {
-        this.robot.logger.info('Message does not pass against filter', filter);
-        return false;
-      } else {
-        this.robot.logger.info('Message passes against filter', filter);
-        return true;
-      }
-    }
-  }
-
+  //TODO
+  // buildHipChat() {}
 }
