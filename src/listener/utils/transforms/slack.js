@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-const util = require('util')
+import { transform } from './resource-transformer';
 
 function AttachmentTitle(resource) {
   if (resource.type) {
@@ -49,8 +49,10 @@ function AttachmentTitle(resource) {
 }
 
 function ToAttachment(resource) {
+  const transformedRes = transform(resource);
+
   let color = '';
-  switch (resource.type.startsWith('AlertResource') ? resource.severity : resource.status) {
+  switch (transformedRes.type.startsWith('AlertResource') ? transformedRes.severity : transformedRes.status) {
     case 'OK':
       color = '#01A982'//OneView Green Status
       break;
@@ -67,74 +69,12 @@ function ToAttachment(resource) {
       break;
   }
 
-  let fields = [];
-  let pretext = '';
-  if (resource.associatedResource && resource.associatedResource.resourceName) {
-    fields.push({
-      title: 'Resource',
-      short: true,
-      value: '<' + resource.associatedResource.resourceHyperlink + '|' + resource.associatedResource.resourceName + '>'
-    });
-  }
-
-  if (resource.type.startsWith('server-hardware')) {
-    if (resource.serverProfileUri) {
-      fields.push({
-        title: 'Profile',
-        short: true,
-        value: '<' + resource.serverProfileHyperlink + '|' + resource.serverProfileUri.replace(/.*\/(.*)$/, '$1') + '>'
-      });
-    } else {
-      fields.push({
-        title: 'Profile',
-        short: true,
-        value: 'Available for deployment'
-      });
-    }
-  }
-
-  if (resource.powerState) {
-    fields.push({
-      title: 'Power',
-      short: true,
-      value: resource.powerState
-    });
-  }
-
-  // add description here for SCMs
-  if (resource.type.startsWith('AlertResource') && resource.description) {
-    fields.push({
-      title: 'Description',
-      short: false,
-      value: resource.description
-    });
-  }
-
-  if (resource.type.startsWith('ServerProfileCompliancePreview') && resource.automaticUpdates || resource.manualUpdates) {
-    pretext = 'The preview of manual and automatic updates required to make the server profile consistent with its template.'
-    if (resource.automaticUpdates && Object.prototype.toString.call(resource.automaticUpdates) === '[object Array]' ) {
-      resource.automaticUpdates.forEach(function(automaticUpdate) {
-        fields.push({
-          title: 'Auto',
-          short: false,
-          value: automaticUpdate
-        });
-      });
-    }
-    if (resource.manualUpdates && Object.prototype.toString.call(resource.manualUpdates) === '[object Array]' ) {
-      resource.manualUpdates.forEach(function(manualUpdate) {
-        fields.push({
-          title: 'Manual',
-          short: false,
-          value: manualUpdate
-        });
-      });
-    }
-  }
+  const fields = transformedRes.buildSlackFields();
+  const pretext = transformedRes.pretext;
 
   return {
-    title: AttachmentTitle(resource),
-    title_link: resource.hyperlink,
+    title: AttachmentTitle(transformedRes),
+    title_link: transformedRes.hyperlink,
     color: color,
     //fallback: TODO: Describe object as text,
     fields: fields,

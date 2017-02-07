@@ -20,20 +20,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-export function isTerminal(task) {
-  if (!task || !task.type || !task.type.startsWith("TaskResource")) {
-    return true;
+export default class Resource {
+  constructor(oneViewResource) {
+    this.type = oneViewResource.type;
+    this.status = oneViewResource.status;
+    this.state = oneViewResource.state;
+    this.description = oneViewResource.description;
+    this.hyperlink = oneViewResource.hyperlink;
   }
-
-  switch (task.taskState) {
-    case 'Completed':
-    case 'Error':
-    case 'Interrupted':
-    case 'Killed':
-    case 'Terminated':
-    case 'Warning':
-      return true;
-  }
-
-  return false;
 }

@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -156,7 +156,7 @@ export default function MetricToPng(robot, metricName, metricList) {
 
       svg2png(buf)
       .then(buffer => fs.writeFile("dest.png", buffer))
-      .catch(e => console.error(e));
+      .catch(e => robot.logger.error(e));
     });
 
     if (robot.adapterName === 'slack') {

@@ -20,20 +20,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-export function isTerminal(task) {
-  if (!task || !task.type || !task.type.startsWith("TaskResource")) {
-    return true;
-  }
+import ServerProfile from './server-profile';
+import Alert from './alert';
+import ServerHardware from './server-hardware';
+import ServerProfileCompliancePreview from './server-profile-compliance-preview';
 
-  switch (task.taskState) {
-    case 'Completed':
-    case 'Error':
-    case 'Interrupted':
-    case 'Killed':
-    case 'Terminated':
-    case 'Warning':
-      return true;
+export function transform(oneViewResource) {
+  if (oneViewResource.type.toLowerCase().startsWith('serverprofile') && !oneViewResource.type.toLowerCase().startsWith('serverprofilecompliancepreview')) {
+    return new ServerProfile(oneViewResource);
+  } else if (oneViewResource.type.toLowerCase().startsWith('alertresource')) {
+    return new Alert(oneViewResource);
+  } else if (oneViewResource.type.toLowerCase().startsWith('serverprofiletemplate')) {
+    return new ServerProfileTemplate(oneViewResource);
+  } else if (oneViewResource.type.toLowerCase().startsWith('server-hardware')) {
+    return new ServerHardware(oneViewResource);
+  } else if (oneViewResource.type.toLowerCase().startsWith('serverprofilecompliancepreview')) {
+    return new ServerProfileCompliancePreview(oneViewResource);
   }
-
-  return false;
 }

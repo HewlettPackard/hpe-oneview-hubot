@@ -20,20 +20,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-export function isTerminal(task) {
-  if (!task || !task.type || !task.type.startsWith("TaskResource")) {
-    return true;
+import Resource from './resource';
+
+export default class Alert extends Resource {
+
+  constructor(oneViewResource) {
+    if (oneViewResource) {
+      super(oneViewResource);
+      this.associatedResource = oneViewResource.associatedResource;
+      this.severity = oneViewResource.severity;
+      this.alertState = oneViewResource.alertState;
+      this.taskHyperlink = oneViewResource.taskHyperlink;
+    }
   }
 
-  switch (task.taskState) {
-    case 'Completed':
-    case 'Error':
-    case 'Interrupted':
-    case 'Killed':
-    case 'Terminated':
-    case 'Warning':
-      return true;
+  buildSlackFields() {
+    let fields = [];
+    for (const field in this) {
+      if (field === 'type' || field === 'status' || field === 'severity' || field.toLowerCase().includes('hyperlink') || !this[field]) {
+        continue;
+      }
+      if (field === 'associatedResource') {
+        fields.push({
+          title: 'Resource',
+          short: true,
+          value: '<' + this[field].resourceHyperlink + '|' + this[field].resourceName + '>'
+        });
+      } else {
+        fields.push({
+            title: field,
+            short: true,
+            value: this[field]
+          });
+      }
+    }
+    return fields;
   }
 
-  return false;
+  //TODO
+  // buildHipChat() {}
 }
