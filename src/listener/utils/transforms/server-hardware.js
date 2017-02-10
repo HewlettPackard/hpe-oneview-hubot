@@ -40,7 +40,7 @@ export default class ServerHardware extends Resource {
     let fields = [];
     let hasProfile = false;
     for (const field in this) {
-      if (field === 'name' || field === 'type' || field === 'status' || field.toLowerCase().includes('hyperlink') || field === 'serverProfileUri' || !this[field]) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       fields.push({
@@ -67,6 +67,30 @@ export default class ServerHardware extends Resource {
     return fields;
   }
 
-  //TODO
-  // buildHipChat() {}
+  buildHipChatOutput() {
+    let output = '';
+    let hasProfile = false;
+    for (const field in this) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      output += '\t\u2022 ' + field + ': ' + this[field] + '\n';
+    }
+    if (this.serverProfileUri) {
+      output += '\t\u2022 Profile: ' +  getDeviceName(this.serverProfileUri) + '\n';
+      hasProfile = true;
+    }
+    if (!hasProfile) {
+      output += '\t\u2022 Profile: Available for deployment\n';
+    }
+    //Add status to output only for HipChat
+    output += '\t\u2022 Status: ' +  this.status + '\n';
+
+    return output;
+  }
+
+  __isNonDisplayField__(field){
+    var nonDisplayFields = ['name', 'type', 'status', 'serverprofileuri', 'serverprofilehyperlink', 'hyperlink'];
+    return nonDisplayFields.includes(field.toLowerCase());
+  }
 }

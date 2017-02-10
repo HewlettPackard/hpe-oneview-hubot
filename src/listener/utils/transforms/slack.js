@@ -168,4 +168,8 @@ export default class SlackTransform {
     };
     msg.send(message);
   }
+
+  getProviderName() {
+    return 'Slack';
+  }
 }

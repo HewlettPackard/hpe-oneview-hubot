@@ -71,4 +71,8 @@ export default class ShellTransform {
     }
     msg.send(userError);
   }
+
+  getProviderName() {
+    return 'Shell';
+  }
 }
