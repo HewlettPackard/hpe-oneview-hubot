@@ -119,10 +119,15 @@ export default class ResourceTransforms {
   messageRoom(room, resource, text) {
     return new Promise((resolve, reject) => {
       try {
+        let r = room;
+        if (this.provider.getProviderName() === 'HipChat') {
+          r = process.env.HUBOT_HIPCHAT_ROOMS;
+        }
+        this.robot.logger.debug('Selecting room ' + r + ' to send message to.');
         if (typeof resource === 'string') {
-          resolve(this.provider.messageRoom(this.robot, room, null, addPeriod(resource)));
+          resolve(this.provider.messageRoom(this.robot, r, null, addPeriod(resource)));
         } else {
-          resolve(this.provider.messageRoom(this.robot, room, resource, addPeriod(text)));
+          resolve(this.provider.messageRoom(this.robot, r, resource, addPeriod(text)));
         }
       } catch (err) {
         this.robot.logger.error("Transform error in messageRoom handler", err);
@@ -170,5 +175,4 @@ export default class ResourceTransforms {
     }
     return "are " + this.makePlural(count, word);
   }
-
 }

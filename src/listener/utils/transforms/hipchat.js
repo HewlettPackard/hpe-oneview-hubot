@@ -20,6 +20,58 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+import { transform } from './resource-transformer';
+
+function Title(resource) {
+  if (resource.type) {
+    if (resource.type.startsWith('AlertResource')) {
+      if (resource.alertTypeID && resource.alertTypeID.startsWith("Trap")) {
+        return "Trap: " + resource.description;
+      }
+      return resource.description + '\n';
+    }
+
+    if (resource.type.startsWith('server-hardware')) {
+      return 'Server Hardware: ' + resource.name + '\n';
+    }
+
+    if (resource.type.startsWith('ServerProfileTemplate')) {
+      return 'Profile Template: ' + resource.name + '\n';
+    }
+
+    if (resource.type.startsWith('ServerProfile') && !resource.type.startsWith('ServerProfileCompliancePreview')) {
+      return 'Profile: ' + resource.name + '\n';
+    }
+  }
+}
+
+function ToOutput(resource) {
+  const transformedRes = transform(resource);
+
+  const title = Title(transformedRes);
+
+  let output = '';
+  if (title) {
+    output = title;
+  }
+  if(transformedRes.pretext) {
+    output += transformedRes.pretext + '\n';
+  }
+  output += transformedRes.buildHipChatOutput();
+  return output;
+}
+
+function output(resource) {
+  if (Array.isArray(resource)) {
+    return resource.map(ToOutput);
+  } else if (resource.members) {
+    return resource.members.map(ToOutput);
+  } else {
+    return [ToOutput(resource)];
+  }
+  return [];
+}
+
 export default class HipChatTransform {
   hyperlink(uri, name) {
     return name ? name : uri;
@@ -37,17 +89,16 @@ export default class HipChatTransform {
   }
 
   send(msg, resource, text) {
+    if (!resource) {
+      throw "Resource was null";
+    }
+
     if (text) {
-      msg.send(text);
+      msg.send(out);
     }
-    var output = JSON.stringify(resource, null, '  ');
-    const MAX_KB = 31;  //31 works... 32 does NOT...
-    const MAX_BYTES = MAX_KB * 1024;
-    if (output.length > MAX_BYTES) {
-        output = output.substring(0,MAX_BYTES) + "... ";
-        output += "[Output truncated at "+MAX_KB+"k characters]"
-    }
-    msg.send(output);
+
+    const out = output(resource).join('\n');
+    msg.send(out);
   }
 
   messageRoom(robot, room, resource, text) {
@@ -56,7 +107,8 @@ export default class HipChatTransform {
     }
 
     if (resource) {
-      robot.messageRoom(room, JSON.stringify(resource, null, '  '));
+      const out = output(resource).join('\n');
+      robot.messageRoom(room, out);
     }
   }
 
@@ -77,5 +129,9 @@ export default class HipChatTransform {
       });
     }
     msg.send(userError);
+  }
+
+  getProviderName() {
+    return 'HipChat';
   }
 }

@@ -39,7 +39,7 @@ export default class ServerProfile extends Resource {
   buildSlackFields() {
     let fields = [];
     for (const field in this) {
-      if (field === 'name' || field === 'type' || field === 'status' || field.toLowerCase().includes('hyperlink') || field.toLowerCase().includes('uri') || !this[field]) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       fields.push({
@@ -58,6 +58,24 @@ export default class ServerProfile extends Resource {
     return fields;
   }
 
-  //TODO
-  // buildHipChat() {}
+  buildHipChatOutput() {
+    let output = '';
+    for (const field in this) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      output += '\t\u2022 ' + field + ': ' + this[field] + '\n';
+    }
+    if (this.serverHardwareUri) {
+      output += '\t\u2022 Server Hardware: ' + getDeviceName(this.serverHardwareUri) + '\n';
+    }
+    //Add status to output only for HipChat
+    output += '\t\u2022 Status: ' +  this.status + '\n';
+    return output;
+  }
+
+  __isNonDisplayField__(field){
+    var nonDisplayFields = ['name', 'type', 'status', 'serverhardwareuri', 'serverhardwarehyperlink', 'hyperlink'];
+    return nonDisplayFields.includes(field.toLowerCase());
+  }
 }

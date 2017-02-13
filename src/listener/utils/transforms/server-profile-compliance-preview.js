@@ -39,7 +39,7 @@ export default class ServerProfileCompliancePreview extends Resource {
   buildSlackFields() {
     let fields = [];
     for (const field in this) {
-      if (field === 'type' || field === 'status' || field === 'pretext' || field.toLowerCase().includes('hyperlink') || !this[field]) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       let value = '';
@@ -57,6 +57,27 @@ export default class ServerProfileCompliancePreview extends Resource {
     return fields;
   }
 
-  //TODO
-  // buildHipChat() {}
+  buildHipChatOutput() {
+    let output = '';
+    for (const field in this) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      let value = '';
+      if (Array.isArray(this[field])) {
+        value = this[field].join("\n");
+      } else {
+        value = this[field];
+      }
+      if (value) {
+        output += field + ':\n' + value + '\n';
+      }
+    }
+    return output;
+  }
+
+  __isNonDisplayField__(field){
+    var nonDisplayFields = ['type', 'status', 'pretext', 'hyperlink'];
+    return nonDisplayFields.includes(field.toLowerCase());
+  }
 }

@@ -37,7 +37,7 @@ export default class Alert extends Resource {
   buildSlackFields() {
     let fields = [];
     for (const field in this) {
-      if (field === 'type' || field === 'status' || field === 'severity' || field.toLowerCase().includes('hyperlink') || !this[field]) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       if (field === 'associatedResource') {
@@ -57,6 +57,25 @@ export default class Alert extends Resource {
     return fields;
   }
 
-  //TODO
-  // buildHipChat() {}
+  buildHipChatOutput() {
+    let output = '';
+    for (const field in this) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      if (field === 'associatedResource') {
+        output += '\t\u2022 Resource: ' + this[field].resourceName + '\n';
+      } else {
+        output += '\t\u2022 ' + field + ': ' + this[field] + '\n';
+      }
+    }
+    //Add status to output only for HipChat
+    output += '\t\u2022 Severity: ' +  this.severity + '\n';
+    return output;
+  }
+
+  __isNonDisplayField__(field){
+    var nonDisplayFields = ['type', 'status', 'severity', 'hyperlink'];
+    return nonDisplayFields.includes(field.toLowerCase());
+  }
 }
