@@ -165,12 +165,17 @@ export default class Connection {
   }
 
   __handleResponse__(res) {
-    if (res && res.statusCode == 202 && res.headers['location']) {
-      return this.__getTask__(res.headers['location'])
+    let response;
+    if (typeof res === 'string') {
+      response = JSON.parse(res);
+    } else {
+      response = res;
     }
-
-    if (res && res.body) {
-      return res.body;
+    if (response && response.statusCode == 202 && response.headers['location']) {
+      return this.__getTask__(response.headers['location'])
+    }
+    if (response && response.body) {
+      return response.body;
     }
 
     return {};
@@ -197,45 +202,11 @@ export default class Connection {
            resolve(res);
          } else {
            let task = res;
-           let resourceUri = task.associatedResource.resourceUri;
-           const fetch = {
-             method: 'GET', json: true, headers: this.headers,
-             uri: 'https://' + this.host + task.uri
-           };
-
-
-            this.__newSession__().then((auth) => {
-             const checkTask = () => {
-               if (isTerminal(task)) {
-                 if (!resourceUri || options.method === 'DELETE') {
-                   resolve(task);
-                 } else {
-                   fetch.uri = 'https://' + this.host + resourceUri;
-                   //Task is done, return the resource
-                   //TODO: What happens in the case of a SP/SPT operation that ends in parameter validation?
-                   request(fetch).then((res) => {
-                     res["__task_output__"] = task;
-                     res["__task_state__"] = task.taskState;
-                     resolve(res);
-                   }).catch(reject);
-                 }
-               } else {
-                 new Promise((r) => setTimeout(r, 150)).then(() => { return request(fetch); }).then((res) => {
-                   task = res;
-
-                   feedback(this.enhance.transformHyperlinks(auth, task));
-
-                   if (! resourceUri) {
-                     resourceUri = task.associatedResource.resourceUri;
-                   }
-
-                   checkTask();
-                 });
-               }
-             }
-
+           this.__newSession__().then((auth) => {
              //Start the polling loop
-             checkTask();
+             this.__checkTask__(task, feedback, auth, options).then((res) => {
+               resolve(res);
+             });
            }).catch(reject);
          }
        } catch(err) {
@@ -248,4 +219,37 @@ export default class Connection {
      }).catch(reject);
    });
  }
-};
+
+ __checkTask__(task, feedback, auth, options) {
+   let resourceUri = task.associatedResource.resourceUri;
+   const fetch = {
+     method: 'GET', json: true, headers: this.headers,
+     uri: 'https://' + this.host + task.uri
+   };
+
+   if (isTerminal(task)) {
+     return new Promise((resolve, reject) => {
+       if (!resourceUri || options.method === 'DELETE') {
+         resolve(task);
+       } else {
+         fetch.uri = 'https://' + this.host + resourceUri;
+         //TODO: What happens in the case of a SP/SPT operation that ends in parameter validation?
+         request(fetch).then((res) => {
+           res["__task_output__"] = task;
+           res["__task_state__"] = task.taskState;
+           return resolve(res);
+         }).catch(reject);
+       }
+     });
+   } else {
+     return new Promise((r) => setTimeout(r, 150)).then(() => { return request(fetch); }).then((res) => {
+       task = res;
+       feedback(this.enhance.transformHyperlinks(auth, task));
+       if (!resourceUri) {
+         resourceUri = task.associatedResource.resourceUri;
+       }
+       return this.__checkTask__(task, feedback, auth, options);
+     });
+   }
+ }
+}

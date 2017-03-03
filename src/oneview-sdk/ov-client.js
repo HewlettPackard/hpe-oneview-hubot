@@ -25,7 +25,7 @@ THE SOFTWARE.
 import connection from './connection';
 import serverhardware from './server-hardware';
 import serverprofiles from './server-profiles';
-import ServerProfileTemplates from './server-profile-templates';
+import serverprofiletemplates from './server-profile-templates';
 import notifications from './notifications';
 
 export default class OVClient {
@@ -37,7 +37,7 @@ export default class OVClient {
     this.pollingInterval = pollingInterval;
     this.server_hardware = new serverhardware(this);
     this.server_profiles = new serverprofiles(this);
-    this.serverProfileTemplates = new ServerProfileTemplates(this);
+    this.server_profile_templates = new serverprofiletemplates(this);
     this.notifications = new notifications(applianceIp, this.connection, robot);
     this.notificationsRoom = notificationsRoom;
     if (this.notificationsRoom === undefined) {
@@ -92,7 +92,7 @@ export default class OVClient {
   }
 
   get ServerProfileTemplates() {
-    return this.serverProfileTemplates;
+    return this.server_profile_templates;
   }
 
   get Notifications() {
