@@ -33,16 +33,16 @@ export { lex as Lexer };
 const toNormal = {
   Term: {
     toNormal: function() {
-      if (this.hasOwnProperty('number') && this.number != null) {
+      if (this.hasOwnProperty('number') && this.number !== null) {
         let next = '' + this.number;
         if (this.text.endsWith(',')) {
-          next += ','
+          next += ',';
         } else if (this.text.endsWith('.')) {
-          next += '.'
+          next += '.';
         } else if (this.text.endsWith('!')) {
-          next += '!'
+          next += '!';
         } else if (this.text.endsWith('?')) {
-          next += '?'
+          next += '?';
         }
         this.text = next;
         this.rebuild();
@@ -52,15 +52,15 @@ const toNormal = {
   }, Sentence: {
       toNormal : function() {
         this.terms.forEach((t) => { t.toNormal(); });
-        return this
+        return this;
       }
   }, Text: {
     toNormal : function() {
       this.sentences.forEach((s) => { s.toNormal(); });
-      return this
+      return this;
     }
   }
-}
+};
 
 //nlp.plugin(require('nlp-locale'))//Plugin that convert from British to USA
 nlp.plugin(toNormal);

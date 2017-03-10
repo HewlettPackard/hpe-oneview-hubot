@@ -38,7 +38,7 @@ export default class ResourceEnhancer {
           return;
         } else if (Array.isArray(val)) {
           val.forEach((v) => { this.removeHyperlinks(v); });
-        } else if (typeof val === 'object' && Object.keys(val).length != 0) {
+        } else if (typeof val === 'object' && Object.keys(val).length !== 0) {
           this.removeHyperlinks(val);
         } else if (typeof val === 'string') {
           if (hyperlinkDetector.test(key)) {
@@ -64,7 +64,7 @@ export default class ResourceEnhancer {
           return;
         } else if (Array.isArray(val)) {
           val.forEach((v) => { this.transformHyperlinks(auth, v); });
-        } else if (typeof val === 'object' && Object.keys(val).length != 0) {
+        } else if (typeof val === 'object' && Object.keys(val).length !== 0) {
           this.transformHyperlinks(auth, val);
         } else if (typeof val === 'string') {
           const match = key.match(uriSplitter);
@@ -119,4 +119,4 @@ export default class ResourceEnhancer {
     //TODO Fill in the rest of the OneView resource views
     return '';
   }
-};
+}

@@ -93,11 +93,11 @@ export default class HipChatTransform {
       throw "Resource was null";
     }
 
+    const out = output(resource).join('\n');
     if (text) {
       msg.send(out);
     }
 
-    const out = output(resource).join('\n');
     msg.send(out);
   }
 

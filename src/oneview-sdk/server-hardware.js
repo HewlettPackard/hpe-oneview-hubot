@@ -36,9 +36,9 @@ export default class ServerHardware {
   }
 
   setPowerState(id, state, control) {
-    let body = {powerState:state}
+    let body = {powerState:state};
     if (control) {
-      body.powerControl = control
+      body.powerControl = control;
     }
     return this.ov_client.connection.put((id.startsWith(uri) ? id : uri + id) + '/powerState', body);
   }

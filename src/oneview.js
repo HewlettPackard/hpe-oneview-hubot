@@ -40,7 +40,7 @@ const main = (robot) => {
     robot);
   client.login({'userName': oneview_config.userName,
       'password': oneview_config.password}, false).then(() => {
-    robot.logger.info('Logged into OV appliance.')
+    robot.logger.info('Logged into OV appliance.');
     const brain = new ovBrain(client, robot, Lexer);
 
     ovListener(robot, client);
@@ -53,7 +53,7 @@ const main = (robot) => {
   }
 
   process.on('exit', exitHandler.bind(null,{cleanup:true}));
-}
+};
 
 export default main;
 module.exports = main;

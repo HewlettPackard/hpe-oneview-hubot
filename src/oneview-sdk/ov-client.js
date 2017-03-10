@@ -63,7 +63,7 @@ export default class OVClient {
     this.connection.__newSession__ = auth;
 
     return auth().then((auth) => {
-      this.connection.headers['auth'] = auth;
+      this.connection.headers.auth = auth;
       this.connection.loggedIn = true;
       return auth;
     }).then(() => {
@@ -124,7 +124,7 @@ export default class OVClient {
 
   __checkToken__() {
     return new Promise ((resolve, reject) => {
-      this.connection.headers['session-id'] = this.connection.headers['auth'];
+      this.connection.headers['session-id'] = this.connection.headers.auth;
       this.connection.get('/rest/sessions').then((res) => {
         resolve(res.sessionID);
       }).catch((err) => {

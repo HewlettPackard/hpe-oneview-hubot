@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-function noop() {};
+function noop() {}
 
 export class Emitter {
   constructor() {
@@ -35,7 +35,7 @@ export class Emitter {
     try {
       this.next(arg);
     } catch(err) {
-      this.robot.logger.error("Error in feedback", err)
+      this.robot.logger.error("Error in feedback", err);
     }
   }
 }
@@ -68,13 +68,13 @@ if (!Promise.allSettled) {
             if (resolved == arr.length) {
               resolve(results);
             }
-          }
-        }
+          };
+        };
 
         for (var i = 0; i < arr.length; i++) {
           arr[i].then(exec(i)).catch(exec(i));
         }
       }
     });
-  }
+  };
 }

@@ -74,10 +74,10 @@ export default class Connection {
       json: true,
       headers: this.headers,
       resolveWithFullResponse: true
-    }
+    };
 
     if (filter) {
-      options['qs'] = filter;
+      options.qs = filter;
     }
 
     return this.__http__(options);
@@ -171,8 +171,8 @@ export default class Connection {
     } else {
       response = res;
     }
-    if (response && response.statusCode == 202 && response.headers['location']) {
-      return this.__getTask__(response.headers['location'])
+    if (response && response.statusCode == 202 && response.headers.location) {
+      return this.__getTask__(response.headers.location);
     }
     if (response && response.body) {
       return response.body;
@@ -235,8 +235,8 @@ export default class Connection {
          fetch.uri = 'https://' + this.host + resourceUri;
          //TODO: What happens in the case of a SP/SPT operation that ends in parameter validation?
          request(fetch).then((res) => {
-           res["__task_output__"] = task;
-           res["__task_state__"] = task.taskState;
+           res.__task_output__ = task;
+           res.__task_state__ = task.taskState;
            return resolve(res);
          }).catch(reject);
        }

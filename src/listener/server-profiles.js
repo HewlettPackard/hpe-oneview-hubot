@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import Listener from './base-listener';
-const Conversation = require('hubot-conversation');
+import Listener from "./base-listener";
+const Conversation = require("hubot-conversation");
 
 export default class ServerProfilesListener extends Listener {
   constructor(robot, client, transform, serverHardware) {

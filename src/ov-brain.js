@@ -62,8 +62,7 @@ export default class OneViewBrain {
 
     robot.on('__hpe__brain_notification__', function (message) {
       if (message) {
-        if (message.changeType.toLowerCase() === 'created' && (message.resource.type.toLowerCase().includes('serverprofile')
-        || message.resource.type.toLowerCase().includes('server-hardware'))) {
+        if (message.changeType.toLowerCase() === 'created' && (message.resource.type.toLowerCase().includes('serverprofile') || message.resource.type.toLowerCase().includes('server-hardware'))) {
           Lexer.addNamedDevice(message.resource.name, message.resource.uri, 'name');
           robot.logger.debug('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
           if (message.resource.serialNumberType === 'Virtual' && !message.resource.type.toLowerCase().includes('template')) {
@@ -78,4 +77,4 @@ export default class OneViewBrain {
       }
     });
   }
-};
+}
