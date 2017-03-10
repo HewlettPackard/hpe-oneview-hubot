@@ -28,7 +28,7 @@ const amqp = require('amqp');
 const alerts = 'scmb.alerts.Created.#';
 const sp = 'scmb.server-profiles.#';
 const spt = 'scmb.server-profile-templates.#';
-const sh = 'scmb.server-hardware.Created.#'
+const sh = 'scmb.server-hardware.Created.#';
 
 class MessageEmitter {
   constructor(robot, queue) {
@@ -128,7 +128,7 @@ export default class Notifications {
       certFile : sslFolder + 'client.pem',
       caFile : sslFolder + 'caroot.pem',
       rejectUnauthorized : true
-    }
+    };
 
     let options = {
       host: this.host,
@@ -137,7 +137,7 @@ export default class Notifications {
       vhost: '/',
       noDelay: true,
       ssl: ssl_options
-    }
+    };
 
     Promise.all([
       exists(ssl_options.keyFile),
@@ -191,7 +191,7 @@ export default class Notifications {
           }
         });
       });
-    }
+    };
 
     const writeClientCerts = () => {
       return this.restAPI.get('/rest/certificates/client/rabbitmq/keypair/default').then((cert) => {
@@ -200,13 +200,13 @@ export default class Notifications {
           write(certFile.file, cert.base64SSLCertData)
         ]);
       });
-    }
+    };
 
     const writeCaCerts = () => {
       return this.restAPI.get('/rest/certificates/ca').then((ca) => {
         return write(caFile.file, ca);
       });
-    }
+    };
 
     if (!keyFile.exists || !certFile.exists || !caFile.exists) {
       return createCertificate().then(() => {

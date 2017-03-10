@@ -50,13 +50,10 @@ function chooseLabel(metricName) {
   switch (metricName) {
     case 'CPU':
       return 'Ghz';
-      break;
     case 'Power':
       return 'W';
-      break;
     case 'Temperature':
       return 'C';
-      break;
     default:
       break;
     }
@@ -165,8 +162,9 @@ export default function MetricToPng(robot, metricName, metricList) {
       let file = {
           file: readStream,
           channels: 'random',
-          name: metricName + '.PNG'
-      }
+          name: metricName + '.PNG',
+          filetype: 'png'
+      };
 
       robot.adapter.client.web.files.upload(' ', file, (err, res) => {
         if (err) {

@@ -44,7 +44,7 @@ function stacktrace(error) {
 
 function addPeriod(text) {
   if (text && !text.endsWith('.')) {//TODO" Naieve assumption that the bot will never use ! or ?
-    return text + '.'
+    return text + '.';
   }
   return text;
 }

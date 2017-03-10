@@ -48,4 +48,4 @@ export default class DeveloperListener extends Listener {
       return this.transform.error(msg, err);
     });
   }
-};
+}

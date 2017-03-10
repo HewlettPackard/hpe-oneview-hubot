@@ -23,7 +23,7 @@ THE SOFTWARE.
 const spellingErrors = {
   "utilizaton":"utilization",
   "uzing":"using"
-}
+};
 
 //SpellCheck function
 export default (term) => {
@@ -31,9 +31,9 @@ export default (term) => {
   const fixed = term.text.split(" ").map((w) => {
     if (spellingErrors[w]) {
       rebuild = true;
-      return spellingErrors[w]
+      return spellingErrors[w];
     }
-    return w
+    return w;
   });
 
   if (rebuild) {

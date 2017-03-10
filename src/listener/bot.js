@@ -24,7 +24,7 @@ import Listener from './base-listener';
 
 import ServerProfilesListener from './server-profiles';
 
-const BULLET = " * ";
+const BULLET = '\t\u2022 ';
 
 export default class BotListener extends Listener {
   constructor(robot, client, transform, developer,
@@ -52,11 +52,10 @@ export default class BotListener extends Listener {
 
   GetActions() {
     return "What can I help you with today? Here's just a few things I can do:\n" +
-      BULLET + this.serverProfiles.title + " help\n" +
-      BULLET + this.serverProfileTemplate.title + " help\n" +
-      BULLET + this.serverHardware.title + " help\n" +
+      BULLET + this.serverProfiles.title + " help.\n" +
+      BULLET + this.serverProfileTemplate.title + " help.\n" +
+      BULLET + this.serverHardware.title + " help.\n";
 //      BULLET + this.developer.capabilitiesHeader + "\n" +
-      "";
   }
 
   ListAllActions(msg) {
@@ -89,7 +88,6 @@ export default class BotListener extends Listener {
       case "sp":
         return this.serverProfiles.title + " commands:\n" +
           this.serverProfiles.capabilities.join('\n');
-        break;
       case "server profile templates":
       case "server profile template":
       case "profile templates":
@@ -99,19 +97,16 @@ export default class BotListener extends Listener {
       case "spt":
         return this.serverProfileTemplate.title + " commands:\n" +
           this.serverProfileTemplate.capabilities.join('\n');
-        break;
       case "server hardware":
       case "hardware":
       case "sh":
         return this.serverHardware.title + " commands:\n" +
           this.serverHardware.capabilities.join('\n');
-        break;
       case "all": //all help
         return this.GetAllActions();
-        break;
       default:
         return this.GetActions();
     }
   }
 
-};
+}

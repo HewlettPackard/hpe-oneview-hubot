@@ -28,10 +28,10 @@ const defaults = {
   'template': 'Noun',
   'server': 'Noun',
   'hardware': 'Noun'
-}
+};
 
 const space = /\s+/;
-const bladeName = /^(\D*)(.*?), bay (\d+)$/
+const bladeName = /^(\D*)(.*?), bay (\d+)$/;
 const maxNgram = 10;
 const minNgram = 3;
 const fuzzySetThreshold = 0.83;//A fuzzy match that is less than this value is not considered a good enough match to replace
@@ -46,7 +46,7 @@ export default class Lexer {
     this.largestDevice = 1;
 
     //TODO: BUG - This should really be part of a spelling error correction task, we should use an independent fuzzy set that operates on individual words.
-    // for (var k in defaults) {
+    // for (let k in defaults) {
       //TODO: this seems to be stripping words that are needed in the regexs in the individual listeners (ie this @hubot list all server profiles becomes  @hubot list all server)
       // this.lex[k] = defaults[k];
       // this.__addFuzzyLookup__(k, k);
@@ -82,7 +82,7 @@ export default class Lexer {
     namedDevices.forEach((namedDevice) => {
       if (namedDevice.replacement === replacement && namedDevice.name !== search && namedDevice.type === 'name') {
         robot.logger.info('Updating resource name for ' + namedDevice.replacement + ' from ' + namedDevice.name + ' to ' + search);
-        namedDevice.search = new RegExp('\\b' + tSearch + '\\b', 'ig');;
+        namedDevice.search = new RegExp('\\b' + tSearch + '\\b', 'ig');
         namedDevice.name = tSearch;
       }
     });
@@ -93,7 +93,7 @@ export default class Lexer {
   }
 
   __addFuzzyLookup__(key, mapped) {
-    var tKey = key.trim();
+    let tKey = key.trim();
     this.fuzzyset.add(tKey);
     this.lookupset[tKey] = mapped;
   }
@@ -142,11 +142,11 @@ export default class Lexer {
     const empty = {};
 
     const initWindow = (start, size) => {
-      var window = [];
-      for (var i = 0; i < size; i++) { window.push(empty); }
+      let window = [];
+      for (let i = 0; i < size; i++) { window.push(empty); }
 
-      var j = 0;
-      var i = start;
+      let j = 0;
+      let i = start;
       for (; i < len && j < size; i++, j++) {
         window[j] = words[i]
         if (words[i].processed) {
@@ -159,7 +159,7 @@ export default class Lexer {
       }
 
       return { window: window, i: i };
-    }
+    };
 
     const process = (buffer) => {
       const set = this.fuzzyset.get(buffer.window.map((s) => { return s.str; }).join(' '));
@@ -169,28 +169,28 @@ export default class Lexer {
           w.processed = true;
         });
       }
-    }
+    };
 
-    for (var j = this.largestDevice; j > 0; j--) {
+    for (let j = this.largestDevice; j > 0; j--) {
       if (j > words.length) {
         continue;
       }
 
       let buffer = initWindow(0, j);
-      if (buffer == null) {
+      if (buffer === null) {
         continue;
       }
       process(buffer);
 
-      for (var i = j; i < words.length; i++) {
+      for (let i = j; i < words.length; i++) {
         if (words[i].processed) {
           buffer = initWindow(i, j);
-          if (buffer == null) {
+          if (buffer === null) {
             break;
           }
           i = buffer.i;
         } else {
-          for (var k = 0; k < j; k++) {
+          for (let k = 0; k < j; k++) {
             buffer.window[k] = buffer.window[k+1];
           }
           buffer.window[j-1] = words[i];

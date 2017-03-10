@@ -141,15 +141,15 @@ export default class ServerHardwareListener extends Listener {
       this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AveragePower,PeakPower,PowerCap'}).then((res) => {
         return MetricToPng(this.robot, 'Power', res.metricList);
       }).then(() => {
-        this.robot.logger.debug('Finished creating Power chart.')
+        this.robot.logger.debug('Finished creating Power chart.');
         this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AmbientTemperature'}).then((res) => {
           return MetricToPng(this.robot, 'Temperature', res.metricList);
         }).then(() => {
-          this.robot.logger.debug('Finished creating Temperature chart.')
+          this.robot.logger.debug('Finished creating Temperature chart.');
           this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
             return MetricToPng(this.robot, 'CPU', res.metricList);
           }).then(() => {
-            this.robot.logger.debug('Finished creating CPU chart.')
+            this.robot.logger.debug('Finished creating CPU chart.');
             resolve();
           }).catch((err) => {
             return this.transform.error(msg, err);
