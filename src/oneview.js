@@ -30,8 +30,9 @@ import configLoader from './config-loader';
 
 const main = (robot) => {
   // load OneView configuration data from external file
-  let oneview_config = configLoader(robot);
-  if(oneview_config == null) {
+  let oneviewConfig = configLoader(robot);
+  if(oneviewConfig == null) {
+    robot.logger.error('OneView config file not found!  Bot will not be started.');
     return;
   }
 
@@ -39,10 +40,10 @@ const main = (robot) => {
   nlp(robot);
 
   robot.logger.info('Initializing OneView');
-  const client = new ovClient(oneview_config, robot);
+  const client = new ovClient(oneviewConfig, robot);
   client.login({
-    'userName': oneview_config.userName,
-    'password': oneview_config.password
+    'userName': oneviewConfig.userName,
+    'password': oneviewConfig.password
   }, false).then(() => {
     robot.logger.info('Logged into OV appliance.');
     new ovBrain(client, robot, Lexer);

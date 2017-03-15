@@ -31,23 +31,23 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var useProxy = false;
 
 export default class Connection {
-  constructor(oneview_config){
+  constructor(oneviewConfig){
     this.session = undefined;
-    this.host = oneview_config.applianceIp;
+    this.host = oneviewConfig.applianceIp;
     this.cred = undefined;
-    this.apiVersion = oneview_config.apiVersion;
+    this.apiVersion = oneviewConfig.apiVersion;
     this.enhance = new Enhance(this.host);
-    this.readOnly = oneview_config.readOnly;
+    this.readOnly = oneviewConfig.readOnly;
     this.headers = {
-      'X-API-Version': oneview_config.apiVersion,
+      'X-API-Version': oneviewConfig.apiVersion,
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'auth': ''
     };
 
-    if (oneview_config.doProxy) {
+    if (oneviewConfig.doProxy) {
       useProxy = true;
-      this.setProxy(oneview_config.proxyHost, oneview_config.proxyPort)
+      this.setProxy(oneviewConfig.proxyHost, oneviewConfig.proxyPort)
     }
 
     this.loggedIn = false;
