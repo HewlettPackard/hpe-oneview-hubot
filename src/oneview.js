@@ -20,7 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import nlp, { Lexer } from './middleware/nlp-middleware';
+import nlp, {
+  Lexer
+} from './middleware/nlp-middleware';
 import ovListener from './listener/ov-listener';
 import ovClient from './oneview-sdk/ov-client';
 import ovBrain from './ov-brain';
@@ -29,31 +31,34 @@ import configLoader from './config-loader';
 const main = (robot) => {
   // load OneView configuration data from external file
   let oneview_config = configLoader(robot);
+  if(oneview_config == null) {
+    return;
+  }
 
   robot.logger.info('Initializing NLP');
   nlp(robot);
 
   robot.logger.info('Initializing OneView');
-  const client = new ovClient(oneview_config.applianceIp,
-    oneview_config.apiVersion, oneview_config.pollingInterval,
-    oneview_config.readOnly, oneview_config.notificationsRoom,
-    robot);
-  client.login({'userName': oneview_config.userName,
-      'password': oneview_config.password}, false).then(() => {
+  const client = new ovClient(oneview_config, robot);
+  client.login({
+    'userName': oneview_config.userName,
+    'password': oneview_config.password
+  }, false).then(() => {
     robot.logger.info('Logged into OV appliance.');
-    const brain = new ovBrain(client, robot, Lexer);
-
+    new ovBrain(client, robot, Lexer);
     ovListener(robot, client);
   }); //end login
 
   //TODO: Bug #22 Not working.  Need to perform an aysnc shutdown from the SCMB
-  function exitHandler(options, err) {
+  function exitHandler() {
     robot.logger.debug('in exitHandler, calling disconnect');
     client.Notifications.disconnect();
   }
 
-  process.on('exit', exitHandler.bind(null,{cleanup:true}));
-};
+  process.on('exit', exitHandler.bind(null, {
+    cleanup: true
+  }));
+}
 
 export default main;
 module.exports = main;

@@ -29,17 +29,16 @@ import serverprofiletemplates from './server-profile-templates';
 import notifications from './notifications';
 
 export default class OVClient {
-  constructor(applianceIp, apiVersion, pollingInterval, readOnly,
-    notificationsRoom, robot) {
-    this.host = applianceIp;
+  constructor(oneview_config, robot) {
+    this.host = oneview_config.applianceIp;
     this.robot = robot;
-    this.connection = new connection(applianceIp, apiVersion, readOnly);
-    this.pollingInterval = pollingInterval;
+    this.connection = new connection(oneview_config);
+    this.pollingInterval = oneview_config.pollingInterval;
     this.server_hardware = new serverhardware(this);
     this.server_profiles = new serverprofiles(this);
     this.server_profile_templates = new serverprofiletemplates(this);
-    this.notifications = new notifications(applianceIp, this.connection, robot);
-    this.notificationsRoom = notificationsRoom;
+    this.notifications = new notifications(oneview_config.applianceIp, this.connection, robot);
+    this.notificationsRoom = oneview_config.notificationsRoom;
     if (this.notificationsRoom === undefined) {
       this.notificationsRoom = 'clean-room';
     }
@@ -101,10 +100,10 @@ export default class OVClient {
 
   __pollAuthToken__(credentials) {
     this.__delay__(this.pollingInterval * 60000).then(() => {
-      this.__checkToken__().then((res) => {
+      this.__checkToken__().then(() => {
         this.robot.logger.debug('Existing OV auth token is still valid.');
         this.__pollAuthToken__(credentials);
-      }).catch((err) => {
+      }).catch(() => {
          this.robot.logger.info('Existing OV auth token appears to no longer be valid.  Creating new token now.');
          this.login(credentials, true);
          this.__pollAuthToken__(credentials);

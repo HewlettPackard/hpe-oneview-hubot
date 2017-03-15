@@ -23,8 +23,10 @@ THE SOFTWARE.
 export default (robot) => {
     try {
       const configuration = require('../oneview-configuration.json');
+      robot.logger.info('Applying configuration from json file.');
       return configuration;
     } catch(err) {
       robot.logger.error('Error reading OneView configuration file: ', err);
+      return;
     }
 };
