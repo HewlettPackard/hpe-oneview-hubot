@@ -29,16 +29,16 @@ import serverprofiletemplates from './server-profile-templates';
 import notifications from './notifications';
 
 export default class OVClient {
-  constructor(oneview_config, robot) {
-    this.host = oneview_config.applianceIp;
+  constructor(oneviewConfig, robot) {
+    this.host = oneviewConfig.applianceIp;
     this.robot = robot;
-    this.connection = new connection(oneview_config);
-    this.pollingInterval = oneview_config.pollingInterval;
+    this.connection = new connection(oneviewConfig);
+    this.pollingInterval = oneviewConfig.pollingInterval;
     this.server_hardware = new serverhardware(this);
     this.server_profiles = new serverprofiles(this);
     this.server_profile_templates = new serverprofiletemplates(this);
-    this.notifications = new notifications(oneview_config.applianceIp, this.connection, robot);
-    this.notificationsRoom = oneview_config.notificationsRoom;
+    this.notifications = new notifications(oneviewConfig.applianceIp, this.connection, robot);
+    this.notificationsRoom = oneviewConfig.notificationsRoom;
     if (this.notificationsRoom === undefined) {
       this.notificationsRoom = 'clean-room';
     }
