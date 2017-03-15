@@ -145,9 +145,7 @@ export default class Connection {
   __http__(options) {
     if (useProxy)
     {
-      console.log(options);
       options.proxy = this.proxyHost + ':' + this.proxyPort;
-      console.log(options);
     }
 
     if (options.uri.endsWith('/rest/login-sessions')) {
