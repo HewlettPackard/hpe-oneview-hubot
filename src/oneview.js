@@ -42,8 +42,10 @@ const main = (robot) => {
       'password': oneview_config.password}, false).then(() => {
     robot.logger.info('Logged into OV appliance.');
     const brain = new ovBrain(client, robot, Lexer);
-
     ovListener(robot, client);
+    // Introduce robot after the brain has been built
+    robot.messageRoom('#' + client.notificationsRoom, "Hello, I'm " + robot.name + "!"
+      +  " How can I assist you? Type '@" + robot.name + " help' to learn what I can do.");
   }); //end login
 
   //TODO: Bug #22 Not working.  Need to perform an aysnc shutdown from the SCMB
