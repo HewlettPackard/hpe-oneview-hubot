@@ -28,26 +28,27 @@ import { isTerminal } from './tasks';
 //TODO this is global to the NodeJS process we probably want to figure out a cleaner way to do this
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-export default class Connection {
-  constructor(applianceIp, apiVersion, readOnly){
-    this.session = undefined;
-    this.host = applianceIp;
-    this.cred = undefined;
-    this.apiVersion = apiVersion;
-    this.enhance = new Enhance(this.host);
-    this.readOnly = readOnly;
+var useProxy = false;
 
-    let headers = {
-      'X-API-Version': apiVersion,
+export default class Connection {
+  constructor(oneviewConfig){
+    this.session = undefined;
+    this.host = oneviewConfig.applianceIp;
+    this.cred = undefined;
+    this.apiVersion = oneviewConfig.apiVersion;
+    this.enhance = new Enhance(this.host);
+    this.readOnly = oneviewConfig.readOnly;
+    this.headers = {
+      'X-API-Version': oneviewConfig.apiVersion,
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'auth': ''
     };
-    this.headers = headers;
 
-    this.proxyHost = undefined;
-    this.proxyPort = undefined;
-    this.doProxy = false;
+    if (oneviewConfig.doProxy) {
+      useProxy = true;
+      this.setProxy(oneviewConfig.proxyHost, oneviewConfig.proxyPort)
+    }
 
     this.loggedIn = false;
   }
@@ -56,11 +57,9 @@ export default class Connection {
     return this.readOnly;
   }
 
-  //TODO setup proxy and other connection attributes
   setProxy(proxyHost, proxyPort) {
     this.proxyHost = proxyHost;
     this.proxyPort = proxyPort;
-    this.doProxy = true;
   }
 
   get(path, filter) {
@@ -144,6 +143,11 @@ export default class Connection {
 
   //Mark the method as "private" by convention, note this is pseudo privacy.
   __http__(options) {
+    if (useProxy)
+    {
+      options.proxy = this.proxyHost + ':' + this.proxyPort;
+    }
+
     if (options.uri.endsWith('/rest/login-sessions')) {
       return request(options).then(::this.__handleResponse__);
     }

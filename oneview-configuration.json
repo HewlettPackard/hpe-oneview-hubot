@@ -6,5 +6,8 @@
   "notificationsFilters": [{"severity": "Critical"}],
   "pollingInterval": 30,
   "readOnly": true,
-  "notificationsRoom": "clean-room"
+  "notificationsRoom": "clean-room",
+  "doProxy": false,
+  "proxyHost": "0.0.0.0",
+  "proxyPort": 0
 }
