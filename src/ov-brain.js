@@ -26,6 +26,7 @@ function error(err, robot) {
 
 export default class OneViewBrain {
   constructor(client, robot, Lexer) {
+
     client.ServerHardware.getAllServerHardware().then((res) => {
       if (res && res.members) {
         for (var i = 0; i < res.members.length; i++) {
@@ -76,5 +77,8 @@ export default class OneViewBrain {
         }
       }
     });
+
+    //Introduce robot after the brain has been built
+    robot.messageRoom('#' + client.notificationsRoom, "Hello, I'm " + robot.name + "!  How can I assist you? Type '@" + robot.name + " help' to learn what I can do.");
   }
 }
