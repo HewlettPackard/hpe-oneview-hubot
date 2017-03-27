@@ -31,8 +31,9 @@ import configLoader from './config-loader';
 const main = (robot) => {
   // load OneView configuration data from external file
   let oneviewConfig = configLoader(robot);
-  if(oneviewConfig == null) {
-    robot.logger.error('OneView config file not found!  Bot will not be started.');
+  if (oneviewConfig == null) {
+    robot.logger.error(
+      'OneView config file not found!  Bot will not be started.');
     return;
   }
 
@@ -48,10 +49,26 @@ const main = (robot) => {
     robot.logger.info('Logged into OV appliance.');
     new ovBrain(client, robot, Lexer);
     ovListener(robot, client);
-    // Introduce robot after the brain has been built
-    robot.messageRoom('#' + client.notificationsRoom, "Hello, I'm " + robot.name + "!"
-      +  " How can I assist you? Type '@" + robot.name + " help' to learn what I can do.");
+    introBot();
   }); //end login
+
+  function introBot() {
+    client.ServerHardware.getAllServerHardware().then((sh) => {
+      client.ServerProfiles.getAllServerProfiles().then((sp) => {
+        client.ServerProfileTemplates.getAllServerProfileTemplates()
+          .then((spt) => {
+            robot.messageRoom('#' + client.notificationsRoom,
+              "Hello, I'm " + robot.name + "! "
+              +"Your OneView instance is currently showing:"
+              + "\n\t\u2022" + sh.members.length + " server(s)"
+              + "\n\t\u2022" + sp.members.length + " server profile(s)"
+              + "\n\t\u2022" + spt.members.length +" server profile template(s)"
+              + "\nHow can I assist you? Type '@" + robot.name
+              + " help' to learn what I can do.");
+          });
+      });
+    });
+  }
 
   //TODO: Bug #22 Not working.  Need to perform an aysnc shutdown from the SCMB
   function exitHandler() {
