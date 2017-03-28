@@ -22,8 +22,6 @@ THE SOFTWARE.
 
 import Listener from './base-listener';
 
-import ServerProfilesListener from './server-profiles';
-
 const BULLET = '\t\u2022 ';
 
 export default class BotListener extends Listener {
