@@ -101,7 +101,7 @@ export default class ServerProfilesListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile.  Are you sure you want to do this? (yes/no)");
 
-    dialog.addChoice(/yes/i, (msg2) => {
+    dialog.addChoice(/yes/i, () => {
       this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
         return this.serverHardware.PowerOnHardware(res.serverHardwareUri, msg);
       }).catch((err) => {
@@ -110,7 +110,7 @@ export default class ServerProfilesListener extends Listener {
 
     });
 
-    dialog.addChoice(/no/i, (msg3) => {
+    dialog.addChoice(/no/i, () => {
       return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't do that.");
     });
   }
@@ -123,7 +123,7 @@ export default class ServerProfilesListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile.  Are you sure you want to do this? (yes/no)");
 
-    dialog.addChoice(/yes/i, (msg2) => {
+    dialog.addChoice(/yes/i, () => {
       this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
         return this.serverHardware.PowerOffHardware(res.serverHardwareUri, msg);
       }).catch((err) => {
@@ -131,7 +131,7 @@ export default class ServerProfilesListener extends Listener {
       });
     });
 
-    dialog.addChoice(/no/i, (msg3) => {
+    dialog.addChoice(/no/i, () => {
       return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't do that.");
     });
   }

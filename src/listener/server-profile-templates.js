@@ -106,7 +106,7 @@ export default class ServerProfileTemplateListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy " + this.transform.makePlural(msg.count, 'profile') + ".  Are you sure you want to do this? (yes/no)");
 
-    dialog.addChoice(/yes/i, (msg2) => {
+    dialog.addChoice(/yes/i, () => {
       var template = null;
       this.__getAvailableTargets__(msg.templateId, (spt) => { template = spt; }).then((targets) => {
         var i = -1;
@@ -124,7 +124,6 @@ export default class ServerProfileTemplateListener extends Listener {
                                             'Power on the profile') + "\n" +
                                             "These operations will take a long time.  Grab a coffee.  I will let you know when I'm finished.").then(() => {
             return Promise.allSettled(targets.map((target) => {
-              let startMessage = false;
               return this.client.ServerProfileTemplates.deployProfile(template.uri, target.uri, template.name + ' - ' + target.name).feedback((res) => {
                 this.robot.logger.debug(res);
               }).then((profile) => {
@@ -144,7 +143,7 @@ export default class ServerProfileTemplateListener extends Listener {
       });
     });
 
-    dialog.addChoice(/no/i, (msg3) => {
+    dialog.addChoice(/no/i, () => {
       return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't deploy the " + this.transform.makePlural(msg.count, 'profile'));
     });
   }
@@ -157,11 +156,11 @@ export default class ServerProfileTemplateListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to un-deploy " + this.transform.makePlural(msg.count, 'profile') + ".  Are you sure you want to do this? (yes/no)");
 
-    dialog.addChoice(/yes/i, (msg2) => {
+    dialog.addChoice(/yes/i, () => {
       var template = null;
       this.client.ServerProfileTemplates.getProfilesUsingTemplate(msg.templateId, (spt) => { template = spt; }).then((profiles) => {
         var i = -1;
-        return profiles.filter((t) => {
+        return profiles.filter(() => {
           i++;
           return i < msg.count;
         });
@@ -173,7 +172,6 @@ export default class ServerProfileTemplateListener extends Listener {
                                         'I will notify you when I am finished.  Grab a snack.  This is going to take a bit.').then(() => {
           return Promise.allSettled(profiles.map((profile) => {
             return this.serverHardware.PowerOffHardware(profile.serverHardwareUri, msg, true).then(() => {
-              let startMessage = false;
               return this.client.ServerProfiles.deleteServerProfile(profile.uri).feedback((res) => {
                 this.robot.logger.debug(res);
               });
@@ -189,7 +187,7 @@ export default class ServerProfileTemplateListener extends Listener {
       });
     });
 
-    dialog.addChoice(/no/i, (msg3) => {
+    dialog.addChoice(/no/i, () => {
       return this.transform.text(msg, msg.message.user.name + " I won't un-deploy the " + this.transform.makePlural(msg.count, 'profile'));
     });
   }
@@ -202,7 +200,7 @@ export default class ServerProfileTemplateListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
     this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template.  Are you sure you want to do this? (yes/no)");
 
-    dialog.addChoice(/yes/i, (msg2) => {
+    dialog.addChoice(/yes/i, () => {
       var template = null;
       this.client.ServerProfileTemplates.getNonCompliantProfiles(msg.templateId, (spt) => { template = spt; }).then((profiles) => {
         if (profiles.length == 0) {
@@ -233,7 +231,7 @@ export default class ServerProfileTemplateListener extends Listener {
       });
     });
 
-    dialog.addChoice(/no/i, (msg3) => {
+    dialog.addChoice(/no/i, () => {
       return this.transform.text(msg, "OK " + msg.message.user.name + " I won't fix the compliance issues.");
     });
   }

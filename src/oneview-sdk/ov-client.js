@@ -114,7 +114,7 @@ export default class OVClient {
   }
 
   __delay__(ms) {
-    return new Promise ((resolve, reject) => {
+    return new Promise ((resolve) => {
       setTimeout(function(){
           resolve();
       }, ms);

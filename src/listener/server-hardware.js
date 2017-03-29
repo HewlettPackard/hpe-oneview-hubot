@@ -90,13 +90,13 @@ export default class ServerHardwareListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade.  Are you sure you want to do this? (yes/no)");
 
-    dialog.addChoice(/yes/i, (msg2) => {
+    dialog.addChoice(/yes/i, () => {
       this.PowerOnHardware(msg.serverId, msg).catch((err) => {
         return this.transform.error(msg, err);
       });
     });
 
-    dialog.addChoice(/no/i, (msg3) => {
+    dialog.addChoice(/no/i, () => {
       return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't do that.");
     });
   }
@@ -109,13 +109,13 @@ export default class ServerHardwareListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade.  Are you sure you want to do this? (yes/no)");
 
-    dialog.addChoice(/yes/i, (msg2) => {
+    dialog.addChoice(/yes/i, () => {
       this.PowerOffHardware(msg.serverId, msg).catch((err) => {
         return this.transform.error(msg, err);
       });
     });
 
-    dialog.addChoice(/no/i, (msg3) => {
+    dialog.addChoice(/no/i, () => {
       return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't do that.");
     });
   }
@@ -137,7 +137,7 @@ export default class ServerHardwareListener extends Listener {
   }
 
   ListServerHardwareUtilization(msg) {
-    let p = new Promise ((resolve, reject) => {
+    let p = new Promise ((resolve) => {
       this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AveragePower,PeakPower,PowerCap'}).then((res) => {
         return MetricToPng(this.robot, 'Power', res.metricList);
       }).then(() => {

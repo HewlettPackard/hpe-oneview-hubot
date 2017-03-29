@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 
 import ServerProfile from './server-profile';
+import ServerProfileTemplate from './server-profile-template';
 import Alert from './alert';
 import ServerHardware from './server-hardware';
 import ServerProfileCompliancePreview from './server-profile-compliance-preview';

@@ -49,6 +49,10 @@ function addPeriod(text) {
   return text;
 }
 
+function isVowel(x) {
+  return /[aeiouAEIOU]/.test(x);
+}
+
 export default class ResourceTransforms {
   constructor(robot) {
     if (robot.adapterName === 'slack') {
@@ -175,4 +179,6 @@ export default class ResourceTransforms {
     }
     return "are " + this.makePlural(count, word);
   }
+
+
 }

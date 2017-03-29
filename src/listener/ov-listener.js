@@ -40,7 +40,7 @@ export default function(robot, client) {
   const spt = new ServerProfileTemplateListener(robot, client, transform, sh, sp);
 
   // LAST!!
-  const bot = new BotListener(robot, client, transform, dev, sh, sp, spt);
+  new BotListener(robot, client, transform, dev, sh, sp, spt);
 
   // TODO: Bug This should not be bound here, probably want a NotificationsListener instead
   // connect to the SCMB to emit notifications

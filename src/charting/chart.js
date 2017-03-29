@@ -36,7 +36,6 @@ function buildD3DataArray(metricList) {
       let name = metricList[i].metricName;
       let samples = metricList[i].metricSamples;
       for (let j=0; j < samples.length; j++) {
-        let sampleData = samples[j];
         let d = new Date(0); //uses local time zone
         d.setUTCSeconds(samples[j][0] / 1000);
         data.push({metric: name, date: d.toISOString(), value: samples[j][1]});
@@ -179,7 +178,7 @@ export default function MetricToPng(robot, metricName, metricList) {
       robot.logger.info('Adapter ' + robot.adapterName + ' does not support web file upload.');
     }
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       setTimeout(function() {
         resolve();
       }, 4000);

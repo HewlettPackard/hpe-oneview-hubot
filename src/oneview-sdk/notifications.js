@@ -36,7 +36,7 @@ class MessageEmitter {
     this.queue = queue;
   }
 
-  onMessage(msg, cb) {
+  onMessage(msg) {
     if (msg && msg.resource.type) {
       let event;
       if (msg.resource.type.toLowerCase().includes('alertresource')) {
@@ -52,7 +52,7 @@ class MessageEmitter {
 }
 
 function exists(filepath) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     fs.access(filepath, fs.F_OK, (err) => {
       resolve(!err);
     });

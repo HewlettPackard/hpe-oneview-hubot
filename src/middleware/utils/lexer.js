@@ -22,14 +22,6 @@ THE SOFTWARE.
 
 import FuzzySet from 'fuzzyset.js';
 
-const defaults = {
-  'server profile template': 'Noun',
-  'server profile': 'Noun',
-  'template': 'Noun',
-  'server': 'Noun',
-  'hardware': 'Noun'
-};
-
 const space = /\s+/;
 const bladeName = /^(\D*)(.*?), bay (\d+)$/;
 const maxNgram = 10;
