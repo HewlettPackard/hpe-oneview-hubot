@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/HewlettPackard/hpe-oneview-hubot.svg?branch=master)](https://travis-ci.org/HewlettPackard/hpe-oneview-hubot)
+
 # hubot-oneview
 
 Hubot script that interfaces with the OneView RESTful API and SCMB
