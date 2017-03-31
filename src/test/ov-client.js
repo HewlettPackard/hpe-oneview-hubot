@@ -37,7 +37,14 @@ describe('OVClient', () => {
   let oVClient;
 
   beforeEach(() => {
-    oVClient = new OVClient('localhost', 300, 60, true, 'room', {});
+    let oneviewConfig = {
+      applianceIp: 'localhost',
+      apiVersion: 300,
+      readOnly: true,
+      pollingInterval: 60,
+      notificationsRoom: 'room'
+    };
+    oVClient = new OVClient(oneviewConfig, {});
   });
 
   it('login failure', () => {
