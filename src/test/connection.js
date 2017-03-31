@@ -104,7 +104,12 @@ describe('Connection', () => {
   let connection;
 
   beforeEach(() => {
-    connection = new Connection('localhost', 300, true);
+    let oneviewConfig = {
+      applianceIp: 'localhost',
+      apiVersion: 300,
+      readOnly: true
+    };
+    connection = new Connection(oneviewConfig);
   });
 
   it('isReadOnly true', () => {

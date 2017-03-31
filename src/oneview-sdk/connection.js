@@ -47,7 +47,7 @@ export default class Connection {
 
     if (oneviewConfig.doProxy) {
       useProxy = true;
-      this.setProxy(oneviewConfig.proxyHost, oneviewConfig.proxyPort)
+      this.setProxy(oneviewConfig.proxyHost, oneviewConfig.proxyPort);
     }
 
     this.loggedIn = false;

@@ -44,6 +44,7 @@
   },
   "main": "dist/oneview.js",
   "scripts": {
+    "test": "node_modules/.bin/mocha src/test/*.js --compilers js:babel-core/register -R list",
     "prepublish": "gulp build"
   }
 }
