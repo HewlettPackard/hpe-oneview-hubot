@@ -27,10 +27,13 @@
     "hubot": "2.x"
   },
   "devDependencies": {
+    "babel-plugin-istanbul": "^4.1.1",
     "babel-plugin-transform-function-bind": "^6.8.0",
     "babel-preset-es2015": "^6.16.0",
     "babel-register": "^6.18.0",
     "chai": "^3.5.0",
+    "coveralls": "^2.13.0",
+    "cross-env": "^4.0.0",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
@@ -38,13 +41,26 @@
     "gulp-util": "^3.0.7",
     "hubot": "2.x",
     "hubot-test-helper": "^1.3.0",
+    "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "nock": "^9.0.8",
+    "nyc": "^10.2.0",
     "sinon": "^1.17.7"
   },
   "main": "dist/oneview.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha src/test/*.js --compilers js:babel-core/register -R list",
-    "prepublish": "gulp build"
+    "prepublish": "gulp build",
+    "test": "node_modules/.bin/_mocha src/test/*.js --compilers js:babel-core/register -R list",
+    "coverage": "cross-env NODE_ENV=test nyc npm test && nyc report --reporter=text-lcov | coveralls && rm -rf ./coverage"
+  },
+  "nyc": {
+    "require": [
+      "babel-register"
+    ],
+    "sourceMap": false,
+    "instrument": false,
+    "exclude": [
+      "src/test/*.js"
+    ]
   }
 }
