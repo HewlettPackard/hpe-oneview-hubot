@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/HewlettPackard/hpe-oneview-hubot.svg?branch=master)](https://travis-ci.org/HewlettPackard/hpe-oneview-hubot)
+[![Coverage Status](https://coveralls.io/repos/github/HewlettPackard/hpe-oneview-hubot/badge.svg?branch=master)](https://coveralls.io/github/HewlettPackard/hpe-oneview-hubot?branch=master)
 
 # hubot-oneview
 
