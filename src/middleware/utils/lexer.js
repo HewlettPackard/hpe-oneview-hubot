@@ -96,8 +96,8 @@ export default class Lexer {
       if (text.endsWith('.')) {
         text = text.slice(0, -1);
       }
-
-      return this.__fuzzyResolve__(text);
+      // return this.__fuzzyResolve__(text); // this is a mess and is breaking regexs in listeners
+      return text + '.';
     }).join('  ');
 
     namedDevices.forEach((device) => {
@@ -140,7 +140,7 @@ export default class Lexer {
       let j = 0;
       let i = start;
       for (; i < len && j < size; i++, j++) {
-        window[j] = words[i]
+        window[j] = words[i];
         if (words[i].processed) {
           j = 0;
         }
