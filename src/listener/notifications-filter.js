@@ -48,6 +48,7 @@ export default class NotificationsFilter {
   }
 
   __checkFilter__(filter, item) {
+    //TODO need to be case insensitive when matching the filter key to the message.resource.severity
     for (let key in filter) {
       if(item[key] === undefined || item[key] != filter[key]) {
         this.robot.logger.info('Message does not pass against filter', filter);
