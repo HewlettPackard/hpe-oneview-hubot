@@ -28,4 +28,24 @@ export default class Resource {
     this.description = oneViewResource.description;
     this.hyperlink = oneViewResource.hyperlink;
   }
+
+ camelCaseToTitleCase(camelCase){
+    if (camelCase === null || camelCase === "") {
+      return camelCase;
+    }
+    camelCase = camelCase.trim();
+    var newText = "";
+
+    if (/[a-z]/.test(camelCase[0])){
+      newText = camelCase[0].toUpperCase();
+    }
+
+    for (var i = 1; i < camelCase.length; i++) {
+      if (/[A-Z]/.test(camelCase[i]) && /[a-z]/.test(camelCase[i-1])) {
+        newText += " ";
+      }
+      newText += camelCase[i];
+    }
+    return newText;
+  }
 }

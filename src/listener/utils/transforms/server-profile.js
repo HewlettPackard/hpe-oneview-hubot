@@ -42,8 +42,11 @@ export default class ServerProfile extends Resource {
       if (this.__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
+
+      var displayField = this.camelCaseToTitleCase(field);
+
       fields.push({
-        title: field,
+        title: displayField,
         short: true,
         value: this[field]
       });

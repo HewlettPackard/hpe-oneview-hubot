@@ -48,8 +48,11 @@ export default class ServerProfileCompliancePreview extends Resource {
       } else {
         value = this[field];
       }
+
+      var displayField = this.camelCaseToTitleCase(field);
+
       fields.push({
-        title: field,
+        title: displayField,
         short: false,
         value: value
       });

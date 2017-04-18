@@ -38,8 +38,11 @@ export default class ServerProfileTemplate extends Resource {
       if (this.__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
+
+      var displayField = this.amelCaseToTitleCase(field);
+
       fields.push({
-        title: field,
+        title: displayField,
         short: true,
         value: this[field]
       });
