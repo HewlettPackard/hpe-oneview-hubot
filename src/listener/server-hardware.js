@@ -29,22 +29,21 @@ export default class ServerHardwareListener extends Listener {
     super(robot, client, transform);
 
     this.switchBoard = new Conversation(robot);
+    this.room = client.notificationsRoom;
 
     this.title = "Server hardware (sh)";
     this.capabilities = [];
-    // Using a negative look-ahead on the string /rest/server-profiles to prevent
-    // this listener to responding to power events on server profiles
-    this.respond(/(?:will you |can you |please ){0,1}(?:turn|power) on (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?)(?: please){0,1}\.$/i, ::this.PowerOn);
-    this.respond(/(?:will you |can you |please ){0,1}(?:turn|power) off (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?)(?: please){0,1}\.$/i, ::this.PowerOff);
+    this.respond(/(?:turn|power) on (?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOn);
+    this.respond(/(?:turn|power) off (?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOff);
     this.capabilities.push(this.indent + "Power on/off a specific (server) hardware (e.g. turn on Encl1, bay 1).");
 
     this.respond(/(?:get|list|show) all (?:server ){0,1}hardware\.$/i, ::this.ListServerHardware);
     this.capabilities.push(this.indent + "List all (server) hardware (e.g. list all hardware).");
 
-    this.respond(/(?:get|list|show) (?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, ::this.ListServerHardwareUtilization);
+    this.respond(/(?:get|list|show) (?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, ::this.ListServerHardwareUtilization);
     this.capabilities.push(this.indent + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
-    this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/){0,1}(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
+    this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
     this.capabilities.push(this.indent + "List server hardware by name (e.g. list Encl1, bay 1).");
   }
 
@@ -139,15 +138,15 @@ export default class ServerHardwareListener extends Listener {
   ListServerHardwareUtilization(msg) {
     let p = new Promise ((resolve) => {
       this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AveragePower,PeakPower,PowerCap'}).then((res) => {
-        return MetricToPng(this.robot, 'Power', res.metricList);
+        return MetricToPng(this.robot, 'Power', res.metricList, this.room);
       }).then(() => {
         this.robot.logger.debug('Finished creating Power chart.');
         this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AmbientTemperature'}).then((res) => {
-          return MetricToPng(this.robot, 'Temperature', res.metricList);
+          return MetricToPng(this.robot, 'Temperature', res.metricList, this.room);
         }).then(() => {
           this.robot.logger.debug('Finished creating Temperature chart.');
           this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
-            return MetricToPng(this.robot, 'CPU', res.metricList);
+            return MetricToPng(this.robot, 'CPU', res.metricList, this.room);
           }).then(() => {
             this.robot.logger.debug('Finished creating CPU chart.');
             resolve();

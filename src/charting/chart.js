@@ -58,7 +58,7 @@ function chooseLabel(metricName) {
     }
 }
 
-export default function MetricToPng(robot, metricName, metricList) {
+export default function MetricToPng(robot, metricName, metricList, room) {
 
   jsdom.env(
     "<html><body></body></html>",
@@ -160,7 +160,7 @@ export default function MetricToPng(robot, metricName, metricList) {
       let readStream = fs.createReadStream("dest.png");
       let file = {
           file: readStream,
-          channels: 'random',
+          channels: room,
           name: metricName + '.PNG',
           filetype: 'png'
       };

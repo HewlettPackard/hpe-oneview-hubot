@@ -34,27 +34,26 @@ export default class ServerProfileTemplateListener extends Listener {
 
     this.title = "Server Profile Template (spt)";
     this.capabilities = [];
-    //these regexs are a little messy still
     this.respond(/(?:get|list|show) all (?:server profile ){0,1}templates\.$/i, ::this.ListServerProfileTemplates);
     this.capabilities.push(this.indent + "Show all (server) profile templates (e.g. show all templates).");
 
-    this.respond(/(?:get|list|show) available (?:hardware|targets) for (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.GetAvailableTargets);
+    this.respond(/(?:get|list|show) available (?:hardware|targets) for (?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.GetAvailableTargets);
     this.capabilities.push(this.indent + "Show available targets for a server profile template (e.g. show available targets for docker swarm).");
 
-    this.respond(/(?:get|list|show) profile[s]{0,1} (?:using|deployed from|deployed by) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.GetDeployedProfiles);
+    this.respond(/(?:get|list|show) profile[s]{0,1} (?:using|deployed from|deployed by) (?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.GetDeployedProfiles);
     this.capabilities.push(this.indent + "Show profile(s) using a server profile template (e.g. show profile using docker swarm).");
 
-    this.respond(/(?:deploy|create) (:<count>\d+) profile[s]{0,1} (?:from|for|using) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.DeployProfiles);
+    this.respond(/(?:deploy|create) (:<count>\d+) profile[s]{0,1} (?:from|for|using) (?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.DeployProfiles);
     this.capabilities.push(this.indent + "Create profile(s) using a server profile template (e.g. create profile for docker swarm).");
 
-    this.respond(/(?:flex|grow)(?: the)? (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i, ::this.DeployProfiles);
+    this.respond(/(?:flex|grow)(?: the)? (?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i, ::this.DeployProfiles);
     this.capabilities.push(this.indent + "Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).");
 
-    this.respond(/(?:undeploy|remove) (:<count>\d+) profile[s]{0,1} (?:from|that were deployed from|that were using) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.UnDeployProfiles);
-    this.respond(/(?:undeploy|remove) (:<count>\d+) server[s]{0,1} (?:from|that were deployed from|that were using) (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*)\.$/i, ::this.UnDeployProfiles);
+    this.respond(/(?:undeploy|remove) (:<count>\d+) profile[s]{0,1} (?:from|that were deployed from|that were using) (?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.UnDeployProfiles);
+    this.respond(/(?:undeploy|remove) (:<count>\d+) server[s]{0,1} (?:from|that were deployed from|that were using) (?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.UnDeployProfiles);
     this.capabilities.push(this.indent + "Remove a number of profiles/servers from a profile template (e.g. remove 2 profiles from docker swarm).");
 
-    this.respond(/(?:fix)(?: all)? compliance(?: issues)? for (?:\/rest\/server-profile-templates\/){0,1}(:<templateId>.*?)\.$/i, ::this.FixCompliance);
+    this.respond(/(?:fix)(?: all)? compliance(?: issues)? for (?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.FixCompliance);
     this.capabilities.push(this.indent + "Fix compliance for a profile template (e.g. fix compliance for docker swarm).");
   }
 

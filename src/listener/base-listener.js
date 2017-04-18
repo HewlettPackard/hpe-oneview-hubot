@@ -28,7 +28,7 @@ class NamedRegExp extends RegExp {
 
     this.namedGroups = [''];
     let match = namedGroups.exec(rgx.source);
-    while (match != null) {
+    while (match !== null) {
       this.namedGroups.push(match[1] || '');
       if (!match[1]) {
         this.robot.logger.info('Regex without named groups', rgx.source, 'use ?: to prevent capture or name groups with :<name>');
@@ -82,7 +82,7 @@ export default class Listener {
               response[param] = match[i];
             }
           }
-        }
+        };
       }
     }
 
@@ -92,6 +92,6 @@ export default class Listener {
   error(msg) {
     return (err) => {
       this.transform.error(msg, err);
-    }
+    };
   }
 }
