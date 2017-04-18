@@ -44,7 +44,7 @@ export default class ServerHardware extends Resource {
         continue;
       }
 
-      var displayField = this.camelCaseToTitleCase(field);
+      let displayField = this.camelCaseToTitleCase(field);
 
       fields.push({
         title: displayField,

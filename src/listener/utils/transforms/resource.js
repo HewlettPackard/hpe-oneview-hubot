@@ -34,13 +34,13 @@ export default class Resource {
       return camelCase;
     }
     camelCase = camelCase.trim();
-    var newText = "";
+    let newText = "";
 
     if (/[a-z]/.test(camelCase[0])){
       newText = camelCase[0].toUpperCase();
     }
 
-    for (var i = 1; i < camelCase.length; i++) {
+    for (let i = 1; i < camelCase.length; i++) {
       if (/[A-Z]/.test(camelCase[i]) && /[a-z]/.test(camelCase[i-1])) {
         newText += " ";
       }

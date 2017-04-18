@@ -49,7 +49,7 @@ export default class ServerProfileCompliancePreview extends Resource {
         value = this[field];
       }
 
-      var displayField = this.camelCaseToTitleCase(field);
+      let displayField = this.camelCaseToTitleCase(field);
 
       fields.push({
         title: displayField,

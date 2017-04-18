@@ -39,7 +39,7 @@ export default class ServerProfileTemplate extends Resource {
         continue;
       }
 
-      var displayField = this.amelCaseToTitleCase(field);
+      let displayField = this.amelCaseToTitleCase(field);
 
       fields.push({
         title: displayField,
