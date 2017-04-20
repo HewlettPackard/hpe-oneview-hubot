@@ -30,15 +30,12 @@ export default class Resource {
   }
 
  camelCaseToTitleCase(camelCase){
-    if (camelCase === null || camelCase === "") {
+    if (camelCase == null || camelCase === "" ) {
       return camelCase;
     }
     camelCase = camelCase.trim();
-    let newText = "";
 
-    if (/[a-z]/.test(camelCase[0])){
-      newText = camelCase[0].toUpperCase();
-    }
+    let newText = camelCase[0].toUpperCase();
 
     for (let i = 1; i < camelCase.length; i++) {
       if (/[A-Z]/.test(camelCase[i]) && /[a-z]/.test(camelCase[i-1])) {
