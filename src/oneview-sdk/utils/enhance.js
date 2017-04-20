@@ -78,9 +78,24 @@ export default class ResourceEnhancer {
           }
         }
       });
+      if (obj.type && obj.type.toLowerCase().startsWith('server-hardware')) {
+        this.__addSHInterconnectDowlinkHyperlinks__(obj);
+      }
     }
-
     return obj;
+  }
+
+  __addSHInterconnectDowlinkHyperlinks__(obj){
+    if (obj.portMap && obj.portMap.deviceSlots) {
+      for (let slot of obj.portMap.deviceSlots) {
+        if (slot.physicalPorts && slot.physicalPorts.length > 0) {
+          for (let physicalPort of slot.physicalPorts) {
+            let icKey = 'serverInterconnectPort' + physicalPort.portNumber + 'Hyperlink';
+            obj[icKey] = 'https://' + this.host + physicalPort.physicalInterconnectUri + '/statistics/d' + physicalPort.interconnectPort;
+          }
+        }
+      }
+    }
   }
 
   __guiRoute__(uri) {
