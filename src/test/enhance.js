@@ -98,4 +98,43 @@ describe('ResourceEnhancer', () => {
       uri: '/rest/tasks/resourceID',
       hyperlink: 'https://localhost/#/activity/r/rest/tasks/resourceID?s_sid=authtoken' });
   });
+
+  it('addSHInterconnectDowlinkHyperlinks 1 port', () => {
+    let body = {
+      type: 'server-hardware',
+      portMap: {
+        deviceSlots: [{
+          physicalPorts: [{
+            interconnectPort: 9,
+            portNumber: 1,
+            physicalInterconnectUri: '/rest/interconnects/id1'
+          }]
+        }]
+      }
+    };
+    let result = resourceEnhancer.transformHyperlinks('authtoken', body);
+    chai.expect(result).to.deep.equal(body);
+  });
+
+  it('addSHInterconnectDowlinkHyperlinks 2 ports', () => {
+    let body = {
+      type: 'server-hardware',
+      portMap: {
+        deviceSlots: [{
+          physicalPorts: [{
+            interconnectPort: 9,
+            portNumber: 1,
+            physicalInterconnectUri: '/rest/interconnects/id1'
+          },
+          {
+            interconnectPort: 9,
+            portNumber: 2,
+            physicalInterconnectUri: '/rest/interconnects/id2'
+          }]
+        }]
+      }
+    };
+    let result = resourceEnhancer.transformHyperlinks('authtoken', body);
+    chai.expect(result).to.deep.equal(body);
+  });
 });
