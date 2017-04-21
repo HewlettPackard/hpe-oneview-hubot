@@ -40,6 +40,7 @@ export default class Alert extends Resource {
       if (this.__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
+
       if (field === 'associatedResource') {
         fields.push({
           title: 'Resource',
@@ -48,7 +49,7 @@ export default class Alert extends Resource {
         });
       } else {
         fields.push({
-            title: field,
+            title: this.camelCaseToTitleCase(field),
             short: true,
             value: this[field]
           });
@@ -66,7 +67,7 @@ export default class Alert extends Resource {
       if (field === 'associatedResource') {
         output += '\t\u2022 Resource: ' + this[field].resourceName + '\n';
       } else {
-        output += '\t\u2022 ' + field + ': ' + this[field] + '\n';
+        output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
       }
     }
     //Add status to output only for HipChat
