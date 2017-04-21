@@ -49,10 +49,8 @@ export default class ServerProfileCompliancePreview extends Resource {
         value = this[field];
       }
 
-      let displayField = this.camelCaseToTitleCase(field);
-
       fields.push({
-        title: displayField,
+        title: this.camelCaseToTitleCase(field),
         short: false,
         value: value
       });
@@ -73,7 +71,7 @@ export default class ServerProfileCompliancePreview extends Resource {
         value = this[field];
       }
       if (value) {
-        output += field + ':\n' + value + '\n';
+        output += this.camelCaseToTitleCase(field) + ':\n' + value + '\n';
       }
     }
     return output;

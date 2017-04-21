@@ -55,7 +55,7 @@ describe('Resource', () => {
     myKeys[6].should.equal('pxeBootPolicy');
   });
 
-  it('camelCaseToTitleCase undefined', () => {
+  it('camelCaseToTitleCase empty', () => {
     let serverProfileResource = new Resource(oneViewResource);
     let myKeys = Object.keys(oneViewResource);
     serverProfileResource.camelCaseToTitleCase('').should.equal('');

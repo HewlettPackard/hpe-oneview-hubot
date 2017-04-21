@@ -39,10 +39,8 @@ export default class ServerProfileTemplate extends Resource {
         continue;
       }
 
-      let displayField = this.camelCaseToTitleCase(field);
-
       fields.push({
-        title: displayField,
+        title: this.camelCaseToTitleCase(field),
         short: true,
         value: this[field]
       });
@@ -56,7 +54,7 @@ export default class ServerProfileTemplate extends Resource {
       if (this.__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
-      output += '\t\u2022 ' + field + ': ' + this[field] + '\n';
+      output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
     }
     return output;
   }
