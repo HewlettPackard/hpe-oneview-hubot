@@ -29,7 +29,7 @@ const margin = {top: 30, right: 20, bottom: 70, left: 50},
     width = 600 - margin.left - margin.right,
     height = 300 - margin.top - margin.bottom;
 
-function buildD3DataArray(metricList) {
+function __buildD3DataArray__(metricList) {
   let data = [];
   if (metricList) {
     for (let i=0; i < metricList.length; i++) {
@@ -45,7 +45,27 @@ function buildD3DataArray(metricList) {
   }
 }
 
-function chooseLabel(metricName) {
+function __buildNetworkD3DataArray__(metricList, sampleInterval) {
+  let data = [];
+  for (let i=0; i < metricList.length; i++) {
+
+    let d = new Date();
+    let time =  d.getTime();
+    let name = metricList[i].metricName;
+    let samples = metricList[i].metricSamples;
+
+    for (let j=0; j < samples.length; j++) {
+      let gapMs = sampleInterval * 1000;
+      let epochDate = new Date(0);
+      let decrementMs = Math.round(gapMs * j);
+      epochDate.setUTCSeconds((time - decrementMs) / 1000);
+      data.push({metric: name, date: epochDate.toISOString(), value: parseInt(samples[j], 10)});
+    }
+  }
+  return data;
+}
+
+function __chooseLabel__(metricName) {
   switch (metricName) {
     case 'CPU':
       return 'Ghz';
@@ -54,81 +74,111 @@ function chooseLabel(metricName) {
     case 'Temperature':
       return 'C';
     default:
-      break;
+      return 'Kbs';
     }
 }
 
-export default function MetricToPng(robot, metricName, metricList, room) {
+function __uploadPNG__(robot, room, fileName) {
+  return new Promise((resolve, reject) => {
+    if (robot.adapterName === 'slack') {
+      let readStream = fs.createReadStream(fileName);
+      let file = {
+          file: readStream,
+          channels: room,
+          name: fileName,
+          filetype: 'png'
+      };
+      robot.adapter.client.web.files.upload(' ', file, (err, res) => {
+        if (err) {
+          robot.logger.error('Error on Slack web upload', err);
+          reject('Error on Slack web upload', err);
+        }
+        if (res.ok) {
+          robot.logger.info('Completed Slack web upload of chart.');
+          resolve('Completed Slack web upload of chart.');
+        }
+      });
+    } else {
+      resolve('Adapter ' + robot.adapterName + ' does not support web file upload.');
+      robot.logger.info('Adapter ' + robot.adapterName + ' does not support web file upload.');
+    }
+  });
+}
 
-  jsdom.env(
-    "<html><body></body></html>",
-    ['http://d3js.org/d3.v4.js'],
-    function (err, window) {
+export function buildD3Chart(robot, room, metricName, metricList, sampleInterval) {
 
-      let data = buildD3DataArray(metricList);
-      let color = d3.scaleOrdinal(d3.schemeCategory10);
+  return new Promise((resolve, reject) =>  {
 
-      // Parse the date / time
-      let parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
+    const document = jsdom.jsdom("<html><body></body></html>");
+    document.d3 = d3.select(document);
+    let svg = document.d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      // Set the ranges
-      let x = d3.scaleTime().range([0, width]);
-      let y = d3.scaleLinear().range([height, 0]);
+    let data = [];
+    if (sampleInterval) {
+      data = __buildNetworkD3DataArray__(metricList, sampleInterval);
+    } else {
+      data = __buildD3DataArray__(metricList);
+    }
 
-      // Define the line
-      let valueline = d3.line()
-      .curve(d3.curveBasis)
+    let color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    // Parse the date / time
+    let parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
+
+    // Set the ranges
+    let x = d3.scaleTime().range([0, width]);
+    let y = d3.scaleLinear().range([height, 0]);
+
+    // Define the line
+    let valueline = d3.line().curve(d3.curveBasis)
       .x(function(d) { return x(d.date); })
       .y(function(d) { return y(d.value); });
 
-      // Adds the svg canvas
-      let svg = window.d3.select("body")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    data.forEach(function(d) {
+      d.date = parseDate(d.date);
+      d.value = +d.value;
+    });
 
-      data.forEach(function(d) {
-		    d.date = parseDate(d.date);
-		    d.value = +d.value;
-      });
+    // Scale the range of the data
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
-      // Scale the range of the data
-      x.domain(d3.extent(data, function(d) { return d.date; }));
-      y.domain([0, d3.max(data, function(d) { return d.value; })]);
-
-      // Nest the entries by metric
-      let dataNest = d3.nest()
+    // Nest the entries by metric
+    let dataNest = d3.nest()
       .key(function(d) {return d.metric;})
       .entries(data);
 
-      let legendSpace = width/dataNest.length;
+    let legendSpace = width/dataNest.length;
 
-      // Loop through each metric / key
-      dataNest.forEach(function(d, i) {
-          svg.append("path")
-          .attr("stroke", color(i))
-          .attr("stroke-width", 2)
-          .attr("fill", "none")
-          .attr("d", valueline(d.values));
+    // Loop through each metric / key
+    dataNest.forEach(function(d, i) {
+      svg.append("path")
+        .attr("stroke", color(i))
+        .attr("stroke-width", 2)
+        .attr("fill", "none")
+        .attr("d", valueline(d.values));
 
-          // Add the Legend
-          svg.append("text")
-          .attr("x", (legendSpace/2)+i*legendSpace)
-          .attr("y", height + (margin.bottom/2)+ 5)
-          .style("font-family", "sans-serif")
-          .style("font-size", "12px")
-          .style("fill", function() {return d.color = color(i); })
-          .text(d.key);
-      });
+      // Add the Legend
+      svg.append("text")
+        .attr("x", (legendSpace/2)+i*legendSpace)
+        .attr("y", height + (margin.bottom/2)+ 5)
+        .style("font-family", "sans-serif")
+        .style("font-size", "12px")
+        .style("fill", function() {return d.color = color(i); })
+        .text(d.key);
+    });
 
-      // Add the X Axis
-      svg.append("g")
+    // Add the X Axis
+    svg.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
 
-      // Add a title
-      svg.append("text")
+    // Add a title
+    svg.append("text")
       .attr("x", (width / 2))
       .attr("y", 0 - (margin.top / 2))
       .attr("text-anchor", "middle")
@@ -136,51 +186,31 @@ export default function MetricToPng(robot, metricName, metricList, room) {
       .style("font-size", "14px")
       .text(metricName);
 
-      // Add axis label
-      svg.append("text")
+    // Add axis label
+    svg.append("text")
       .attr("x",  0 - 35)
       .attr("y", (height / 2))
       .attr("text-anchor", "middle")
       .style("font-family", "sans-serif")
       .style("font-size", "10px")
-      .text(chooseLabel(metricName));
+      .text(__chooseLabel__(metricName));
 
-      // Add the Y Axis
-      svg.append("g").call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0s"))); //will need custom tickFormat per chart
+    // Add the Y Axis
+    svg.append("g").call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0s")));
 
-      let buf = Buffer.from(window.d3.select("body").html());
+    let buf = Buffer.from(document.d3.select("body").html());
 
-      svg2png(buf)
-      .then(buffer => fs.writeFile("dest.png", buffer))
-      .catch(e => robot.logger.error(e));
-    });
-
-    if (robot.adapterName === 'slack') {
-
-      let readStream = fs.createReadStream("dest.png");
-      let file = {
-          file: readStream,
-          channels: room,
-          name: metricName + '.PNG',
-          filetype: 'png'
-      };
-
-      robot.adapter.client.web.files.upload(' ', file, (err, res) => {
-        if (err) {
-          robot.logger.error('Error on Slack web upload', err);
-        }
-        if (res.ok) {
-          robot.logger.info('Completed Slack web upload of chart.');
-        }
-      });
-
-    } else {
-      robot.logger.info('Adapter ' + robot.adapterName + ' does not support web file upload.');
-    }
-
-    return new Promise(function(resolve) {
-      setTimeout(function() {
+    return svg2png(buf).then((buffer) => {
+      try {
+        fs.writeFileSync(metricName + "-chart.png", buffer);
         resolve();
-      }, 4000);
+      } catch (err) {
+        robot.logger.error('Error creating chart on the filesytem', err);
+        reject(err);
+      }
     });
+
+  }).then((res) => {
+    return __uploadPNG__(robot, room, metricName + "-chart.png");
+  });
 }

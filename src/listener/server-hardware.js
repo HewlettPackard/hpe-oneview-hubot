@@ -21,8 +21,10 @@ THE SOFTWARE.
 */
 
 import Listener from './base-listener';
-import MetricToPng from '../charting/chart';
+import { buildD3Chart } from '../charting/chart';
+import { getLogicalInterconnectsMap } from '../ov-brain';
 const Conversation = require('hubot-conversation');
+const rtrim = /\/statistics\/d\d*/i;
 
 export default class ServerHardwareListener extends Listener {
   constructor(robot, client, transform) {
@@ -41,6 +43,9 @@ export default class ServerHardwareListener extends Listener {
     this.capabilities.push(this.indent + "List all (server) hardware (e.g. list all hardware).");
 
     this.respond(/(?:get|list|show) (?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, ::this.ListServerHardwareUtilization);
+    this.capabilities.push(this.indent + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
+
+    this.respond(/(?:get|list|show) (?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i, ::this.ListAllServerHardwareUtilization);
     this.capabilities.push(this.indent + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
     this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
@@ -136,34 +141,90 @@ export default class ServerHardwareListener extends Listener {
   }
 
   ListServerHardwareUtilization(msg) {
-    let p = new Promise ((resolve) => {
-      this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AveragePower,PeakPower,PowerCap'}).then((res) => {
-        return MetricToPng(this.robot, 'Power', res.metricList, this.room);
-      }).then(() => {
-        this.robot.logger.debug('Finished creating Power chart.');
-        this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AmbientTemperature'}).then((res) => {
-          return MetricToPng(this.robot, 'Temperature', res.metricList, this.room);
-        }).then(() => {
-          this.robot.logger.debug('Finished creating Temperature chart.');
-          this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
-            return MetricToPng(this.robot, 'CPU', res.metricList, this.room);
-          }).then(() => {
-            this.robot.logger.debug('Finished creating CPU chart.');
-            resolve();
-          }).catch((err) => {
-            return this.transform.error(msg, err);
-          });
-        }).catch((err) => {
-          return this.transform.error(msg, err);
-        });
-      }).catch((err) => {
-        return this.transform.error(msg, err);
-      });
-    }); //end new promise
+    this.transform.send(msg, "Ok " + msg.message.user.name + " I'm going to create the CPU and network utilization charts, this can some time.");
 
-    p.then(() => {
+    let icMap = getLogicalInterconnectsMap();
+
+    let p1 = this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
+      return buildD3Chart(this.robot, this.room, 'CPU', res.metricList);
+    });
+
+    let p2 = this.client.ServerHardware.getServerHardware(msg.serverId).then((res) => {
+      let promises = [];
+      for (let serverInterconnectPortLink of res.serverInterconnectPortLinks) {
+        let shInterconnectUri = serverInterconnectPortLink.replace(rtrim, ''); //remove statistics port to make lookup key
+        let shLogicalInterconnectUri = icMap.get(shInterconnectUri);
+        if(shLogicalInterconnectUri) { //don't query if the interconnect is not part of a logical interconnect
+          promises.push(this.client.ServerHardware.getServerNetworkUtilization(serverInterconnectPortLink, shLogicalInterconnectUri));
+        }
+      }
+      return Promise.all(promises);
+    }).then((responses) => {
+      //responses will be pairs of port statistics and telemetry configuration
+      let promises = [];
+      for (let response of responses) {
+        if (response[0].advancedStatistics) {
+          let receiveKilobytesPerSec = {metricName: 'receiveKilobytesPerSec', metricSamples: response[0].advancedStatistics.receiveKilobytesPerSec.split(':')};
+          let transmitKilobytesPerSec = {metricName: 'transmitKilobytesPerSec', metricSamples: response[0].advancedStatistics.transmitKilobytesPerSec.split(':')};
+          promises.push(buildD3Chart(this.robot, this.room, 'Network Utilization Port ' + response[0].portNumber, [receiveKilobytesPerSec, transmitKilobytesPerSec], response[1].sampleInterval));
+        }
+      }
+      return Promise.all(promises);
+    });
+
+    Promise.all([p1, p2]).then((res) => {
       this.robot.logger.info('All charts finsihed.');
-      return this.transform.send(msg, "Ok " + msg.message.user.name + " I've finished creating all of the hardware utilization charts.");
+      return this.transform.send(msg, msg.message.user.name + " I've finished creating the hardware utilization charts.");
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
+  }
+
+  ListAllServerHardwareUtilization(msg) {
+    this.transform.send(msg, msg.message.user.name + " I'm going to create all of the server utilization charts including CPU, temp, power and network utilization.  This can take quite some time.");
+
+    let icMap = getLogicalInterconnectsMap();
+
+    let p1 = this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AveragePower,PeakPower,PowerCap'}).then((res) => {
+      return Promise.all([res, buildD3Chart(this.robot, this.room, 'Power', res.metricList)]);
+    });
+
+    let p2 = this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AmbientTemperature'}).then((res) => {
+      return Promise.all([res, buildD3Chart(this.robot, this.room, 'Temperature', res.metricList)]);
+    });
+
+    let p3 = this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
+      return Promise.all([res, buildD3Chart(this.robot, this.room, 'CPU', res.metricList)]);
+    });
+
+    let p4 = this.client.ServerHardware.getServerHardware(msg.serverId).then((res) => {
+      let promises = [];
+      for (let serverInterconnectPortLink of res.serverInterconnectPortLinks) {
+        let shInterconnectUri = serverInterconnectPortLink.replace(rtrim, ''); //remove statistics port to make lookup key
+        let shLogicalInterconnectUri = icMap.get(shInterconnectUri);
+        if(shLogicalInterconnectUri) { //don't query if the interconnect is not part of a logical interconnect
+          promises.push(this.client.ServerHardware.getServerNetworkUtilization(serverInterconnectPortLink, shLogicalInterconnectUri));
+        }
+      }
+      return Promise.all(promises);
+    }).then((responses) => {
+      //responses will be pairs of port statistics and telemetry configuration
+      let promises = [];
+      for (let response of responses) {
+        if (response[0].advancedStatistics) {
+          let receiveKilobytesPerSec = {metricName: 'receiveKilobytesPerSec', metricSamples: response[0].advancedStatistics.receiveKilobytesPerSec.split(':')};
+          let transmitKilobytesPerSec = {metricName: 'transmitKilobytesPerSec', metricSamples: response[0].advancedStatistics.transmitKilobytesPerSec.split(':')};
+          promises.push(buildD3Chart(this.robot, this.room, 'Network Utilization Port ' + response[0].portNumber, [receiveKilobytesPerSec, transmitKilobytesPerSec], response[1].sampleInterval));
+        }
+      }
+      return Promise.all(promises);
+    });
+
+    Promise.all([p1, p2, p3, p4]).then(() => {
+      this.robot.logger.info('All charts finsihed.');
+      return this.transform.send(msg, "Ok " + msg.message.user.name + " I've finished creating all the hardware utilization charts.");
+    }).catch((err) => {
+      return this.transform.error(msg, err);
     });
   }
 

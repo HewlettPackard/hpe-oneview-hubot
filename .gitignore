@@ -7,3 +7,4 @@ dist/**
 local-configuration.json
 .nyc_output
 coverage/**
+.jshintrc

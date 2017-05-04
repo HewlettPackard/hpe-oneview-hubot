@@ -87,14 +87,15 @@ export default class ResourceEnhancer {
 
   __addSHInterconnectDowlinkHyperlinks__(obj){
     if (obj.portMap && obj.portMap.deviceSlots) {
+      let serverInterconnectPortLinks = [];
       for (let slot of obj.portMap.deviceSlots) {
         if (slot.physicalPorts && slot.physicalPorts.length > 0) {
           for (let physicalPort of slot.physicalPorts) {
-            let icKey = 'serverInterconnectPort' + physicalPort.portNumber + 'Hyperlink';
-            obj[icKey] = 'https://' + this.host + physicalPort.physicalInterconnectUri + '/statistics/d' + physicalPort.interconnectPort;
+            serverInterconnectPortLinks.push(physicalPort.physicalInterconnectUri + '/statistics/d' + physicalPort.interconnectPort);
           }
         }
       }
+      obj.serverInterconnectPortLinks = serverInterconnectPortLinks;
     }
   }
 
