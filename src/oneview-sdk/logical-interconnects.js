@@ -20,42 +20,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-const uri = '/rest/server-hardware/';
+const uri = '/rest/logical-interconnects/';
 
-export default class ServerHardware {
+export default class LogicalInterconnects {
   constructor (ov_client) {
     this.ov_client = ov_client;
   }
 
-  getAllServerHardware(filter) {
+  getAllLogicalInterconnects(filter) {
     return this.ov_client.connection.get(uri, filter);
   }
 
-  getServerHardware(id) {
+  getLogicalInterconnect(id) {
     return this.ov_client.connection.get(id.startsWith(uri) ? id : uri + id);
   }
 
-  setPowerState(id, state, control) {
-    let body = {powerState:state};
-    if (control) {
-      body.powerControl = control;
-    }
-    return this.ov_client.connection.put((id.startsWith(uri) ? id : uri + id) + '/powerState', body);
-  }
-
-  getServerUtilization(id, filter) {
-    return this.ov_client.connection.get((id.startsWith(uri) ? id : uri + id) + '/utilization', filter);
-  }
-
-  /*
-  This function returns a response that contains both the server's interconnect port
-  statistics and the telemetry configurations for the port.
-  @param server hardware interconnect port statistics uri
-  @param server hardware logical interconnect uri
-  */
-  getServerNetworkUtilization(shInterconnectPortStatisticsUri, shLogicalInterconnectUri) {
-    return this.ov_client.connection.get(shInterconnectPortStatisticsUri).then((res) => {
-      return Promise.all([res, this.ov_client.LogicalInterconnects.getLogicalInterconnectTelemetryConfiguration(shLogicalInterconnectUri)]);
+  getLogicalInterconnectTelemetryConfiguration(id) {
+    return this.getLogicalInterconnect(id).then((res) => {
+      return res.telemetryConfiguration;
     });
   }
 }

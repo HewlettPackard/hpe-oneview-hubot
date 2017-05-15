@@ -24,6 +24,8 @@ function error(err, robot) {
   robot.logger.error("Error initializing the OneView brain", err);
 }
 
+const logicalInterconnectsMap = new Map();
+
 export default class OneViewBrain {
   constructor(client, robot, Lexer) {
     client.ServerHardware.getAllServerHardware().then((res) => {
@@ -63,6 +65,19 @@ export default class OneViewBrain {
       }
     }).catch(error, robot);
 
+    client.LogicalInterconnects.getAllLogicalInterconnects().then((res) => {
+      if (res && res.members) {
+        for (var i = 0; i < res.members.length; i++) {
+          const lic = res.members[i];
+          const ics = lic.interconnects;
+          for (let ic of ics) {
+            logicalInterconnectsMap.set(ic, lic.uri);
+          }
+
+        }
+      }
+    }).catch(error, robot);
+
     robot.on('__hpe__brain_notification__', function (message) {
       if (message) {
         if (message.changeType.toLowerCase() === 'created' && (message.resource.type.toLowerCase().includes('serverprofile') || message.resource.type.toLowerCase().includes('server-hardware'))) {
@@ -80,4 +95,8 @@ export default class OneViewBrain {
       }
     });
   }
+}
+
+export function getLogicalInterconnectsMap() {
+  return logicalInterconnectsMap;
 }

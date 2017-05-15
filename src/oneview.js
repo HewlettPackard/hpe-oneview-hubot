@@ -31,7 +31,7 @@ import configLoader from './config-loader';
 const main = (robot) => {
   // load OneView configuration data from external file
   let oneviewConfig = configLoader(robot);
-  if (oneviewConfig == null) {
+  if (oneviewConfig === null) {
     robot.logger.error(
       'OneView config file not found!  Bot will not be started.');
     return;
@@ -79,7 +79,7 @@ const main = (robot) => {
   process.on('exit', exitHandler.bind(null, {
     cleanup: true
   }));
-}
+};
 
 export default main;
 module.exports = main;
