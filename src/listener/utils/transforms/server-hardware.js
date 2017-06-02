@@ -29,7 +29,7 @@ export default class ServerHardware extends Resource {
     if (oneViewResource) {
       super(oneViewResource);
       this.name = oneViewResource.name;
-      this.formFactor = oneViewResource.formFactor;
+      this.model = oneViewResource.model;
       this.powerState = oneViewResource.powerState;
       this.serverProfileUri = oneViewResource.serverProfileUri;
       this.serverProfileHyperlink = oneViewResource.serverProfileHyperlink;
