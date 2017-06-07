@@ -32,9 +32,9 @@ export default class OneViewBrain {
       if (res && res.members) {
         for (var i = 0; i < res.members.length; i++) {
           const sh = res.members[i];
-          Lexer.addNamedDevice(sh.name, sh.uri, 'name');
-          Lexer.addNamedDevice(sh.serialNumber, sh.uri, 'serialNumber');
-          robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber}});
+          Lexer.addNamedDevice(sh.name, sh.uri, 'name', sh.hyperlink);
+          Lexer.addNamedDevice(sh.serialNumber, sh.uri, 'serialNumber', sh.hyperlink);
+          robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber, hyperlink : sh.hyperlink}});
           robot.logger.info('Found server hardware: (Name: ' + sh.name + ', Serial Number: ' + sh.serialNumber + ', URI: ' + sh.uri + ')');
         }
       }
@@ -44,9 +44,9 @@ export default class OneViewBrain {
       if (res && res.members) {
         for (var i = 0; i < res.members.length; i++) {
           const sp = res.members[i];
-          Lexer.addNamedDevice(sp.name, sp.uri, 'name');
+          Lexer.addNamedDevice(sp.name, sp.uri, 'name', sp.hyperlink);
           if (sp.serialNumberType === 'Virtual') {
-            Lexer.addNamedDevice(sp.serialNumber, sp.uri, 'serialNumber');
+            Lexer.addNamedDevice(sp.serialNumber, sp.uri, 'serialNumber', sp.hyperlink);
           }
           robot.logger.info('Found server profile: (Name: ' + sp.name + ', URI: ' + sp.uri + ')');
           //robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber}});
@@ -58,9 +58,9 @@ export default class OneViewBrain {
       if (res && res.members) {
         for (var i = 0; i < res.members.length; i++) {
           const spt = res.members[i];
-          Lexer.addNamedDevice(spt.name, spt.uri, 'name');
+          Lexer.addNamedDevice(spt.name, spt.uri, 'name', spt.hyperlink);
           robot.logger.info('Found server profile template: (Name: ' + spt.name + ', URI: ' + spt.uri + ')');
-          //robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber}});
+          //robot.brain.set("__hpe__" + spt.uri, {uri:spt.uri, keys:{name:spt.name, serialNumber: spt.serialNumber, hyperlink: spt.hyperlink}});
         }
       }
     }).catch(error, robot);
@@ -81,16 +81,16 @@ export default class OneViewBrain {
     robot.on('__hpe__brain_notification__', function (message) {
       if (message) {
         if (message.changeType.toLowerCase() === 'created' && (message.resource.type.toLowerCase().includes('serverprofile') || message.resource.type.toLowerCase().includes('server-hardware'))) {
-          Lexer.addNamedDevice(message.resource.name, message.resource.uri, 'name');
+          Lexer.addNamedDevice(message.resource.name, message.resource.uri, 'name', message.resource.hyperlink);
           robot.logger.debug('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
           if (message.resource.serialNumberType === 'Virtual' && !message.resource.type.toLowerCase().includes('template')) {
-            Lexer.addNamedDevice(message.resource.serialNumber, message.resource.uri, 'serialNumber');
-            robot.logger.debug('Adding named device ' + message.resource.serialNumber + ' ' + message.resource.uri);
+            Lexer.addNamedDevice(message.resource.serialNumber, message.resource.uri, 'serialNumber', message.resource.hyperlink);
+            robot.logger.debug('Adding named device ' + message.resource.serialNumber + ' ' + message.resource.uri + ' ' + message.resource.hyperlink);
           }
         }
 
         if (message.changeType.toLowerCase() === 'updated' && message.resource.type.toLowerCase().includes('serverprofile')) {
-          Lexer.updateNamedDevice(robot, message.resource.name, message.resource.uri);
+          Lexer.updateNamedDevice(robot, message.resource.name, message.resource.uri, message.resource.hyperlink);
         }
       }
     });

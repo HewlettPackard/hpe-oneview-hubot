@@ -22,6 +22,7 @@ THE SOFTWARE.
 
 import Listener from './base-listener';
 import UserException from '../oneview-sdk/user-exception';
+import { getDeviceNameAndHyperLink } from '../middleware/utils/lexer';
 const Conversation = require('hubot-conversation');
 
 export default class ServerProfileTemplateListener extends Listener {
@@ -197,7 +198,13 @@ export default class ServerProfileTemplateListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template.  Are you sure you want to do this? (yes/no)");
+
+    let nameAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profile-templates/" + msg.templateId);
+    let templateName = nameAndHyperlink.deviceName;
+    let templateHyperlink = nameAndHyperlink.hyperlink;
+    this.robot.logger.info("Template name: " + templateName + " template hyperlink: " + templateHyperlink);
+    this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template " + this.transform.hyperlink(templateHyperlink, templateName) + ".  Are you sure you want to do this? (yes/no)");
+
 
     dialog.addChoice(/yes/i, () => {
       var template = null;

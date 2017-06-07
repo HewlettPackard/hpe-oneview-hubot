@@ -23,8 +23,11 @@ THE SOFTWARE.
 import Listener from './base-listener';
 import { buildD3Chart } from '../charting/chart';
 import { getLogicalInterconnectsMap } from '../ov-brain';
+import { getDeviceNameAndHyperLink } from '../middleware/utils/lexer';
 const Conversation = require('hubot-conversation');
 const rtrim = /\/statistics\/d\d*/i;
+
+
 
 export default class ServerHardwareListener extends Listener {
   constructor(robot, client, transform) {
@@ -92,7 +95,13 @@ export default class ServerHardwareListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade.  Are you sure you want to do this? (yes/no)");
+
+    let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-hardware/" + msg.serverId);
+    let bladeName = deviceAndHyperlink.deviceName;
+    let bladeHyperlink = deviceAndHyperlink.hyperlink;
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (yes/no)");
+
+
 
     dialog.addChoice(/yes/i, () => {
       this.PowerOnHardware(msg.serverId, msg).catch((err) => {
@@ -111,7 +120,12 @@ export default class ServerHardwareListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade.  Are you sure you want to do this? (yes/no)");
+
+    let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-hardware/" + msg.serverId);
+    let bladeName = deviceAndHyperlink.deviceName;
+    let bladeHyperlink = deviceAndHyperlink.hyperlink;
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (yes/no)");
+
 
     dialog.addChoice(/yes/i, () => {
       this.PowerOffHardware(msg.serverId, msg).catch((err) => {

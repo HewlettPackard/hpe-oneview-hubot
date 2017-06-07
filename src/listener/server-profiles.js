@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 
 import Listener from "./base-listener";
+import { getDeviceNameAndHyperLink } from '../middleware/utils/lexer';
 const Conversation = require("hubot-conversation");
 
 export default class ServerProfilesListener extends Listener {
@@ -98,8 +99,14 @@ export default class ServerProfilesListener extends Listener {
       return this.transform.text(msg, "Hold on a sec...  You'll have to set readOnly mode to false in your config file first if you want to do that...   ");
     }
 
+
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile.  Are you sure you want to do this? (yes/no)");
+
+    let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
+    let profileName = deviceAndHyperlink.deviceName;
+    let profileHyperlink = deviceAndHyperlink.hyperlink;
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (yes/no)");
+
 
     dialog.addChoice(/yes/i, () => {
       this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
@@ -121,7 +128,12 @@ export default class ServerProfilesListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile.  Are you sure you want to do this? (yes/no)");
+
+    let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
+    let profileName = deviceAndHyperlink.deviceName;
+    let profileHyperlink = deviceAndHyperlink.hyperlink;
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (yes/no)");
+
 
     dialog.addChoice(/yes/i, () => {
       this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {

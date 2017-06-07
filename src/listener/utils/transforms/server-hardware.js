@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 
 import Resource from './resource';
-import { getDeviceName } from '../../../middleware/utils/lexer';
+import { getDeviceNameAndHyperLink } from '../../../middleware/utils/lexer';
 
 export default class ServerHardware extends Resource {
 
@@ -54,7 +54,7 @@ export default class ServerHardware extends Resource {
       fields.push({
         title: 'Profile',
         short: true,
-        value: '<' + this.serverProfileHyperlink + '|' + getDeviceName(this.serverProfileUri) + '>'
+        value: '<' + this.serverProfileHyperlink + '|' + getDeviceNameAndHyperLink(this.serverProfileUri).deviceName + '>'
       });
       hasProfile = true;
     }
@@ -78,7 +78,7 @@ export default class ServerHardware extends Resource {
       output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
     }
     if (this.serverProfileUri) {
-      output += '\t\u2022 Profile: ' +  getDeviceName(this.serverProfileUri) + '\n';
+      output += '\t\u2022 Profile: ' +  getDeviceNameAndHyperLink(this.serverProfileUri).deviceName + '\n';
       hasProfile = true;
     }
     if (!hasProfile) {

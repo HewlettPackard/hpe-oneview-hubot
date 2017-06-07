@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 
 import Resource from './resource';
-import { getDeviceName } from '../../../middleware/utils/lexer';
+import { getDeviceNameAndHyperLink } from '../../../middleware/utils/lexer';
 
 export default class ServerProfile extends Resource {
 
@@ -53,7 +53,7 @@ export default class ServerProfile extends Resource {
       fields.push({
         title: 'Server Hardware',
         short: true,
-        value: '<' + this.serverHardwareHyperlink + '|' + getDeviceName(this.serverHardwareUri) + '>'
+        value: '<' + this.serverHardwareHyperlink + '|' + getDeviceNameAndHyperLink(this.serverHardwareUri).deviceName + '>'
       });
     }
     return fields;
@@ -68,7 +68,7 @@ export default class ServerProfile extends Resource {
       output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
     }
     if (this.serverHardwareUri) {
-      output += '\t\u2022 Server Hardware: ' + getDeviceName(this.serverHardwareUri) + '\n';
+      output += '\t\u2022 Server Hardware: ' + getDeviceNameAndHyperLink(this.serverHardwareUri).deviceName + '\n';
     }
     //Add status to output only for HipChat
     output += '\t\u2022 Status: ' +  this.status + '\n';
