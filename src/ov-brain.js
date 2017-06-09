@@ -19,7 +19,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 function error(err, robot) {
   robot.logger.error("Error initializing the OneView brain", err);
 }
@@ -32,9 +31,10 @@ export default class OneViewBrain {
       if (res && res.members) {
         for (var i = 0; i < res.members.length; i++) {
           const sh = res.members[i];
-          Lexer.addNamedDevice(sh.name, sh.uri, 'name', sh.hyperlink);
-          Lexer.addNamedDevice(sh.serialNumber, sh.uri, 'serialNumber', sh.hyperlink);
-          robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber, hyperlink : sh.hyperlink}});
+
+          Lexer.addNamedDevice(sh.name, sh.uri, 'name', sh.hyperlink, sh.model);
+          Lexer.addNamedDevice(sh.serialNumber, sh.uri, 'serialNumber', sh.hyperlink, sh.model);
+          robot.brain.set("__hpe__" + sh.uri, {uri:sh.uri, keys:{name:sh.name, serialNumber: sh.serialNumber, hyperlink : sh.hyperlink, model: sh.model}});
           robot.logger.info('Found server hardware: (Name: ' + sh.name + ', Serial Number: ' + sh.serialNumber + ', URI: ' + sh.uri + ')');
         }
       }
@@ -78,19 +78,26 @@ export default class OneViewBrain {
       }
     }).catch(error, robot);
 
+
     robot.on('__hpe__brain_notification__', function (message) {
       if (message) {
-        if (message.changeType.toLowerCase() === 'created' && (message.resource.type.toLowerCase().includes('serverprofile') || message.resource.type.toLowerCase().includes('server-hardware'))) {
-          Lexer.addNamedDevice(message.resource.name, message.resource.uri, 'name', message.resource.hyperlink);
-          robot.logger.debug('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
+        if (message.changeType.toLowerCase() === 'created') {
+          if (message.resource.type.toLowerCase().includes('serverprofile')) {
+            Lexer.addNamedDevice(message.resource.name, message.resource.uri, 'name');
+            robot.logger.debug('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
+          }
+          if (message.resource.type.toLowerCase().includes('server-hardware')) {
+            Lexer.addNamedDevice(message.resource.name, message.resource.uri, 'name', message.resource.model);
+            robot.logger.debug('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
+          }
+
           if (message.resource.serialNumberType === 'Virtual' && !message.resource.type.toLowerCase().includes('template')) {
-            Lexer.addNamedDevice(message.resource.serialNumber, message.resource.uri, 'serialNumber', message.resource.hyperlink);
-            robot.logger.debug('Adding named device ' + message.resource.serialNumber + ' ' + message.resource.uri + ' ' + message.resource.hyperlink);
+            Lexer.addNamedDevice(message.resource.serialNumber, message.resource.uri, 'serialNumber');
+            robot.logger.debug('Adding named device ' + message.resource.serialNumber + ' ' + message.resource.uri);
           }
         }
-
         if (message.changeType.toLowerCase() === 'updated' && message.resource.type.toLowerCase().includes('serverprofile')) {
-          Lexer.updateNamedDevice(robot, message.resource.name, message.resource.uri, message.resource.hyperlink);
+          Lexer.updateNamedDevice(robot, message.resource.name, message.resource.uri);
         }
       }
     });

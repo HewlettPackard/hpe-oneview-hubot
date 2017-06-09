@@ -22,6 +22,7 @@ THE SOFTWARE.
 
 import Resource from './resource';
 import { getDeviceNameAndHyperLink } from '../../../middleware/utils/lexer';
+import { getHardwareModel } from '../../../middleware/utils/lexer';
 
 export default class ServerProfile extends Resource {
 
@@ -55,7 +56,13 @@ export default class ServerProfile extends Resource {
         short: true,
         value: '<' + this.serverHardwareHyperlink + '|' + getDeviceNameAndHyperLink(this.serverHardwareUri).deviceName + '>'
       });
+      fields.push({
+        title: 'Hardware Model',
+        short: true,
+        value: getHardwareModel(this.serverHardwareUri)
+      });
     }
+
     return fields;
   }
 
@@ -69,6 +76,7 @@ export default class ServerProfile extends Resource {
     }
     if (this.serverHardwareUri) {
       output += '\t\u2022 Server Hardware: ' + getDeviceNameAndHyperLink(this.serverHardwareUri).deviceName + '\n';
+      output += '\t\u2022 Hardware Model: ' + getHardwareModel(this.serverHardwareUri) + '\n';
     }
     //Add status to output only for HipChat
     output += '\t\u2022 Status: ' +  this.status + '\n';
@@ -76,7 +84,7 @@ export default class ServerProfile extends Resource {
   }
 
   __isNonDisplayField__(field){
-    var nonDisplayFields = ['name', 'type', 'status', 'serverhardwareuri', 'serverhardwarehyperlink', 'hyperlink'];
+    var nonDisplayFields = ['name', 'type', 'status', 'serverhardwareuri', 'serverhardwarehyperlink', 'hyperlink', 'state'];
     return nonDisplayFields.includes(field.toLowerCase());
   }
 }

@@ -45,10 +45,10 @@ export default class Lexer {
     // }
   }
 
-  addNamedDevice(search, replacement, type, hyperlink) {
+  addNamedDevice(search, replacement, type, hyperlink, model) {
     const tSearch = search.trim();
 
-    this.__addNamedDevice__(tSearch, replacement, type, hyperlink);
+    this.__addNamedDevice__(tSearch, replacement, type, hyperlink, model);
 
     if (bladeName.test(tSearch)) {//We know blades conform to a specific naming pattern so we can get really accurate fuzzy search results by mapping some explicit typographic errors to the correct value
       this.__addFuzzyLookup__(tSearch.replace(bladeName, '$1$2, bay $3'), tSearch);
@@ -81,9 +81,8 @@ export default class Lexer {
     });
   }
 
-  __addNamedDevice__(key, replacement, type, hyperlink) {
-    namedDevices.push({search:new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement, type: type, name: key, hyperlink: hyperlink});
-
+  __addNamedDevice__(key, replacement, type, hyperlink, model) {
+    namedDevices.push({search:new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement, type: type, name: key, hyperlink: hyperlink, model: model});
   }
 
   __addFuzzyLookup__(key, mapped) {
@@ -211,4 +210,15 @@ export function getDeviceNameAndHyperLink(uri) {
     deviceName : deviceName,
     hyperlink : hyperlink
   };
+
+}
+
+export function getHardwareModel(uri) {
+  let model = '';
+    namedDevices.forEach((namedDevice) => {
+      if (uri === namedDevice.replacement && namedDevice.type === 'name') {
+        model = namedDevice.model;
+      }
+    });
+    return model;
 }

@@ -202,7 +202,6 @@ export default class ServerProfileTemplateListener extends Listener {
     let nameAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profile-templates/" + msg.templateId);
     let templateName = nameAndHyperlink.deviceName;
     let templateHyperlink = nameAndHyperlink.hyperlink;
-    this.robot.logger.info("Template name: " + templateName + " template hyperlink: " + templateHyperlink);
     this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template " + this.transform.hyperlink(templateHyperlink, templateName) + ".  Are you sure you want to do this? (yes/no)");
 
 
