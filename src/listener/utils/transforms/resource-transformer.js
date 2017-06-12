@@ -27,7 +27,8 @@ import ServerHardware from './server-hardware';
 import ServerProfileCompliancePreview from './server-profile-compliance-preview';
 
 export function transform(oneViewResource) {
-  if (oneViewResource.type.toLowerCase().startsWith('serverprofile') && !oneViewResource.type.toLowerCase().startsWith('serverprofilecompliancepreview')) {
+  if (oneViewResource.type.toLowerCase().startsWith('serverprofile') && !oneViewResource.type.toLowerCase().startsWith('serverprofilecompliancepreview')
+            && !oneViewResource.type.toLowerCase().startsWith('serverprofiletemplate')) {
     return new ServerProfile(oneViewResource);
   } else if (oneViewResource.type.toLowerCase().startsWith('alertresource')) {
     return new Alert(oneViewResource);

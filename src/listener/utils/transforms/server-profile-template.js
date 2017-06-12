@@ -28,7 +28,7 @@ export default class ServerProfileTemplate extends Resource {
     if (oneViewResource) {
       super(oneViewResource);
       this.name = oneViewResource.name;
-      this.affinity = oneViewResource.affinity;
+      this.description = oneViewResource.description;
     }
   }
 
