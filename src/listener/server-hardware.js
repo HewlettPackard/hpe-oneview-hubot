@@ -77,16 +77,41 @@ export default class ServerHardwareListener extends Listener {
       return this.transform.text(msg, "Not so fast...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
     }
     let startMessage = false;
-    return this.client.ServerHardware.setPowerState(id, "Off", "MomentaryPress").feedback((res) => {
-      if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
-        startMessage = true;
-        this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering off " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + ", this may take some time.");
-      }
-    }).then((res) => {
-      if (!suppress) {
-        this.transform.send(msg, res, "Finished powering off " + res.name);
-      }
+
+
+    let dialog = this.switchBoard.startDialog(msg);
+    this.transform.text(msg, "How would you like to power off the blade? (@" + this.robot.name + " Momentary Press/@" + this.robot.name + " Press and Hold)");
+
+    dialog.addChoice(/momentary press/i, () => {
+      return this.client.ServerHardware.setPowerState(id, "Off", "MomentaryPress").feedback((res, err) => {
+        if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
+          startMessage = true;
+          this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering off " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + " with a Momentary Press. This may take some time.");
+        }
+      }).then((res) => {
+        if (!suppress) {
+          this.transform.send(msg, res, "Finished powering off " + res.name);
+        }
+      }).catch((err) => {
+        this.transform.error(msg, err);
+      });
     });
+
+    dialog.addChoice(/press and hold/i, () => {
+      return this.client.ServerHardware.setPowerState(id, "Off", "PressAndHold").feedback((res, err) => {
+        if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
+          startMessage = true;
+          this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering off " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + " with Press and Hold. This may take some time.");
+        }
+      }).then((res) => {
+        if (!suppress) {
+          this.transform.send(msg, res, "Finished powering off " + res.name);
+        }
+      }).catch((err) => {
+        this.transform.error(msg, err);
+      });
+    });
+
   }
 
   PowerOn(msg) {
@@ -128,9 +153,7 @@ export default class ServerHardwareListener extends Listener {
 
 
     dialog.addChoice(/yes/i, () => {
-      this.PowerOffHardware(msg.serverId, msg).catch((err) => {
-        return this.transform.error(msg, err);
-      });
+      this.PowerOffHardware(msg.serverId, msg);
     });
 
     dialog.addChoice(/no/i, () => {
