@@ -196,7 +196,7 @@ export function buildD3Chart(robot, room, metricName, metricList, sampleInterval
       .text(__chooseLabel__(metricName));
 
     // Add the Y Axis
-    svg.append("g").call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0s")));
+    svg.append("g").call(d3.axisLeft(y).ticks(4, "s"));
 
     let buf = Buffer.from(document.d3.select("body").html());
 
