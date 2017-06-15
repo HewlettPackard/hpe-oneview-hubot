@@ -89,6 +89,11 @@ export default class Listener {
     this.robot.respond(rgx, options, cb);
   }
 
+  catchAll(options, callback) {
+    this.robot.catchAll(options, callback);
+  }
+
+
   error(msg) {
     return (err) => {
       this.transform.error(msg, err);

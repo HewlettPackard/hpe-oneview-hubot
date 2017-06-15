@@ -99,7 +99,7 @@ export default class ServerHardwareListener extends Listener {
     let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-hardware/" + msg.serverId);
     let bladeName = deviceAndHyperlink.deviceName;
     let bladeHyperlink = deviceAndHyperlink.hyperlink;
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (yes/no)");
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
 
 
@@ -124,7 +124,7 @@ export default class ServerHardwareListener extends Listener {
     let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-hardware/" + msg.serverId);
     let bladeName = deviceAndHyperlink.deviceName;
     let bladeHyperlink = deviceAndHyperlink.hyperlink;
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (yes/no)");
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
 
     dialog.addChoice(/yes/i, () => {

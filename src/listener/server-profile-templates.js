@@ -104,7 +104,7 @@ export default class ServerProfileTemplateListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy " + this.transform.makePlural(msg.count, 'profile') + ".  Are you sure you want to do this? (yes/no)");
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy " + this.transform.makePlural(msg.count, 'profile') + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
     dialog.addChoice(/yes/i, () => {
       var template = null;
@@ -154,7 +154,7 @@ export default class ServerProfileTemplateListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to un-deploy " + this.transform.makePlural(msg.count, 'profile') + ".  Are you sure you want to do this? (yes/no)");
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to un-deploy " + this.transform.makePlural(msg.count, 'profile') + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
     dialog.addChoice(/yes/i, () => {
       var template = null;
@@ -202,7 +202,7 @@ export default class ServerProfileTemplateListener extends Listener {
     let nameAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profile-templates/" + msg.templateId);
     let templateName = nameAndHyperlink.deviceName;
     let templateHyperlink = nameAndHyperlink.hyperlink;
-    this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template " + this.transform.hyperlink(templateHyperlink, templateName) + ".  Are you sure you want to do this? (yes/no)");
+    this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template " + this.transform.hyperlink(templateHyperlink, templateName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
 
     dialog.addChoice(/yes/i, () => {

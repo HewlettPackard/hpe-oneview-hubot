@@ -105,7 +105,7 @@ export default class ServerProfilesListener extends Listener {
     let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
     let profileName = deviceAndHyperlink.deviceName;
     let profileHyperlink = deviceAndHyperlink.hyperlink;
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (yes/no)");
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
 
     dialog.addChoice(/yes/i, () => {
@@ -132,7 +132,7 @@ export default class ServerProfilesListener extends Listener {
     let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
     let profileName = deviceAndHyperlink.deviceName;
     let profileHyperlink = deviceAndHyperlink.hyperlink;
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (yes/no)");
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
 
     dialog.addChoice(/yes/i, () => {

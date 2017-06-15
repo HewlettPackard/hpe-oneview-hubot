@@ -42,6 +42,7 @@ export default class BotListener extends Listener {
 
     this.respond(/(:<text>[a-zA-Z][a-z A-Z]*?) help\.$/i, ::this.ListActionsFor);
     this.capabilities.push(this.indent + "<text> Help (Show help in a specific area).");
+
   }
 
   ListActions(msg) {

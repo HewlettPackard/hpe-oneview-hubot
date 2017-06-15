@@ -98,11 +98,19 @@ export default (robot) => {
     const resolved = lex.resolveDevices(cleanSentences).trim();
     robot.logger.debug('Took', (Date.now() - start) +"ms", "to resolve dependencies, normalized string: ", resolved);
 
+
+
     //TODO Normalize the first question to ### questions in the case of multiple sentences
 
     message.original_text = message.text;
     message.text = resolved;
     message.nlp = nlp.text(message.text);
+
+
+    if (!resolved.includes('@' + robot.name)) {
+      context.response.message.done = true;
+    }
+
     next();
   });
 };
