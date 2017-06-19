@@ -53,6 +53,14 @@ export default class ServerHardwareListener extends Listener {
 
     this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
     this.capabilities.push(this.indent + "List server hardware by name (e.g. list Encl1, bay 1).");
+
+    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>["critical"|"ok"|"disabled"|"warning"]*?) (?:server ){0,1}hardware\.$/i, ::this.ListHardwareByStatus);
+    this.capabilities.push(this.indent + "List all critical/warning/ok/disabled (server) hardware (e.g. list all critical hardware).");
+
+    this.respond(/(?:get|list|show) (?:all ){0,1}(:<powerState>["powered on|"powered off"]*?) (?:server ){0,1}hardware\.$/i, ::this.ListHardwareByPowerState);
+    this.capabilities.push(this.indent + "List all powered on/off (server) hardware (e.g. list all active/inactive hardware)");
+
+
   }
 
   PowerOnHardware(id, msg, suppress) {
@@ -172,6 +180,41 @@ export default class ServerHardwareListener extends Listener {
   ListServerHardwareById(msg) {
     this.client.ServerHardware.getServerHardware(msg.serverId).then((res) => {
       return this.transform.send(msg, res);
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
+  }
+
+  ListHardwareByStatus(msg) {
+    let status = msg.status.toLowerCase();
+    status = status.charAt(0).toUpperCase() + status.slice(1);
+      this.client.ServerHardware.getHardwareByStatus(status).then((res) => {
+        if (res.count === 0) {
+          return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades with a " + msg.status.toLowerCase() + " status.");
+        }
+        else {
+          if (msg.status.toLowerCase() === "ok") {
+              return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + msg.status.toUpperCase() + " status.");
+          }
+          else {
+            return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have a " + msg.status.toLowerCase() + " status.");
+          }
+        }
+      }).catch((err) => {
+        return this.transform.error(msg, err);
+      });
+    }
+
+  ListHardwareByPowerState(msg) {
+    let status = msg.powerState.substring(8, msg.powerState.length);
+    status = status.charAt(0).toUpperCase() + status.slice(1);
+    this.client.ServerHardware.getHardwareByPowerState(status).then((res) => {
+      if (res.count === 0) {
+        return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades that are powered " + status.toLowerCase() + ".");
+      }
+      else {
+        return this.transform.send(msg, res, "Okay, " + msg.message.user.name + ", the following blades are powered " + status.toLowerCase() + ".");
+      }
     }).catch((err) => {
       return this.transform.error(msg, err);
     });

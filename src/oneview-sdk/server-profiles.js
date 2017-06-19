@@ -35,6 +35,10 @@ export default class ServerProfiles {
     return this.ov_client.connection.get((id.startsWith(uri) ? id : uri + id));
   }
 
+  getProfilesByStatus(status) {
+      return this.ov_client.connection.get("/rest/server-profiles?filter=\"status=" + status + "\"");
+  }
+
   createServerProfile(profile) {
     return this.ov_client.ClientConnection.post(uri, profile);
   }

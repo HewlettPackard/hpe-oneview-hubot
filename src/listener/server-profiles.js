@@ -48,6 +48,11 @@ export default class ServerProfilesListener extends Listener {
     this.respond(/(?:turn|power) on (?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOnServerProfile);
     this.respond(/(?:turn|power) off (?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOffServerProfile);
     this.capabilities.push(this.indent + "Power on/off a specific (server) profile (e.g. turn on hadoop cluster).");
+
+
+    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>["critical"|"ok"|"disabled"|"warning"]*?) (?:server ){0,1}profiles\.$/i, ::this.ListProfilesByStatus);
+    this.capabilities.push(this.indent + "List all critical/warning/ok/disabled (server) profiles (e.g. list all critical profiles).");
+
   }
 
   ListServerProfiles(msg) {
@@ -72,6 +77,26 @@ export default class ServerProfilesListener extends Listener {
     }).catch((err) => {
       return this.transform.error(msg, err);
     });
+  }
+
+  ListProfilesByStatus(msg) {
+    let status = msg.status.toLowerCase();
+    status = status.charAt(0).toUpperCase() + status.slice(1);
+      this.client.ServerProfiles.getProfilesByStatus(status).then((res) => {
+        if (res.count === 0) {
+          return this.transform.text(msg, msg.message.user.name + ", I didn't find any profiles with a " + msg.status.toLowerCase() + " status.");
+        }
+        else {
+          if (msg.status.toLowerCase() === "ok") {
+              return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following profiles have an " + msg.status.toUpperCase() + " status.");
+          }
+          else {
+            return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following profiles have a " + msg.status.toLowerCase() + " status.");
+          }
+        }
+      }).catch((err) => {
+        return this.transform.error(msg, err);
+      });
   }
 
   MakeServerProfileCompliant(profileId, msg, suppress) {

@@ -43,9 +43,19 @@ export default class ServerHardware {
     return this.ov_client.connection.put((id.startsWith(uri) ? id : uri + id) + '/powerState', body);
   }
 
+  getHardwareByPowerState(state) {
+    return this.ov_client.connection.get("/rest/server-hardware?filter=\"powerState=" + state + "\"");
+  }
+
   getServerUtilization(id, filter) {
     return this.ov_client.connection.get((id.startsWith(uri) ? id : uri + id) + '/utilization', filter);
   }
+
+  getHardwareByStatus(status) {
+      return this.ov_client.connection.get("/rest/server-hardware?filter=\"status=" + status + "\"");
+  }
+
+
 
   /*
   This function returns a response that contains both the server's interconnect port
