@@ -74,40 +74,39 @@ const sentenceSpacer = /\s*([?!])\s*|(?!\d*\.\d+)\s*([.])\s*/g;
 //Matches the end of a sentence, optionally matching . or ! or ?
 const sentenceTerminal = /\s*[.?!]{0,1}$/;
 
+export function runNLP (message, logger) {
+  const cleaned = message.text.replace(wordSpacer, ' ').replace(sentenceSpacer, "$1$2  ").trim();
+
+  let cleanSentences = null;
+  // if text contains IP address don't run through nlp_compromise
+  if (/(?:[0-9]{1,3}\.){3}[0-9]{1,3}/.test(cleaned)) {
+    cleanSentences = cleaned;
+  } else {
+    let normalized = nlp.text(cleaned)/*.to_present().toAmerican()*/.toNormal();
+    if (normalized.contractions && normalized.contractions.expand) {
+      normalized = normalized.contractions.expand();
+    }
+    //Ensure that all sentences end with '.' a note, this will replace ! and ? with .
+    cleanSentences = nlp.text(normalized.text()).sentences.map((s) => {
+      return s.str.trim().replace(sentenceTerminal, '.');
+    }).join('  ');
+  }
+
+  const start = Date.now();
+  const resolved = lex.resolveDevices(cleanSentences).trim();
+  logger.debug('Took', (Date.now() - start) +"ms", "to resolve dependencies, normalized string: ", resolved);
+
+  message.original_text = message.text;
+  message.text = resolved;
+  message.nlp = nlp.text(message.text);
+}
+
 export default (robot) => {
   robot.receiveMiddleware((context, next, done) => {
     const message = context.response.message.message || context.response.message;
-    const cleaned = message.text.replace(wordSpacer, ' ').replace(sentenceSpacer, "$1$2  ").trim();
+    runNLP(message, robot.logger);
 
-    let cleanSentences = null;
-    // if text contains IP address don't run through nlp_compromise
-    if (/(?:[0-9]{1,3}\.){3}[0-9]{1,3}/.test(cleaned)) {
-      cleanSentences = cleaned;
-    } else {
-      let normalized = nlp.text(cleaned)/*.to_present().toAmerican()*/.toNormal();
-      if (normalized.contractions && normalized.contractions.expand) {
-        normalized = normalized.contractions.expand();
-      }
-      //Ensure that all sentences end with '.' a note, this will replace ! and ? with .
-      cleanSentences = nlp.text(normalized.text()).sentences.map((s) => {
-        return s.str.trim().replace(sentenceTerminal, '.');
-      }).join('  ');
-    }
-
-    const start = Date.now();
-    const resolved = lex.resolveDevices(cleanSentences).trim();
-    robot.logger.debug('Took', (Date.now() - start) +"ms", "to resolve dependencies, normalized string: ", resolved);
-
-
-
-    //TODO Normalize the first question to ### questions in the case of multiple sentences
-
-    message.original_text = message.text;
-    message.text = resolved;
-    message.nlp = nlp.text(message.text);
-
-
-    if (!resolved.includes('@' + robot.name)) {
+    if (!message.text.includes('@' + robot.name)) {
       context.response.message.done = true;
     }
 
