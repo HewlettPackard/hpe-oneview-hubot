@@ -59,8 +59,11 @@
     ],
     "sourceMap": false,
     "instrument": false,
+    "all": true,
     "exclude": [
-      "src/test/*.js"
+      "src/test/*.js",
+      "dist",
+      "gulpfile.babel.js"
     ]
   }
 }
