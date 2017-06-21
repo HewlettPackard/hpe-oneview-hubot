@@ -50,7 +50,7 @@ export default class ServerProfilesListener extends Listener {
     this.capabilities.push(this.indent + "Power on/off a specific (server) profile (e.g. turn on hadoop cluster).");
 
 
-    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>["critical"|"ok"|"disabled"|"warning"]*?) (?:server ){0,1}profiles\.$/i, ::this.ListProfilesByStatus);
+    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}profiles\.$/i, ::this.ListProfilesByStatus);
     this.capabilities.push(this.indent + "List all critical/warning/ok/disabled (server) profiles (e.g. list all critical profiles).");
 
   }
