@@ -128,7 +128,7 @@ export default class ResourceEnhancer {
       return 'enclosuregroups/show/interconectbayconfiguration/r';
     }
 
-    if (uri.startsWith('/rest/alerts/') || uri.startsWith('/rest/tasks/')) {
+    if (uri.startsWith('/rest/alerts') || uri.startsWith('/rest/tasks/')) {
       return 'activity/r';
     }
 

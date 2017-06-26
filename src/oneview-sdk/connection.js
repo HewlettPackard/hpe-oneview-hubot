@@ -78,7 +78,7 @@ export default class Connection {
     if (filter) {
       options.qs = filter;
     }
-
+    
     return this.__http__(options);
   }
 

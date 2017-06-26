@@ -26,6 +26,7 @@ import connection from './connection';
 import serverhardware from './server-hardware';
 import serverprofiles from './server-profiles';
 import serverprofiletemplates from './server-profile-templates';
+import alerts from './alerts';
 import logicalinterconnects from './logical-interconnects';
 import notifications from './notifications';
 
@@ -38,6 +39,7 @@ export default class OVClient {
     this.server_hardware = new serverhardware(this);
     this.server_profiles = new serverprofiles(this);
     this.server_profile_templates = new serverprofiletemplates(this);
+    this.alerts = new alerts(this);
     this.logical_interconnects = new logicalinterconnects(this);
     this.notifications = new notifications(oneviewConfig.applianceIp, this.connection, robot);
     this.notificationsRoom = oneviewConfig.notificationsRoom;
@@ -94,6 +96,10 @@ export default class OVClient {
 
   get ServerProfileTemplates() {
     return this.server_profile_templates;
+  }
+
+  get Alerts() {
+    return this.alerts;
   }
 
   get LogicalInterconnects() {
