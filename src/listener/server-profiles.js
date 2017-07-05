@@ -132,10 +132,15 @@ export default class ServerProfilesListener extends Listener {
     let profileHyperlink = deviceAndHyperlink.hyperlink;
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
-
     dialog.addChoice(/yes/i, () => {
       this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
-        return this.serverHardware.PowerOnHardware(res.serverHardwareUri, msg);
+        if (res.serverHardwareUri === null) {
+          return this.transform.text(msg, msg.message.user.name + ", " + this.transform.hyperlink(profileHyperlink, profileName) + " does not have any assigned server hardware to power on. Try assigning server hardware to the profile.");
+        }
+        else {
+          return this.serverHardware.PowerOnHardware(res.serverHardwareUri, msg);
+        }
+
       }).catch((err) => {
         return this.transform.error(msg, err);
       });
@@ -162,7 +167,12 @@ export default class ServerProfilesListener extends Listener {
 
     dialog.addChoice(/yes/i, () => {
       this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
-        return this.serverHardware.PowerOffHardware(res.serverHardwareUri, msg);
+        if (res.serverHardwareUri === null) {
+          return this.transform.text(msg, msg.message.user.name + ", " + this.transform.hyperlink(profileHyperlink, profileName) + " does not have any assigned server hardware to power off. Try assigning server hardware to the profile.");
+        }
+        else {
+          return this.serverHardware.PowerOffHardware(res.serverHardwareUri, msg);
+        }
       }).catch((err) => {
         return this.transform.error(msg, err);
       });
