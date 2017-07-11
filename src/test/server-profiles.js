@@ -26,9 +26,7 @@ import ServerProfiles from '../oneview-sdk/server-profiles';
 let chai = require('chai');
 let sinon = require('sinon');
 let nock = require('nock');
-let assert = require('assert');
 let Bluebird = require('bluebird');
-
 
 describe('ServerProfiles', () => {
   let oVClient;
