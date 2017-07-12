@@ -82,7 +82,7 @@ export default class Lexer {
   }
 
   __addNamedDevice__(key, replacement, type, hyperlink, model) {
-    namedDevices.push({search:new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement, type: type, name: key, hyperlink: hyperlink, model: model});
+    namedDevices.push({search: new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement, type: type, name: key, hyperlink: hyperlink, model: model});
   }
 
   __addFuzzyLookup__(key, mapped) {
@@ -92,7 +92,7 @@ export default class Lexer {
   }
 
   resolveDevices(text) {
-    text = this.nlp.text(text).sentences.map((sentence) => {//Split the message into sentences so our window is applied on each sentence.
+    text = this.nlp.text(text).sentences.map((sentence) => { //Split the message into sentences so our window is applied on each sentence.
       let text = sentence.str.trim();
       if (text.endsWith('.')) {
         text = text.slice(0, -1);
@@ -100,6 +100,11 @@ export default class Lexer {
       // return this.__fuzzyResolve__(text); // this is a mess and is breaking regexs in listeners
       return text + '.';
     }).join('  ');
+
+    // sort namedDevices by 'complexity' of the search regular expressions
+    namedDevices.sort(function(a, b) {
+      return b.search.toString().length - a.search.toString().length;
+    });
 
     namedDevices.forEach((device) => {
       text = text.replace(device.search, device.replacement);
@@ -215,10 +220,10 @@ export function getDeviceNameAndHyperLink(uri) {
 
 export function getHardwareModel(uri) {
   let model = '';
-    namedDevices.forEach((namedDevice) => {
-      if (uri === namedDevice.replacement && namedDevice.type === 'name') {
-        model = namedDevice.model;
-      }
-    });
-    return model;
+  namedDevices.forEach((namedDevice) => {
+    if (uri === namedDevice.replacement && namedDevice.type === 'name') {
+      model = namedDevice.model;
+    }
+  });
+  return model;
 }

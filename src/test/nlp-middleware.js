@@ -89,37 +89,33 @@ describe('NLP Middleware', () => {
     Message.nlp.raw_text.should.equal('@hubot show /rest/server-hardware/30303437.');
   });
 
-  //TODO add tests for more complex resource names for each of the resources (SH, SP and SPT)
+  it('runNLP complex profile', () => {
+    const Message = {
+      user: { id: '1', name: 'Shell', room: 'Shell' },
+      text: '@hubot show profile1 - docker',
+      id: 'messageId',
+      done: false,
+      room: 'Shell'
+    };
 
-  // TODO fix resolveDevices so this test passes
-  // it('runNLP complex profile', () => {
-  //   const Message = {
-  //     user: { id: '1', name: 'Shell', room: 'Shell' },
-  //     text: '@hubot show profile1 - docker',
-  //     id: 'messageId',
-  //     done: false,
-  //     room: 'Shell'
-  //   };
-  //
-  //   runNLP(Message, logger);
-  //   Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab3.');
-  //   Message.original_text.should.equal('@hubot show profile1 - docker');
-  //   Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab37.');
-  // });
+    runNLP(Message, logger);
+    Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab3.');
+    Message.original_text.should.equal('@hubot show profile1 - docker');
+    Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab3.');
+  });
 
-  // TODO fix resolveDevices so this test passes
-  // it('runNLP complex profile', () => {
-  //   const Message = {
-  //     user: { id: '1', name: 'Shell', room: 'Shell' },
-  //     text: '@hubot show profile1 - 0000A661, bay 2',
-  //     id: 'messageId',
-  //     done: false,
-  //     room: 'Shell'
-  //   };
-  //
-  //   runNLP(Message, logger);
-  //   Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab2.');
-  //   Message.original_text.should.equal('@hubot show profile1 - 0000A661, bay 2');
-  //   Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab2.');
-  // });
+  it('runNLP complex profile', () => {
+    const Message = {
+      user: { id: '1', name: 'Shell', room: 'Shell' },
+      text: '@hubot show profile1 - 0000A661, bay 2',
+      id: 'messageId',
+      done: false,
+      room: 'Shell'
+    };
+
+    runNLP(Message, logger);
+    Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab2.');
+    Message.original_text.should.equal('@hubot show profile1 - 0000A661, bay 2');
+    Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab2.');
+  });
 });
