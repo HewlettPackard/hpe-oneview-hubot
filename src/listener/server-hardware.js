@@ -22,12 +22,9 @@ THE SOFTWARE.
 
 import Listener from './base-listener';
 import { buildD3Chart } from '../charting/chart';
-import { getLogicalInterconnectsMap } from '../ov-brain';
-import { getDeviceNameAndHyperLink } from '../middleware/utils/lexer';
+import { getLogicalInterconnectsMap, getDeviceNameAndHyperLink } from '../ov-brain';
 const Conversation = require('hubot-conversation');
 const rtrim = /\/statistics\/d\d*/i;
-
-
 
 export default class ServerHardwareListener extends Listener {
   constructor(robot, client, transform) {
@@ -59,8 +56,6 @@ export default class ServerHardwareListener extends Listener {
 
     this.respond(/(?:get|list|show) (?:all ){0,1}(:<powerState>powered on|powered off*?) (?:server ){0,1}hardware\.$/i, ::this.ListHardwareByPowerState);
     this.capabilities.push(this.indent + "List all powered on/off (server) hardware (e.g. list all active/inactive hardware)");
-
-
   }
 
   PowerOnHardware(id, msg, suppress) {
@@ -85,7 +80,6 @@ export default class ServerHardwareListener extends Listener {
       return this.transform.text(msg, "Not so fast...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
     }
     let startMessage = false;
-
 
     let dialog = this.switchBoard.startDialog(msg);
     this.transform.text(msg, "How would you like to power off the blade? (@" + this.robot.name + " Momentary Press/@" + this.robot.name + " Press and Hold)");
@@ -119,7 +113,6 @@ export default class ServerHardwareListener extends Listener {
         this.transform.error(msg, err);
       });
     });
-
   }
 
   PowerOn(msg) {
@@ -133,8 +126,6 @@ export default class ServerHardwareListener extends Listener {
     let bladeName = deviceAndHyperlink.deviceName;
     let bladeHyperlink = deviceAndHyperlink.hyperlink;
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
-
-
 
     dialog.addChoice(/yes/i, () => {
       this.PowerOnHardware(msg.serverId, msg).catch((err) => {
@@ -158,7 +149,6 @@ export default class ServerHardwareListener extends Listener {
     let bladeName = deviceAndHyperlink.deviceName;
     let bladeHyperlink = deviceAndHyperlink.hyperlink;
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
-
 
     dialog.addChoice(/yes/i, () => {
       this.PowerOffHardware(msg.serverId, msg);
@@ -188,22 +178,21 @@ export default class ServerHardwareListener extends Listener {
   ListHardwareByStatus(msg) {
     let status = msg.status.toLowerCase();
     status = status.charAt(0).toUpperCase() + status.slice(1);
-      this.client.ServerHardware.getHardwareByStatus(status).then((res) => {
-        if (res.count === 0) {
-          return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades with a " + msg.status.toLowerCase() + " status.");
+    this.client.ServerHardware.getHardwareByStatus(status).then((res) => {
+      if (res.count === 0) {
+        return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades with a " + msg.status.toLowerCase() + " status.");
+      }
+      else {
+        if (msg.status.toLowerCase() === "ok") {
+          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + msg.status.toUpperCase() + " status.");
+        } else {
+          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have a " + msg.status.toLowerCase() + " status.");
         }
-        else {
-          if (msg.status.toLowerCase() === "ok") {
-              return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + msg.status.toUpperCase() + " status.");
-          }
-          else {
-            return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have a " + msg.status.toLowerCase() + " status.");
-          }
-        }
-      }).catch((err) => {
-        return this.transform.error(msg, err);
-      });
-    }
+      }
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
+  }
 
   ListHardwareByPowerState(msg) {
     let status = msg.powerState.substring(8, msg.powerState.length);
@@ -211,8 +200,7 @@ export default class ServerHardwareListener extends Listener {
     this.client.ServerHardware.getHardwareByPowerState(status).then((res) => {
       if (res.count === 0) {
         return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades that are powered " + status.toLowerCase() + ".");
-      }
-      else {
+      } else {
         return this.transform.send(msg, res, "Okay, " + msg.message.user.name + ", the following blades are powered " + status.toLowerCase() + ".");
       }
     }).catch((err) => {
@@ -307,5 +295,4 @@ export default class ServerHardwareListener extends Listener {
       return this.transform.error(msg, err);
     });
   }
-
 }

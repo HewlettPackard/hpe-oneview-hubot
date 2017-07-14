@@ -69,6 +69,16 @@ describe('OVClient', () => {
     });
   });
 
+  it('getAuthToken', () => {
+    nock('https://localhost')
+      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .reply(200, {sessionID: 'ASD-1231-asd_Ll'});
+
+    return oVClient.login({userName: 'admin', password: 'password'}, true).then(() => {
+      oVClient.getAuthToken().should.equal('ASD-1231-asd_Ll');
+    });
+  });
+
   it('get ServerHardware', () => {
     oVClient.ServerHardware.should.be.an.instanceof(ServerHardware);
   });

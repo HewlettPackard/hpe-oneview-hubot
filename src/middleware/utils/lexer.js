@@ -45,10 +45,10 @@ export default class Lexer {
     // }
   }
 
-  addNamedDevice(search, replacement, type, hyperlink, model) {
+  addNamedDevice(search, replacement) {
     const tSearch = search.trim();
 
-    this.__addNamedDevice__(tSearch, replacement, type, hyperlink, model);
+    this.__addNamedDevice__(tSearch, replacement);
 
     if (bladeName.test(tSearch)) {//We know blades conform to a specific naming pattern so we can get really accurate fuzzy search results by mapping some explicit typographic errors to the correct value
       this.__addFuzzyLookup__(tSearch.replace(bladeName, '$1$2, bay $3'), tSearch);
@@ -69,20 +69,18 @@ export default class Lexer {
     }
   }
 
-  updateNamedDevice(robot, search, replacement, hyperlink) {
+  updateNamedDevice(robot, search, replacement) {
     const tSearch = search.trim();
     namedDevices.forEach((namedDevice) => {
-      if (namedDevice.replacement === replacement && namedDevice.name !== search && namedDevice.type === 'name') {
-        robot.logger.info('Updating resource name for ' + namedDevice.replacement + ' from ' + namedDevice.name + ' to ' + search);
-        namedDevice.search = new RegExp('\\b' + tSearch + '\\b', 'ig');
-        namedDevice.name = tSearch;
-        namedDevice.hyperlink = hyperlink;
+      if (namedDevice.replacement === replacement) {
+        robot.logger.debug('Updating resource name for ' + namedDevice.replacement + ' from ' + namedDevice.search + ' to ' + search);
+        namedDevice.search = new RegExp('\\b' + search + '\\b', 'ig');
       }
     });
   }
 
-  __addNamedDevice__(key, replacement, type, hyperlink, model) {
-    namedDevices.push({search: new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement, type: type, name: key, hyperlink: hyperlink, model: model});
+  __addNamedDevice__(key, replacement) {
+    namedDevices.push({search: new RegExp('\\b' + key + '\\b', 'ig'), replacement: replacement});
   }
 
   __addFuzzyLookup__(key, mapped) {
@@ -200,30 +198,4 @@ export default class Lexer {
 
     return words.map((s) => { return (s.processed ? (s.value || '') : s.str); }).filter((s) => { return s; }).join(' ') + '.';
   }
-}
-
-export function getDeviceNameAndHyperLink(uri) {
-  let deviceName = '';
-  let hyperlink = '';
-  namedDevices.forEach((namedDevice) => {
-    if (uri === namedDevice.replacement && namedDevice.type === 'name') {
-      deviceName = namedDevice.name;
-      hyperlink = namedDevice.hyperlink;
-    }
-  });
-  return {
-    deviceName : deviceName,
-    hyperlink : hyperlink
-  };
-
-}
-
-export function getHardwareModel(uri) {
-  let model = '';
-  namedDevices.forEach((namedDevice) => {
-    if (uri === namedDevice.replacement && namedDevice.type === 'name') {
-      model = namedDevice.model;
-    }
-  });
-  return model;
 }

@@ -20,9 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import nlp, {
-  Lexer
-} from './middleware/nlp-middleware';
+import nlp, { Lexer } from './middleware/nlp-middleware';
 import ovListener from './listener/ov-listener';
 import ovClient from './oneview-sdk/ov-client';
 import ovBrain from './ov-brain';

@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 
 import Listener from "./base-listener";
-import { getDeviceNameAndHyperLink } from '../middleware/utils/lexer';
+import { getDeviceNameAndHyperLink } from '../ov-brain';
 const Conversation = require("hubot-conversation");
 
 export default class ServerProfilesListener extends Listener {
@@ -52,7 +52,6 @@ export default class ServerProfilesListener extends Listener {
 
     this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}profiles\.$/i, ::this.ListProfilesByStatus);
     this.capabilities.push(this.indent + "List all critical/warning/ok/disabled (server) profiles (e.g. list all critical profiles).");
-
   }
 
   ListServerProfiles(msg) {
@@ -82,21 +81,19 @@ export default class ServerProfilesListener extends Listener {
   ListProfilesByStatus(msg) {
     let status = msg.status.toLowerCase();
     status = status.charAt(0).toUpperCase() + status.slice(1);
-      this.client.ServerProfiles.getProfilesByStatus(status).then((res) => {
-        if (res.count === 0) {
-          return this.transform.text(msg, msg.message.user.name + ", I didn't find any profiles with a " + msg.status.toLowerCase() + " status.");
+    this.client.ServerProfiles.getProfilesByStatus(status).then((res) => {
+      if (res.count === 0) {
+        return this.transform.text(msg, msg.message.user.name + ", I didn't find any profiles with a " + msg.status.toLowerCase() + " status.");
+      } else {
+        if (msg.status.toLowerCase() === "ok") {
+          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following profiles have an " + msg.status.toUpperCase() + " status.");
+        } else {
+          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following profiles have a " + msg.status.toLowerCase() + " status.");
         }
-        else {
-          if (msg.status.toLowerCase() === "ok") {
-              return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following profiles have an " + msg.status.toUpperCase() + " status.");
-          }
-          else {
-            return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following profiles have a " + msg.status.toLowerCase() + " status.");
-          }
-        }
-      }).catch((err) => {
-        return this.transform.error(msg, err);
-      });
+      }
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
   }
 
   MakeServerProfileCompliant(profileId, msg, suppress) {
@@ -124,7 +121,6 @@ export default class ServerProfilesListener extends Listener {
       return this.transform.text(msg, "Hold on a sec...  You'll have to set readOnly mode to false in your config file first if you want to do that...   ");
     }
 
-
     let dialog = this.switchBoard.startDialog(msg);
 
     let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
@@ -144,7 +140,6 @@ export default class ServerProfilesListener extends Listener {
       }).catch((err) => {
         return this.transform.error(msg, err);
       });
-
     });
 
     dialog.addChoice(/no/i, () => {
@@ -163,7 +158,6 @@ export default class ServerProfilesListener extends Listener {
     let profileName = deviceAndHyperlink.deviceName;
     let profileHyperlink = deviceAndHyperlink.hyperlink;
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
-
 
     dialog.addChoice(/yes/i, () => {
       this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {

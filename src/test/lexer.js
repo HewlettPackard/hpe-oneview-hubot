@@ -22,8 +22,6 @@ THE SOFTWARE.
 
 import nlp from 'nlp_compromise';
 import Lexer from '../middleware/utils/lexer';
-import { getHardwareModel } from '../middleware/utils/lexer';
-import { getDeviceNameAndHyperLink } from '../middleware/utils/lexer';
 
 const lex = new Lexer(nlp);
 let chai = require('chai');
@@ -38,7 +36,6 @@ describe('Lexer', () => {
   lex.addNamedDevice('profile2 docker', '/rest/server-profiles/eb13eab5', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab5?s_sid=LTE', undefined);
   lex.addNamedDevice('Profile3 - hadoop', '/rest/server-profiles/eb13eab6', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab6?s_sid=LTE', undefined);
   lex.addNamedDevice('Profile3hadoop', '/rest/server-profiles/eb13eab7', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab7?s_sid=LTE', undefined);
-  lex.addNamedDevice('Encl1, bay 13', '/rest/server-hardware/eb13eab8-adsf', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab8-adsf?s_sid=LTE', 'BL460c Gen8 1');
   lex.addNamedDevice('Hadoop, profile1', '/rest/server-profiles/eb13eab17', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab17?s_sid=LTE', undefined);
   lex.addNamedDevice('Hadoop', '/rest/server-profile-templates/eb13eab27', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profile-templates/eb13eab27?s_sid=LTE', undefined);
   //TODO make this pass (need to escape special characters in resource names)
@@ -74,32 +71,23 @@ describe('Lexer', () => {
     result.should.equal('@hubot show /rest/server-profile-templates/eb13eab27.');
   });
 
+  it('updateNamedDevice', () => {
+    let robot = {adapterName: 'shell', on: function () { }, logger: {debug: function () {}, error: function () {}, info: function () {}}};
+    lex.updateNamedDevice(robot, 'profile2 - updated', '/rest/server-profiles/eb13eab4');
+    const result = lex.resolveDevices('@hubot show profile2 - updated');
+    result.should.equal('@hubot show /rest/server-profiles/eb13eab4.');
+  });
+
+  it('updateNamedDevice no match', () => {
+    let robot = {adapterName: 'shell', on: function () { }, logger: {debug: function () {}, error: function () {}, info: function () {}}};
+    lex.updateNamedDevice(robot, 'profile22', '/rest/server-profiles/eb13eab67');
+    const result = lex.resolveDevices('@hubot show profile22');
+    result.should.equal('@hubot show profile22.');
+  });
+
   //TODO make this pass (need to escape special characters in resource names)
   // it('resolveDevices complex name 4', () => {
   //   const result = lex.resolveDevices('@hubot show *Profile3hadoop??');
   //   result.should.equal('@hubot show /rest/server-profiles/eb13eab8.');
   // });
-
-  it('getHardwareModel', () => {
-    const result = getHardwareModel('/rest/server-hardware/eb13eab8-adsf');
-    result.should.equal('BL460c Gen8 1');
-  });
-
-  it('getHardwareModel undef', () => {
-    const result = getHardwareModel('/rest/server-profiles/eb13eab7');
-    assert.isUndefined(result, 'asdfasdf');
-  });
-
-  it('getDeviceNameAndHyperLink', () => {
-    const result = getDeviceNameAndHyperLink('/rest/server-hardware/eb13eab8-adsf');
-    const expected = {deviceName: 'Encl1, bay 13', hyperlink: 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab8-adsf?s_sid=LTE'};
-    chai.expect(result).to.deep.equal(expected);
-  });
-
-  it('getDeviceNameAndHyperLink undef', () => {
-    const result = getDeviceNameAndHyperLink('/rest/server-profiles/eb13eab99');
-    const expected = {deviceName: '', hyperlink: ''};
-    chai.expect(result).to.deep.equal(expected);
-  });
-
 });
