@@ -179,6 +179,4 @@ export default class ResourceTransforms {
     }
     return "are " + this.makePlural(count, word);
   }
-
-
 }

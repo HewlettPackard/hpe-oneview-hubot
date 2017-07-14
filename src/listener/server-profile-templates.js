@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 import Listener from './base-listener';
 import UserException from '../oneview-sdk/user-exception';
-import { getDeviceNameAndHyperLink } from '../middleware/utils/lexer';
+import { getDeviceNameAndHyperLink } from '../ov-brain';
 const Conversation = require('hubot-conversation');
 
 export default class ServerProfileTemplateListener extends Listener {
@@ -203,7 +203,6 @@ export default class ServerProfileTemplateListener extends Listener {
     let templateName = nameAndHyperlink.deviceName;
     let templateHyperlink = nameAndHyperlink.hyperlink;
     this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template " + this.transform.hyperlink(templateHyperlink, templateName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
-
 
     dialog.addChoice(/yes/i, () => {
       var template = null;

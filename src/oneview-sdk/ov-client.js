@@ -81,6 +81,10 @@ export default class OVClient {
     return this.connection.loggedIn;
   }
 
+  getAuthToken() {
+    return this.connection.headers.auth;
+  }
+
   //Need to make sure we don't confuse this with OneView connections
   get ClientConnection() {
     return this.connection;

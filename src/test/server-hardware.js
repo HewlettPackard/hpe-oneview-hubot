@@ -31,7 +31,7 @@ let Bluebird = require('bluebird');
 
 describe('ServerHardware', () => {
   let oVClient;
-  var serverHardware;
+  let serverHardware;
   beforeEach(() => {
     let oneviewConfig = {
       applianceIp: 'localhost',

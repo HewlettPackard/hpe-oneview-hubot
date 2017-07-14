@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 
 import Resource from './resource';
-import { getDeviceNameAndHyperLink } from '../../../middleware/utils/lexer';
+import { getDeviceNameAndHyperLink } from '../../../ov-brain';
 
 export default class ServerHardware extends Resource {
 
