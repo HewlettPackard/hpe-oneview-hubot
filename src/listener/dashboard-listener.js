@@ -38,7 +38,7 @@ export default class DashboardListener extends Listener {
 
   ShowOneViewDashboard(msg) {
     this.transform.send(msg, "Ok " + msg.message.user.name + ", I am going to generate your dashboard. This might take a little while.\nFor a more comprehensive view, see " + this.transform.hyperlink("https://" + this.client.host + "/#/dashboard", "Dashboard"));
-    
+
     this.client.Dashboard.getAggregatedAlerts().then((res1) => {
       this.client.Dashboard.getAggregatedServerProfiles().then((res2) => {
         this.client.Dashboard.getAggregatedServerHardware().then((res3) => {
