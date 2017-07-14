@@ -54,93 +54,93 @@ function __uploadPNG__(robot, room, fileName) {
 }
 
 function __transformProfileData__(aggregatedServerProfiles) {
-  let splits1 = aggregatedServerProfiles[0].counts.length;
-  let dataset1 = [];
-  let totalCount1 = 0;
-  if (splits1 === 0) {
-    dataset1.push({ label: "No Profiles", count: 0, percent: 100} );
+  let splits = aggregatedServerProfiles[0].counts.length;
+  let dataset = [];
+  let totalCount = 0;
+  if (splits === 0) {
+    dataset.push({ label: "No Profiles", count: 0, percent: 100} );
   } else {
-    let slices1 = [];
-    for (let i = 0; i < splits1; i++) {
-      slices1.push(aggregatedServerProfiles[0].counts[i]);
-      totalCount1 += aggregatedServerProfiles[0].counts[i].count;
+    let slices = [];
+    for (let i = 0; i < splits; i++) {
+      slices.push(aggregatedServerProfiles[0].counts[i]);
+      totalCount += aggregatedServerProfiles[0].counts[i].count;
     }
-    for (let j = 0; j < splits1; j++) {
-      dataset1.push({ label: slices1[j].value, count: (slices1[j].count), percent: (slices1[j].count / totalCount1) });
+    for (let j = 0; j < splits; j++) {
+      dataset.push({ label: slices[j].value, count: (slices[j].count), percent: (slices[j].count / totalCount) });
     };
   }
 
-  return { splits: splits1, totalCount: totalCount1, dataset: dataset1 };
+  return { splits: splits, totalCount: totalCount, dataset: dataset };
 }
 
 function __transformHardwareData__(aggregatedServerHardware) {
-  let splits2 = aggregatedServerHardware[0].counts.length;
-  let dataset2 = [];
-  let totalCount2 = 0;
-  if (splits2 === 0) {
-    dataset2.push( { label: "No Hardware", count: 0, percent: 100} );
+  let splits = aggregatedServerHardware[0].counts.length;
+  let dataset = [];
+  let totalCount = 0;
+  if (splits === 0) {
+    dataset.push( { label: "No Hardware", count: 0, percent: 100} );
   } else {
-    let slices2 = [];
-    for (let i = 0; i < splits2; i++) {
-      slices2.push(aggregatedServerHardware[0].counts[i]);
-      totalCount2 += aggregatedServerHardware[0].counts[i].count;
+    let slices = [];
+    for (let i = 0; i < splits; i++) {
+      slices.push(aggregatedServerHardware[0].counts[i]);
+      totalCount += aggregatedServerHardware[0].counts[i].count;
     };
-    for (let j = 0; j < splits2; j++) {
-      dataset2.push({ label: slices2[j].value, count: (slices2[j].count), percent: (slices2[j].count / totalCount2) });
+    for (let j = 0; j < splits; j++) {
+      dataset.push({ label: slices[j].value, count: (slices[j].count), percent: (slices[j].count / totalCount) });
     };
   }
 
-  return { splits: splits2, totalCount: totalCount2, dataset: dataset2 };
+  return { splits: splits, totalCount: totalCount, dataset: dataset };
 }
 
 function __transformAlertsData__(aggregatedAlerts) {
-  let splits3 = aggregatedAlerts[0].counts.length;
-  let dataset3 = [];
-  let totalCount3 = 0;
-  if (splits3 === 0) {
-    dataset3.push({ label: "No Alerts", count: 0, percent: 100} );
+  let splits = aggregatedAlerts[0].counts.length;
+  let dataset = [];
+  let totalCount = 0;
+  if (splits === 0) {
+    dataset.push({ label: "No Alerts", count: 0, percent: 100} );
   }
   else {
-    let slices3 = [];
-    for (let i = 0; i < splits3; i++) {
-      slices3.push(aggregatedAlerts[0].counts[i]);
-      totalCount3 += aggregatedAlerts[0].counts[i].count;
+    let slices = [];
+    for (let i = 0; i < splits; i++) {
+      slices.push(aggregatedAlerts[0].counts[i]);
+      totalCount += aggregatedAlerts[0].counts[i].count;
     };
-    for (let j = 0; j < splits3; j++) {
-      dataset3.push({ label: slices3[j].value, count: (slices3[j].count), percent: (slices3[j].count / totalCount3) });
+    for (let j = 0; j < splits; j++) {
+      dataset.push({ label: slices[j].value, count: (slices[j].count), percent: (slices[j].count / totalCount) });
     };
   }
 
-  return { splits: splits3, totalCount: totalCount3, dataset: dataset3 };
+  return { splits: splits, totalCount: totalCount, dataset: dataset };
 }
 
-function __transformHardwareWithProfilesData(aggregatedHardwareWithProfiles) {
-  let splits4 = aggregatedHardwareWithProfiles[0].counts.length;
-  let dataset4 = [];
-  let totalCount4 = 0;
-  if (splits4 === 0) {
-    dataset4.push({ label: "No Hardware", count: 0, percent: 100} );
+function __transformHardwareWithProfilesData__(aggregatedHardwareWithProfiles) {
+  let splits = aggregatedHardwareWithProfiles[0].counts.length;
+  let dataset = [];
+  let totalCount = 0;
+  if (splits === 0) {
+    dataset.push({ label: "No Hardware", count: 0, percent: 100} );
   }
   else {
-    let slices4 = [];
-    for (let i = 0; i < splits4; i++) {
-      slices4.push(aggregatedHardwareWithProfiles[0].counts[i]);
-      totalCount4 += aggregatedHardwareWithProfiles[0].counts[i].count;
+    let slices = [];
+    for (let i = 0; i < splits; i++) {
+      slices.push(aggregatedHardwareWithProfiles[0].counts[i]);
+      totalCount += aggregatedHardwareWithProfiles[0].counts[i].count;
     }
-    for (let j = 0; j < splits4; j++) {
-      if (slices4[j].value == "ProfileApplied") {
-        dataset4.push({ label: "Has Profile", count: (slices4[j].count), percent: (slices4[j].count / totalCount4) });
+    for (let j = 0; j < splits; j++) {
+      if (slices[j].value == "ProfileApplied") {
+        dataset.push({ label: "Has Profile", count: (slices[j].count), percent: (slices[j].count / totalCount) });
       }
       else {
-        dataset4.push({ label: "No Profile", count: (slices4[j].count), percent: (slices4[j].count / totalCount4) });
+        dataset.push({ label: "No Profile", count: (slices[j].count), percent: (slices[j].count / totalCount) });
       }
     };
   }
 
-  return { splits: splits4, totalCount: totalCount4, dataset: dataset4 };
+  return { splits: splits, totalCount: totalCount, dataset: dataset };
 }
 
-function __addHeadersAndLines(svg) {
+function __addHeadersAndLines__(svg) {
   //adding headers to each section and lines to separate in the center
   svg.append("text")
     .attr("x", 75)
@@ -205,7 +205,7 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
     let totalCount3 = alerts.totalCount;
     let dataset3 = alerts.dataset;
 
-    let hardwareWithProfiles = __transformHardwareWithProfilesData(aggregatedHardwareWithProfiles);
+    let hardwareWithProfiles = __transformHardwareWithProfilesData__(aggregatedHardwareWithProfiles);
     let splits4 = hardwareWithProfiles.splits;
     let totalCount4 = hardwareWithProfiles.totalCount;
     let dataset4 = hardwareWithProfiles.dataset;
@@ -221,7 +221,7 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
     let color1 = d3.scaleOrdinal()
         .domain(["Critical", "OK", "Warning", "No Profiles", "No Alerts", "No Hardware", "Has Profile", "No Profile"])
         .range(['#FF454F', '#01A982', '#FFD042', '#C6C9CA', '#C6C9CA', '#C6C9CA', '#425563', '#C6C9CA']);
-        
+
     //arc used in the generation of all the pies
     let arc = d3.arc()
         .outerRadius(radius * 0.8)
@@ -267,7 +267,7 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
         .attr("transform", "translate(" + (radius + 700) + "," + (radius + 700) + ")");
 
     //adds headers for each section and stylistic lines to svg
-    __addHeadersAndLines(svg);
+    __addHeadersAndLines__(svg);
 
     //generate the profiles donut
     let path = g1.selectAll(".arc")
