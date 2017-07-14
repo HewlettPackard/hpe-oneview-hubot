@@ -26,6 +26,7 @@ import DeveloperListener from './developer';
 import ServerHardwareListener from './server-hardware';
 import ServerProfilesListener from './server-profiles';
 import ServerProfileTemplateListener from './server-profile-templates';
+import DashboardListener from './dashboard-listener';
 import AlertsListener from './alerts-listener';
 import DefaultListener from './default-listener';
 import BotListener from './bot';
@@ -40,6 +41,7 @@ export default function(robot, client) {
   const sh = new ServerHardwareListener(robot, client, transform);
   const sp = new ServerProfilesListener(robot, client, transform, sh);
   const spt = new ServerProfileTemplateListener(robot, client, transform, sh, sp);
+  const dash = new DashboardListener(robot, client, transform);
   const al = new AlertsListener(robot, client, transform);
   const deft = new DefaultListener(robot, transform);
 

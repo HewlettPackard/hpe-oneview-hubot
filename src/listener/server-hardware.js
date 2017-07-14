@@ -241,7 +241,7 @@ export default class ServerHardwareListener extends Listener {
     });
 
     Promise.all([p1, p2]).then((res) => {
-      this.robot.logger.info('All charts finsihed.');
+      this.robot.logger.info('All charts finished.');
       return this.transform.send(msg, msg.message.user.name + " I've finished creating the hardware utilization charts.");
     }).catch((err) => {
       return this.transform.error(msg, err);
@@ -289,7 +289,7 @@ export default class ServerHardwareListener extends Listener {
     });
 
     Promise.all([p1, p2, p3, p4]).then(() => {
-      this.robot.logger.info('All charts finsihed.');
+      this.robot.logger.info('All charts finished.');
       return this.transform.send(msg, "Ok " + msg.message.user.name + " I've finished creating all the hardware utilization charts.");
     }).catch((err) => {
       return this.transform.error(msg, err);
