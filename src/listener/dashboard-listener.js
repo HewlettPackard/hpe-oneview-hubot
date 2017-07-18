@@ -39,22 +39,37 @@ export default class DashboardListener extends Listener {
   ShowOneViewDashboard(msg) {
     this.transform.send(msg, "Ok " + msg.message.user.name + ", I am going to generate your dashboard. This might take a little while.\nFor a more comprehensive view, see " + this.transform.hyperlink("https://" + this.client.host + "/#/dashboard", "Dashboard"));
 
-    this.client.Dashboard.getAggregatedAlerts().then((res1) => {
-      this.client.Dashboard.getAggregatedServerProfiles().then((res2) => {
-        this.client.Dashboard.getAggregatedServerHardware().then((res3) => {
-          this.client.Dashboard.getAggregatedServersWithProfiles().then((res4) => {
-            buildDashboard(this.robot, this.room, res1, res2, res3, res4);
-          }).catch((err) => {
-            return this.transform.error(msg, err);
-          });
-        }).catch((err) => {
-          return this.transform.error(msg, err);
-        });
-      }).catch((err) => {
-        return this.transform.error(msg, err);
-      });
+    let promises = [];
+
+    promises.push(this.client.Dashboard.getAggregatedAlerts());
+    promises.push(this.client.Dashboard.getAggregatedServerProfiles());
+    promises.push(this.client.Dashboard.getAggregatedServerHardware());
+    promises.push(this.client.Dashboard.getAggregatedServersWithProfiles());
+
+    Promise.all(promises).then((res) => {
+      buildDashboard(this.robot, this.room, res[0], res[1], res[2], res[3]);
     }).catch((err) => {
-      return this.transform.error(msg, err);
+      this.robot.logger.error("Error getting dashboard data", err);
+      this.transform.error(msg, err);
     });
+
+  //   this.client.Dashboard.getAggregatedAlerts().then((res1) => {
+  //     this.client.Dashboard.getAggregatedServerProfiles().then((res2) => {
+  //       this.client.Dashboard.getAggregatedServerHardware().then((res3) => {
+  //         this.client.Dashboard.getAggregatedServersWithProfiles().then((res4) => {
+  //           buildDashboard(this.robot, this.room, res1, res2, res3, res4);
+  //         }).catch((err) => {
+  //           return this.transform.error(msg, err);
+  //         });
+  //       }).catch((err) => {
+  //         return this.transform.error(msg, err);
+  //       });
+  //     }).catch((err) => {
+  //       return this.transform.error(msg, err);
+  //     });
+  //   }).catch((err) => {
+  //     return this.transform.error(msg, err);
+  //   });
+  // }
   }
 }
