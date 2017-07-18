@@ -53,23 +53,5 @@ export default class DashboardListener extends Listener {
       this.transform.error(msg, err);
     });
 
-  //   this.client.Dashboard.getAggregatedAlerts().then((res1) => {
-  //     this.client.Dashboard.getAggregatedServerProfiles().then((res2) => {
-  //       this.client.Dashboard.getAggregatedServerHardware().then((res3) => {
-  //         this.client.Dashboard.getAggregatedServersWithProfiles().then((res4) => {
-  //           buildDashboard(this.robot, this.room, res1, res2, res3, res4);
-  //         }).catch((err) => {
-  //           return this.transform.error(msg, err);
-  //         });
-  //       }).catch((err) => {
-  //         return this.transform.error(msg, err);
-  //       });
-  //     }).catch((err) => {
-  //       return this.transform.error(msg, err);
-  //     });
-  //   }).catch((err) => {
-  //     return this.transform.error(msg, err);
-  //   });
-  // }
   }
 }
