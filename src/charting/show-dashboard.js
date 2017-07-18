@@ -131,8 +131,11 @@ function __transformHardwareWithProfilesData__(aggregatedHardwareWithProfiles) {
       if (slices[j].value == "ProfileApplied") {
         dataset.push({ label: "Has Profile", count: (slices[j].count), percent: (slices[j].count / totalCount) });
       }
-      else {
+      else if (slices[j].value == "NoProfileApplied") {
         dataset.push({ label: "No Profile", count: (slices[j].count), percent: (slices[j].count / totalCount) });
+      }
+      else {
+        dataset.push({ label: "Unmanaged", count: (slices[j].count), percent: (slices[j].count / totalCount ) });
       }
     };
   }
@@ -219,8 +222,8 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
 
     //color scheme
     let color1 = d3.scaleOrdinal()
-        .domain(["Critical", "OK", "Warning", "No Profiles", "No Alerts", "No Hardware", "Has Profile", "No Profile"])
-        .range(['#FF454F', '#01A982', '#FFD042', '#C6C9CA', '#C6C9CA', '#C6C9CA', '#425563', '#C6C9CA']);
+        .domain(["Critical", "OK", "Warning", "No Profiles", "No Alerts", "No Hardware", "Has Profile", "No Profile", "UNKNOWN", "Unmanaged"])
+        .range(['#FF454F', '#01A982', '#FFD042', '#C6C9CA', '#C6C9CA', '#C6C9CA', '#425563', '#C6C9CA', '#C6C9CA', '#80746E']);
 
     //arc used in the generation of all the pies
     let arc = d3.arc()

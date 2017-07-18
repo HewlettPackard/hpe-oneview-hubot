@@ -192,6 +192,16 @@ export default class ServerProfileTemplateListener extends Listener {
     });
   }
 
+  PowerOffHardware(id, msg) {
+    return this.client.ServerHardware.setPowerState(id, "Off", "MomentaryPress").feedback((res, err) => {
+      this.robot.logger.debug("Powering off blade to fix compliance.", res);
+    }).then((res) => {
+      return res;
+    }).catch((err) => {
+      this.transform.error(msg, err);
+    });
+  }
+
   FixCompliance(msg) {
     if(this.client.connection.isReadOnly()) {
       return this.transform.text(msg, "I'm afraid you'll have to set readOnly mode to false in your config file first if you want to do that...");
@@ -218,7 +228,7 @@ export default class ServerProfileTemplateListener extends Listener {
                                           'This may take a while but I will let you know when I finish.').then(() => {
             return Promise.allSettled(profiles.map((profile) => {
               //TODO bug here if the template is not assigned to a blade, need to null check profile.serverHardwareUri
-              return this.serverHardware.PowerOffHardware(profile.serverHardwareUri, msg, true).then(() => {
+             return this.PowerOffHardware(profile.serverHardwareUri, msg).then((res) => {
                 return this.serverProfiles.MakeServerProfileCompliant(profile.uri, msg, true);
               }).then(() => {
                 return this.serverHardware.PowerOnHardware(profile.serverHardwareUri, msg, true);

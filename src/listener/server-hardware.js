@@ -55,7 +55,7 @@ export default class ServerHardwareListener extends Listener {
     this.capabilities.push(this.indent + "List all critical/warning/ok/disabled (server) hardware (e.g. list all critical hardware).");
 
     this.respond(/(?:get|list|show) (?:all ){0,1}(:<powerState>powered on|powered off*?) (?:server ){0,1}hardware\.$/i, ::this.ListHardwareByPowerState);
-    this.capabilities.push(this.indent + "List all powered on/off (server) hardware (e.g. list all active/inactive hardware)");
+    this.capabilities.push(this.indent + "List all powered on/off (server) hardware.");
   }
 
   PowerOnHardware(id, msg, suppress) {
