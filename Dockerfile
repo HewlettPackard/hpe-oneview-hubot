@@ -3,8 +3,6 @@
 
 FROM jesseolsen/core-hubot:latest
 
-ARG PROXY
-
 COPY docker_entry.sh /usr/local/bin/
 COPY docker_go.sh /go.sh
 COPY . /home/docker/hubot-org/

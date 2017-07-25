@@ -22,11 +22,8 @@ USER root
 #http://askubuntu.com/questions/506158/unable-to-initialize-frontend-dialog-when-using-ssh
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG PROXY
-ENV http_proxy http://$PROXY
-ENV https_proxy http://$PROXY
-ENV HTTP_PROXY http://$PROXY
-ENV HTTPS_PROXY http://$PROXY
+ARG http_proxy
+ARG https_proxy
 
 # Steps from:
 # https://github.com/HewlettPackard/hpe-oneview-hubot/wiki/Getting-Started
@@ -57,11 +54,6 @@ RUN npm install -g yo generator-hubot
 
 ###############################################################################
 USER docker
-
-ENV http_proxy http://$PROXY
-ENV https_proxy http://$PROXY
-ENV HTTP_PROXY http://$PROXY
-ENV HTTPS_PROXY http://$PROXY
 
 RUN npm config set proxy $http_proxy
 RUN npm config set http-proxy $http_proxy
@@ -111,11 +103,6 @@ USER root
 # 4. Install gulp (etc.)
 
 WORKDIR /home/docker/hubot-core-org
-
-ENV http_proxy http://$PROXY
-ENV https_proxy http://$PROXY
-ENV HTTP_PROXY http://$PROXY
-ENV HTTPS_PROXY http://$PROXY
 
 # To install avoid cross-device link not permitted...
 RUN cd /usr/lib/node_modules/npm; npm install fs-extra;        \
