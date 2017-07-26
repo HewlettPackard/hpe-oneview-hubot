@@ -1,9 +1,28 @@
+sudo: true
+dist: trusty
 language: node_js
 node_js:
-  - "6"
-  - "7"
+- '6'
+- '7'
 before_script:
-  - npm install
+- npm install
 script:
-  - npm test
+- npm test
 after_success: npm run coverage
+jobs:
+  include:
+  - stage: build docker image
+    script:
+    - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+    - docker build -f Dockerfile-core -t docker.io/jesseolsen/core-hubot:latest .
+    - docker images
+    - docker tag jesseolsen/core-hubot docker.io/jesseolsen/core-hubot:latest
+    - docker push docker.io/jesseolsen/core-hubot:latest
+    - docker build -t docker.io/jesseolsen/hpe-oneview-hubot:latest .
+    - docker images
+    - docker tag jesseolsen/hpe-oneview-hubot docker.io/jesseolsen/hpe-oneview-hubot:latest
+    - docker push docker.io/jesseolsen/hpe-oneview-hubot:latest
+env:
+  global:
+  - secure: Ped3qjbSgh20mSM7CX3qVgNQZyAtJLZzrk1jEwIWKKVK+/8JuP2HJIa4avrjK8Ds/YjHteT8/+dFanwq2HGC3fVZemhf23BA4duw4k8Ty5vjIxXNJWg9c2t+OwlJ562AShGmWiqX7xMzdNgKb9vvy9OYSYu8YCq8xYV3TMagcFoHXWk2bClpO2qikDnIdNdw7eTsSTHQJAXyeWCzkhvRpI3bA3KnHCLreKZM7QBlL0q+ixSxaugCOVOVjztuQVK+Wc/toL8CHyQEL9Pf4XrMoHOt5ctjq/PcX+TPj603gvCutbceDJClBF48CVzhIHfELcFeaH+v+8tKHu0P36D2uxNpG3H5kQR2x0iq1oMNMvVXNj5W+seNRV5CTQ5Pqy1Rnub3Eo2Z7LvZ38iIEpNGmKLpEGQ5zi/jHI5RVgnd4IltgZzGZ8VIEpMvLxNffGuHDRsuiDKo0L9doESxslFWlRa0uT1lWTHaVZ6zPxvcYRDFzzaq5NdL6xq5lIWDDKEB3c/7t8urYAh//giC9HDAleb+x3HDy5UZmwNPPFCTuPFoW7JrswmSLEnkugYJmFVHqx54ywff8kuCVk2FmCPruCNCuLfbEW2mqOnrDfLgWRojYCui84Lptqc5uczub/GqlnFChV0Fo55OcY41HW3cu19tvd3K6xzGfT+9vtaG6H4=
+  - secure: YWEywMuBWP1xQSQjwfWfUUaQz4/2Zrh+0p0sBMmHAjCabAEspqk8A/eDYjWJN2oEgq8q0hON4QDDpVGy1KSoaWCvayEuQ4Fuqmqe0Yqf211v9hYHnxk72naF2HVeWYGHY3eCehGqM7X/d83wcsPKmqQIrcj17v44YqymTMdO0GMFqTpzW0kWUdkSk1zbvfH678hqKJi552qgvTJAs/Wl8JAAJEgbw72dQzbnP9uIr5m2MltcUVGMr17uqAbgu2qbRQUxQ01arEbaeMnKj+epc7LaL81Ie6c3MuzHpareRYlRh3WJU/tYNcBoyWuXT6FW/lK2ZvRxEtWmPNbwlUFeUNlb5bqCnvLEdyC03u4z1zTbBcjLXGj8GKCUY0L9HGtxDkPw2S6yKKHALkPF/ujtQAz+NDCEpCOwThCkgQh0s9JXG5sGHjtiE0iVFk1pHaGvAqs1RSBfhi9y1thAncJEUh1cy7/3fvUdfT3zEHFTZkNe4fhmBdnt2foCZZ+UeyE/fFxXv6DKZs9FGU6KaMentKT1WXnzL7DYjJGa5xPcjFCV5HlGWFJfmEdz7uxf/HTtc4HS+dusaSJHglpsAOhnIBfT0W7hXQVfAvyt3s9nPLfpAZ+KUYTd+vn4ut0G9cmYld74pVT3EosFTJlsFbv1m3BintYTwJhCsO8RAA+8CGA=
