@@ -1,7 +1,7 @@
 # Docker best practices/commands:
 # https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/
 
-FROM jesseolsen/core-hubot:latest
+FROM hewlettpackardenterprise/core-hubot:latest
 
 ARG http_proxy
 ARG https_proxy

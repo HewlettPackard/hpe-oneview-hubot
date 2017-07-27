@@ -1,2 +1,2 @@
 #!/bin/bash
-docker pull jesseolsen/core-hubot
+docker pull hewlettpackardenterprise/core-hubot
