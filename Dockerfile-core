@@ -1,12 +1,12 @@
 # Docker best practices/commands:
 # https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/
 
-FROM ubuntu:14.04
+FROM alpine:3.5
 
 COPY docker_entry.sh /usr/local/bin/
 COPY docker_go.sh /go.sh
 
-RUN useradd -ms /bin/bash docker
+RUN adduser -Ds /bin/bash docker
 
 ###############################################################################
 USER docker
@@ -31,17 +31,18 @@ ARG https_proxy
 # 1. Clone repo
 
 # 2. Install node.js + npm (etc.)
-RUN apt-get update && apt-get install -y \
-    curl                                 \
-    libcurl3                             \
-    libcurl3-dev                         \
+RUN apk --no-cache add \
+    curl                                \
+    libcurl                             \
+    sudo                                \
+    bash                                \
     php5-curl
-RUN curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-RUN apt-get install -y aptitude
-RUN aptitude install -y \
+#RUN curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+#RUN apk add --no-cache aptitude
+#RUN aptitude install -y
+RUN apk --no-cache add \
     jq                  \
-    nodejs              \
-    npm
+    nodejs
 
 RUN npm config set proxy $http_proxy
 RUN npm config set http-proxy $http_proxy
