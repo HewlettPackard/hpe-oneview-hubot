@@ -18,10 +18,10 @@ jobs:
     - docker images
     - docker tag jesseolsen/core-hubot docker.io/jesseolsen/core-hubot:latest
     - docker push docker.io/jesseolsen/core-hubot:latest
-    - docker build -t docker.io/jesseolsen/hpe-oneview-hubot:latest .
+    - docker build -t docker.io/hewlettpackardenterprise/hpe-oneview-hubot:latest .
     - docker images
-    - docker tag jesseolsen/hpe-oneview-hubot docker.io/jesseolsen/hpe-oneview-hubot:latest
-    - docker push docker.io/jesseolsen/hpe-oneview-hubot:latest
+    - docker tag hewlettpackardenterprise/hpe-oneview-hubot docker.io/hewlettpackardenterprise/hpe-oneview-hubot:latest
+    - docker push docker.io/hewlettpackardenterprise/hpe-oneview-hubot:latest
 env:
   global:
   - secure: Ped3qjbSgh20mSM7CX3qVgNQZyAtJLZzrk1jEwIWKKVK+/8JuP2HJIa4avrjK8Ds/YjHteT8/+dFanwq2HGC3fVZemhf23BA4duw4k8Ty5vjIxXNJWg9c2t+OwlJ562AShGmWiqX7xMzdNgKb9vvy9OYSYu8YCq8xYV3TMagcFoHXWk2bClpO2qikDnIdNdw7eTsSTHQJAXyeWCzkhvRpI3bA3KnHCLreKZM7QBlL0q+ixSxaugCOVOVjztuQVK+Wc/toL8CHyQEL9Pf4XrMoHOt5ctjq/PcX+TPj603gvCutbceDJClBF48CVzhIHfELcFeaH+v+8tKHu0P36D2uxNpG3H5kQR2x0iq1oMNMvVXNj5W+seNRV5CTQ5Pqy1Rnub3Eo2Z7LvZ38iIEpNGmKLpEGQ5zi/jHI5RVgnd4IltgZzGZ8VIEpMvLxNffGuHDRsuiDKo0L9doESxslFWlRa0uT1lWTHaVZ6zPxvcYRDFzzaq5NdL6xq5lIWDDKEB3c/7t8urYAh//giC9HDAleb+x3HDy5UZmwNPPFCTuPFoW7JrswmSLEnkugYJmFVHqx54ywff8kuCVk2FmCPruCNCuLfbEW2mqOnrDfLgWRojYCui84Lptqc5uczub/GqlnFChV0Fo55OcY41HW3cu19tvd3K6xzGfT+9vtaG6H4=
