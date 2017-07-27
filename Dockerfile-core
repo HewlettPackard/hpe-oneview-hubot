@@ -60,7 +60,7 @@ RUN npm config set http-proxy $http_proxy
 RUN npm config set https-proxy $http_proxy
 
 
-RUN echo "n" | yo hubot --defaults --name="jesse-bot" --adapter=slack
+RUN echo "n" | yo hubot --defaults --name="bot" --adapter=slack
 
 ###############################################################################
 USER root

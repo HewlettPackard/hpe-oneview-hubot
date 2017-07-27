@@ -14,10 +14,10 @@ jobs:
   - stage: build docker image
     script:
     - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-    - docker build -f Dockerfile-core -t docker.io/jesseolsen/core-hubot:latest .
+    - docker build -f Dockerfile-core -t docker.io/hewlettpackardenterprise/core-hubot:latest .
     - docker images
-    - docker tag jesseolsen/core-hubot docker.io/jesseolsen/core-hubot:latest
-    - docker push docker.io/jesseolsen/core-hubot:latest
+    - docker tag hewlettpackardenterprise/core-hubot docker.io/hewlettpackardenterprise/core-hubot:latest
+    - docker push docker.io/hewlettpackardenterprise/core-hubot:latest
     - docker build -t docker.io/hewlettpackardenterprise/hpe-oneview-hubot:latest .
     - docker images
     - docker tag hewlettpackardenterprise/hpe-oneview-hubot docker.io/hewlettpackardenterprise/hpe-oneview-hubot:latest
