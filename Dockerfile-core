@@ -3,9 +3,6 @@
 
 FROM alpine:3.5
 
-COPY docker_entry.sh /usr/local/bin/
-COPY docker_go.sh /go.sh
-
 RUN adduser -Ds /bin/bash docker
 
 ###############################################################################
@@ -51,7 +48,7 @@ RUN npm config set https-proxy $http_proxy
 
 # 3. Install Hubot
 
-RUN npm install -g yo generator-hubot
+RUN npm install -g yo generator-hubot css-what css-select
 
 ###############################################################################
 USER docker
@@ -82,16 +79,16 @@ RUN cd /usr/lib/node_modules/npm; npm install fs-extra;        \
 USER docker
 
 
-RUN npm install hubot@2.x;                \
-    npm install hubot-test-helper@^1.3.0; \
-    npm install amqp@^0.2.6;              \
-    npm install d3@^4.2.7;                \
-    npm install jsdom@^9.8.0;             \
-    npm install svg2png@^4.0.0;           \
-    npm install fuzzyset.js@0.0.1;        \
-    npm install nlp_compromise@^6.5.0;    \
-    npm install request@^2.75.0;          \
-    npm install request-promise@^4.1.1;
+RUN npm install hubot@2.x                \
+    hubot-test-helper@^1.3.0             \
+    amqp@^0.2.6                          \
+    d3@^4.2.7                            \
+    jsdom@^9.8.0                         \
+    svg2png@^4.0.0                       \
+    fuzzyset.js@0.0.1                    \
+    nlp_compromise@^6.5.0                \
+    request@^2.75.0                      \
+    request-promise@^4.1.1;
 
 
 RUN npm install babel-plugin-transform-function-bind; \
@@ -120,21 +117,21 @@ RUN npm install -g gulp;                  \
     npm install gulp-task-listing@^1.0.1; \
     npm install gulp-util@^3.0.7
 
-RUN npm install hubot@2.x;                \
-    npm install hubot-test-helper@^1.3.0; \
-    npm install amqp@^0.2.6;              \
-    npm install d3@^4.2.7;                \
-    npm install jsdom@^9.8.0;             \
-    npm install svg2png@^4.0.0;           \
-    npm install fuzzyset.js@0.0.1;        \
-    npm install nlp_compromise@^6.5.0;    \
-    npm install request@^2.75.0;          \
-    npm install request-promise@^4.1.1;   \
-    npm install babel-core;               \
-    npm install babel-plugin-transform-function-bind;  \
-    npm install babel-preset-es2015@^6.16.0;  \
-    npm install babel-register;           \
-    npm install del@^2.2.2;
+RUN npm install hubot@2.x                \
+    hubot-test-helper@^1.3.0             \
+    amqp@^0.2.6                          \
+    d3@^4.2.7                            \
+    jsdom@^9.8.0                         \
+    svg2png@^4.0.0                       \
+    fuzzyset.js@0.0.1                    \
+    nlp_compromise@^6.5.0                \
+    request@^2.75.0                      \
+    request-promise@^4.1.1               \
+    babel-core                           \
+    babel-plugin-transform-function-bind \
+    babel-preset-es2015@^6.16.0          \
+    babel-register                       \
+    del@^2.2.2;
 
 
 # 5. Copy config file
@@ -142,6 +139,9 @@ RUN npm install hubot@2.x;                \
 # 7. Run gulp watch (docker_go.sh handles this, called by docker_run.sh)
 # 8. Run bin/hubot (docker_go.sh handles this, called by docker_run.sh)
 # 9. Test your bot (instructions presented by docker_go.sh)
+
+COPY docker_entry.sh /usr/local/bin/
+COPY docker_go.sh /go.sh
 
 ENTRYPOINT ["sh", "/usr/local/bin/docker_entry.sh"]
 
