@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 import Enhance from './oneview-sdk/utils/enhance';
+const url = require('url');
 
 function error(err, robot) {
   robot.logger.error("Error initializing the OneView brain", err);
@@ -31,53 +32,51 @@ const resourcesMap = new Map();
 export default class OneViewBrain {
   constructor(client, robot, Lexer) {
 
-    this.auth = client.getAuthToken();
-    this.enhance = new Enhance(client.host);
-
     client.ServerHardware.getAllServerHardware().then((res) => {
       if (res && res.members) {
-        for (var i = 0; i < res.members.length; i++) {
-          const sh = res.members[i];
-          Lexer.addNamedDevice(sh.name, sh.uri,);
-          Lexer.addNamedDevice(sh.serialNumber, sh.uri);
-          resourcesMap.set(sh.uri, {name: sh.name, hyperlink: sh.hyperlink, model: sh.model});
-          robot.logger.info('Found server hardware: (Name: ' + sh.name + ', Serial Number: ' + sh.serialNumber + ', URI: ' + sh.uri + ')');
+        for (let member of res.members) {
+          let uri = url.parse(member.hyperlink).hostname + '' + member.uri;
+          Lexer.addNamedDevice(member.name, uri,);
+          Lexer.addNamedDevice(member.serialNumber, uri);
+          resourcesMap.set(uri, {name: member.name, hyperlink: member.hyperlink, model: member.model});
+          robot.logger.info('Found server hardware: (Name: ' + member.name + ', Serial Number: ' + member.serialNumber + ', URI: ' + uri + ')');
         }
       }
     }).catch(error, robot);
 
     client.ServerProfiles.getAllServerProfiles().then((res) => {
       if (res && res.members) {
-        for (var i = 0; i < res.members.length; i++) {
-          const sp = res.members[i];
-          Lexer.addNamedDevice(sp.name, sp.uri);
-          if (sp.serialNumberType === 'Virtual') {
-            Lexer.addNamedDevice(sp.serialNumber, sp.uri);
+        for (let member of res.members) {
+          let uri = url.parse(member.hyperlink).hostname + '' + member.uri;
+          Lexer.addNamedDevice(member.name, uri);
+          if (member.serialNumberType === 'Virtual') {
+            Lexer.addNamedDevice(member.serialNumber, uri);
           }
-          resourcesMap.set(sp.uri, {name: sp.name, hyperlink: sp.hyperlink, model: undefined});
-          robot.logger.info('Found server profile: (Name: ' + sp.name + ', URI: ' + sp.uri + ')');
+          resourcesMap.set(uri, {name: member.name, hyperlink: member.hyperlink, model: undefined});
+          robot.logger.info('Found server profile: (Name: ' + member.name + ', URI: ' + uri + ')');
         }
       }
     }).catch(error, robot);
 
     client.ServerProfileTemplates.getAllServerProfileTemplates().then((res) => {
       if (res && res.members) {
-        for (var i = 0; i < res.members.length; i++) {
-          const spt = res.members[i];
-          Lexer.addNamedDevice(spt.name, spt.uri);
-          resourcesMap.set(spt.uri, {name: spt.name, hyperlink: spt.hyperlink, model: undefined});
-          robot.logger.info('Found server profile template: (Name: ' + spt.name + ', URI: ' + spt.uri + ')');
+        for (let member of res.members) {
+          let uri = url.parse(member.hyperlink).hostname + '' + member.uri;
+          Lexer.addNamedDevice(member.name, uri);
+          resourcesMap.set(uri, {name: member.name, hyperlink: member.hyperlink, model: undefined});
+          robot.logger.info('Found server profile template: (Name: ' + member.name + ', URI: ' + uri + ')');
         }
       }
     }).catch(error, robot);
 
     client.LogicalInterconnects.getAllLogicalInterconnects().then((res) => {
       if (res && res.members) {
-        for (var i = 0; i < res.members.length; i++) {
-          const lic = res.members[i];
-          const ics = lic.interconnects;
-          for (let ic of ics) {
-            logicalInterconnectsMap.set(ic, lic.uri);
+        for (let member of res.members) {
+          let hostname = url.parse(member.hyperlink).hostname;
+          let uri = hostname + '' + member.uri;
+          const ics = member.interconnects;
+          for (let ic of member.interconnects) {
+            logicalInterconnectsMap.set(hostname +'' + ic, uri);
           }
         }
       }
@@ -85,24 +84,34 @@ export default class OneViewBrain {
 
     robot.on('__hpe__brain_notification__', ((message) => {
       if (message.changeType.toLowerCase() === 'created') {
-        if (message.resource.type.toLowerCase().includes('serverprofile')) {
-          Lexer.addNamedDevice(message.resource.name, message.resource.uri);
-          resourcesMap.set(message.resource.uri, {name: message.resource.name, hyperlink: this.enhance.transformHyperlinks(this.auth, message).resourceHyperlink, model: undefined});
-          robot.logger.debug('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
-        }
-        if (message.resource.type.toLowerCase().includes('server-hardware')) {
-          Lexer.addNamedDevice(message.resource.name, message.resource.uri,);
-          resourcesMap.set(message.resource.uri, {name: message.resource.name, hyperlink: this.enhance.transformHyperlinks(this.auth, message).resourceHyperlink, model: message.resource.model});
-          robot.logger.debug('Adding named device ' + message.resource.name + ' ' + message.resource.uri);
-        }
+        let host = url.parse('https://' + message.resourceUri).hostname;
+        let enhance = new Enhance(host);
+        let auth = client.getAuthToken(host);
+
+        let model = message.resource.model;
+        let uri = host + '' + message.resource.uri;
+        Lexer.addNamedDevice(message.resource.name, uri);
+        resourcesMap.set(uri, {name: message.resource.name, hyperlink: enhance.transformHyperlinks(auth, message.resource).hyperlink, model: model});
+        robot.logger.debug('Adding named device: ' + message.resource.name + ' with uri: ' + uri);
+
         if (message.resource.serialNumberType === 'Virtual' && !message.resource.type.toLowerCase().includes('template')) {
-          Lexer.addNamedDevice(message.resource.serialNumber, message.resource.uri);
-          robot.logger.debug('Adding named device ' + message.resource.serialNumber + ' ' + message.resource.uri);
+          let host = url.parse('https://' + message.resourceUri).hostname;
+          let uri = host + '' + message.resource.uri;
+          Lexer.addNamedDevice(message.resource.serialNumber, uri);
+          robot.logger.debug('Adding named device: ' + message.resource.name + ' with uri: ' + uri);
         }
+
       }
       if (message.changeType.toLowerCase() === 'updated' && message.resource.type.toLowerCase().includes('serverprofile')) {
-        Lexer.updateNamedDevice(robot, message.resource.name, message.resource.uri);
+        let host = url.parse('https://' + message.resourceUri).hostname;
+        let enhance = new Enhance(host);
+        let auth = client.getAuthToken(host);
+
+        let model = message.resource.model;
+        let uri = host + '' + message.resource.uri;
+        Lexer.updateNamedDevice(robot, message.resource.name, uri);
         this.__updateResourcesMap__(message, robot);
+        robot.logger.debug('Updating named device: ' + message.resource.name + ' with uri: ' + uri);
       }
     }));
   }
@@ -110,7 +119,6 @@ export default class OneViewBrain {
   __updateResourcesMap__(message, robot) {
     let resource = resourcesMap.get(message.resource.uri);
     if (resource) {
-      robot.logger.debug('Updating resource name for ' + resource.name + ' to ' + message.resource.name);
       resource.name = message.resource.name;
     }
   }

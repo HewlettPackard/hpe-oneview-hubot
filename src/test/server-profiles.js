@@ -33,11 +33,19 @@ describe('ServerProfiles', () => {
   var serverProfiles;
   beforeEach(() => {
     let oneviewConfig = {
-      applianceIp: 'localhost',
-      apiVersion: 300,
+      hosts: [{
+          applianceIp: "localhost",
+          apiVersion: 300,
+          userName: "admin",
+          password: "password",
+          doProxy: false,
+          proxyHost: "0.0.0.0",
+          proxyPort: 0
+        }],
+      notificationsFilters: [{"severity": "Critical"}],
+      pollingInterval: 30,
       readOnly: true,
-      pollingInterval: 60,
-      notificationsRoom: 'room'
+      notificationsRoom: "room"
     };
     oVClient = new OVClient(oneviewConfig, {});
     serverProfiles = new ServerProfiles(oVClient);
@@ -55,7 +63,7 @@ describe('ServerProfiles', () => {
             "status": "Critical",
           }]
     };
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverProfileResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
 
     serverProfiles.getProfilesByStatus("Critical").then(function(data) {
       data.members[0].status.should.equal("Critical");
@@ -74,7 +82,7 @@ describe('ServerProfiles', () => {
             "status": "Warning",
           }]
     };
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverProfileResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
 
     serverProfiles.getProfilesByStatus("Warning").then(function(data) {
       data.members[0].status.should.equal("Warning");
@@ -93,7 +101,7 @@ describe('ServerProfiles', () => {
             "status": "OK",
           }]
     };
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverProfileResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
 
     serverProfiles.getProfilesByStatus("OK").then(function(data) {
       data.members[0].status.should.equal("OK");
@@ -112,13 +120,11 @@ describe('ServerProfiles', () => {
             "status": "Disabled",
           }]
     };
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverProfileResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
 
     serverProfiles.getProfilesByStatus("Disabled").then(function(data) {
       data.members[0].status.should.equal("Disabled");
     });
   }));
-
-
 
 });

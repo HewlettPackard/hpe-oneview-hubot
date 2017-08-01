@@ -37,21 +37,23 @@ export default class DashboardListener extends Listener {
   }
 
   ShowOneViewDashboard(msg) {
-    this.transform.send(msg, "Ok " + msg.message.user.name + ", I am going to generate your dashboard. This might take a little while.\nFor a more comprehensive view, see " + this.transform.hyperlink("https://" + this.client.host + "/#/dashboard", "Dashboard"));
+    this.transform.send(msg, "Oh I'm sorry the dashboard is broken!");
 
-    let promises = [];
+    // this.transform.send(msg, "Ok " + msg.message.user.name + ", I am going to generate your dashboard. This might take a little while.\nFor a more comprehensive view, see " + this.transform.hyperlink("https://" + this.client.host + "/#/dashboard", "Dashboard"));
 
-    promises.push(this.client.Dashboard.getAggregatedAlerts());
-    promises.push(this.client.Dashboard.getAggregatedServerProfiles());
-    promises.push(this.client.Dashboard.getAggregatedServerHardware());
-    promises.push(this.client.Dashboard.getAggregatedServersWithProfiles());
+    // let promises = [];
 
-    Promise.all(promises).then((res) => {
-      buildDashboard(this.robot, this.room, res[0], res[1], res[2], res[3]);
-    }).catch((err) => {
-      this.robot.logger.error("Error getting dashboard data", err);
-      this.transform.error(msg, err);
-    });
+    // promises.push(this.client.Dashboard.getAggregatedAlerts());
+    // promises.push(this.client.Dashboard.getAggregatedServerProfiles());
+    // promises.push(this.client.Dashboard.getAggregatedServerHardware());
+    // promises.push(this.client.Dashboard.getAggregatedServersWithProfiles());
+
+    // Promise.all(promises).then((res) => {
+    //   buildDashboard(this.robot, this.room, res[0], res[1], res[2], res[3]);
+    // }).catch((err) => {
+    //   this.robot.logger.error("Error getting dashboard data", err);
+    //   this.transform.error(msg, err);
+    // });
 
   }
 }

@@ -104,16 +104,7 @@ describe('Connection', () => {
   let connection;
 
   beforeEach(() => {
-    let oneviewConfig = {
-      applianceIp: 'localhost',
-      apiVersion: 300,
-      readOnly: true
-    };
-    connection = new Connection(oneviewConfig);
-  });
-
-  it('isReadOnly true', () => {
-    connection.isReadOnly().should.equal(true);
+    connection = new Connection("localhost", 300, false, "0.0.0.0", 0);
   });
 
   it('setProxy', () => {

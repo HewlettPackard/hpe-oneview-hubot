@@ -40,15 +40,13 @@ const main = (robot) => {
 
   robot.logger.info('Initializing OneView');
   const client = new ovClient(oneviewConfig, robot);
-  client.login({
-    'userName': oneviewConfig.userName,
-    'password': oneviewConfig.password
-  }, false).then(() => {
-    robot.logger.info('Logged into OV appliance.');
+
+  client.login(false).then(() => {
+    robot.logger.info('Logged into OV appliance(s).');
     new ovBrain(client, robot, Lexer);
     ovListener(robot, client);
     introBot();
-  }); //end login
+  });
 
   function introBot() {
     client.ServerHardware.getAllServerHardware().then((sh) => {

@@ -34,28 +34,49 @@ let assert = require('assert');
 chai.should();
 
 describe('OVClient', () => {
-  let oVClient;
+  let robot = {adapterName: 'shell', on: function () { }, logger: {debug: function () {}, error: function () {}, info: function () {}}};
+  let oneviewConfig = {
+    hosts: [
+      {
+        applianceIp: "localhost",
+        apiVersion: 300,
+        userName: "admin",
+        password: "password",
+        doProxy: false,
+        proxyHost: "0.0.0.0",
+        proxyPort: 0
+      },
+      {
+        applianceIp: "localhost2",
+        apiVersion: 300,
+        userName: "admin",
+        password: "password",
+        doProxy: false,
+        proxyHost: "0.0.0.0",
+        proxyPort: 0
+      },
+    ],
+    notificationsFilters: [{"severity": "Critical"}],
+    pollingInterval: 30,
+    readOnly: true,
+    notificationsRoom: "room"
+  };
 
-  beforeEach(() => {
-    let oneviewConfig = {
-      applianceIp: 'localhost',
-      apiVersion: 300,
-      readOnly: true,
-      pollingInterval: 60,
-      notificationsRoom: 'room'
-    };
-    oVClient = new OVClient(oneviewConfig, {});
-  });
+  let oVClient = new OVClient(oneviewConfig, robot);
 
   it('login failure', () => {
     nock('https://localhost')
       .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
       .reply(503, {sessionID: ''});
+    nock('https://localhost2')
+      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .reply(503, {sessionID: ''});
 
-    return oVClient.login({userName: 'admin', password: 'password'}, true).then(() => {
+    return oVClient.login(true).then(() => {
       assert.fail('Fail');
     }).catch((e) => {
-      oVClient.isLoggedIn().should.equal(false);
+      e.name.should.equal('StatusCodeError');
+      e.statusCode.should.equal(503);
     });
   });
 
@@ -63,9 +84,13 @@ describe('OVClient', () => {
     nock('https://localhost')
       .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
       .reply(200, {sessionID: 'ASD-1231-asd_Ll'});
+    nock('https://localhost2')
+      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .reply(200, {sessionID: 'ASD-1231-asd_L2'});
 
-    return oVClient.login({userName: 'admin', password: 'password'}, true).then(() => {
-      oVClient.isLoggedIn().should.equal(true);
+    return oVClient.login(true).then(() => {
+      oVClient.getAuthToken('localhost').should.equal('ASD-1231-asd_Ll');
+      oVClient.getAuthToken('localhost2').should.equal('ASD-1231-asd_L2');
     });
   });
 
@@ -73,10 +98,18 @@ describe('OVClient', () => {
     nock('https://localhost')
       .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
       .reply(200, {sessionID: 'ASD-1231-asd_Ll'});
+    nock('https://localhost2')
+      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .reply(200, {sessionID: 'ASD-1231-asd_L2'});
 
-    return oVClient.login({userName: 'admin', password: 'password'}, true).then(() => {
-      oVClient.getAuthToken().should.equal('ASD-1231-asd_Ll');
+    return oVClient.login(true).then(() => {
+      oVClient.getAuthToken('localhost').should.equal('ASD-1231-asd_Ll');
+      oVClient.getAuthToken('localhost2').should.equal('ASD-1231-asd_L2');
     });
+  });
+
+  it('isReadOnly true', () => {
+    oVClient.isReadOnly().should.equal(true);
   });
 
   it('get ServerHardware', () => {

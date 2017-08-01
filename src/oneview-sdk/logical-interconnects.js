@@ -25,18 +25,35 @@ const uri = '/rest/logical-interconnects/';
 export default class LogicalInterconnects {
   constructor (ov_client) {
     this.ov_client = ov_client;
+    this.connections = ov_client.getConnections();
   }
 
   getAllLogicalInterconnects(filter) {
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri, filter));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
     return this.ov_client.connection.get(uri, filter);
   }
 
-  getLogicalInterconnect(id) {
-    return this.ov_client.connection.get(id.startsWith(uri) ? id : uri + id);
+  getLogicalInterconnect(host, id) {
+    const connection = this.connections.get(host);
+    return connection.get(id.startsWith(uri) ? id : uri + id);
   }
 
-  getLogicalInterconnectTelemetryConfiguration(id) {
-    return this.getLogicalInterconnect(id).then((res) => {
+  getLogicalInterconnectTelemetryConfiguration(host, id) {
+    return this.getLogicalInterconnect(host, id).then((res) => {
       return res.telemetryConfiguration;
     });
   }

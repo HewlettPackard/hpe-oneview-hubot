@@ -31,14 +31,16 @@ const spt = 'scmb.server-profile-templates.#';
 const sh = 'scmb.server-hardware.Created.#';
 
 class MessageEmitter {
-  constructor(robot, queue) {
+  constructor(robot, queue, host) {
     this.robot = robot;
     this.queue = queue;
+    this.host = host;
   }
 
   onMessage(msg) {
     if (msg && msg.resource.type) {
       let event;
+      msg.resourceUri = this.host + '' + msg.resourceUri;
       if (msg.resource.type.toLowerCase().includes('alertresource')) {
         event = '__hpe__notification__';
       }
@@ -59,8 +61,7 @@ function exists(filepath) {
   });
 }
 
-function mkdir(p)
-{
+function mkdir(p) {
   p = path.resolve(p);
   return new Promise((resolve, reject) => {
     fs.mkdir(p, function (err) {
@@ -96,14 +97,12 @@ function write(filepath, string) {
 }
 
 export default class Notifications {
-  constructor (host, restAPI, robot) {
+  constructor (client, robot) {
     this.robot = robot;
-    this.host = host;
-    this.connection = undefined;
-    this.queue = undefined;
-    this.restAPI = restAPI;
+    this.client = client;
   }
 
+  //TODO fix
   disconnect () {
     this.robot.logger.info('Disonnecting from SCMB');
     var exchange = this.connection.exchange('scmb', {type: 'topic'});
@@ -116,11 +115,10 @@ export default class Notifications {
     this.robot.logger.info('Disconnected from SCMB');
   }
 
-  // pass the robot to emit messages
-  __connect__() {
-    this.robot.logger.info('Connecting to SCMB');
+  __connect__(host) {
+    this.robot.logger.info('Connecting to SCMB on host', host);
 
-    const sslFolder = 'oneview-hubot/pem_files/' + this.restAPI.host + '/';
+    const sslFolder = 'oneview-hubot/pem_files/' + host + '/';
 
     let ssl_options = {
       enabled : true,
@@ -131,7 +129,7 @@ export default class Notifications {
     };
 
     let options = {
-      host: this.host,
+      host: host,
       port: 5671,
       authMechanism: 'EXTERNAL',
       vhost: '/',
@@ -144,46 +142,41 @@ export default class Notifications {
       exists(ssl_options.certFile),
       exists(ssl_options.caFile)
     ]).then((arr) => {
-      return this.__initCerts__({file:ssl_options.keyFile, exists:arr[0]}, {file:ssl_options.certFile, exists:arr[1]}, {file:ssl_options.caFile, exists:arr[2]});
+      return this.__initCerts__(host, {file:ssl_options.keyFile, exists:arr[0]}, {file:ssl_options.certFile, exists:arr[1]}, {file:ssl_options.caFile, exists:arr[2]});
     }).then(() => {
       let connection = amqp.createConnection(options, {reconnect: true});
-      this.connection = connection;
 
       connection.on('error', (e) => {
         this.robot.logger.error("SCMB connection error", e);
       });
 
-      connection.on('ready', ::this.__ready__);
-    }).catch((err) => {
-      this.robot.logger.error("Issue creating RabbitMQ connection, bot will not be able to push notifications");
-      this.robot.logger.error(err);
-    });
-  }
+      connection.on('ready', () => {
+        connection.queue('', { autoDelete: false, confirm: true }, (queue) => {
 
-  __ready__() {
-    if (!this.ready) {
-      this.ready = true;
+          const exchange = connection.exchange('scmb', {type: 'topic'});
+          queue.bind(exchange, alerts);
+          queue.bind(exchange, sp);
+          queue.bind(exchange, spt);
+          queue.bind(exchange, sh);
 
-      this.connection.queue('', { autoDelete: false, confirm: true }, (queue) => {
-        this.queue = queue;
-
-        const exchange = this.connection.exchange('scmb', {type: 'topic'});
-        queue.bind(exchange, alerts);
-        queue.bind(exchange, sp);
-        queue.bind(exchange, spt);
-        queue.bind(exchange, sh);
-        this.robot.logger.info('Connected to SCMB, waiting for messages');
-
-        const emitter = new MessageEmitter(this.robot, queue);
-        queue.subscribe({ack: true}, ::emitter.onMessage);
+          const emitter = new MessageEmitter(this.robot, queue, host);
+          queue.subscribe({ack: true}, ::emitter.onMessage);
+        });
       });
-    }
+
+    }).catch((err) => {
+      this.robot.logger.error("Issue creating RabbitMQ connection, bot will not be able to push notifications", err);
+    });
+
+    this.robot.logger.info('Connected to SCMB, waiting for messages');
   }
 
-  __initCerts__(keyFile, certFile, caFile) {
+  __initCerts__(host, keyFile, certFile, caFile) {
+    const connection = this.client.getConnections().get(host);
+
     const createCertificate = () => {
       return new Promise((resolve, reject) => {
-        this.restAPI.post("/rest/certificates/client/rabbitmq", {type:"RabbitMqClientCertV2",commonName:"default"}).then(resolve).catch((err) => {
+        connection.post("/rest/certificates/client/rabbitmq", {type:"RabbitMqClientCertV2",commonName:"default"}).then(resolve).catch((err) => {
           if (err && err.error && err.error.errorCode == "RABBITMQ_CLIENTCERT_CONFLICT") {
             resolve('Certificate already existed.');
           } else {
@@ -194,7 +187,7 @@ export default class Notifications {
     };
 
     const writeClientCerts = () => {
-      return this.restAPI.get('/rest/certificates/client/rabbitmq/keypair/default').then((cert) => {
+      return connection.get('/rest/certificates/client/rabbitmq/keypair/default').then((cert) => {
         return Promise.all([
           write(keyFile.file, cert.base64SSLKeyData),
           write(certFile.file, cert.base64SSLCertData)
@@ -203,7 +196,7 @@ export default class Notifications {
     };
 
     const writeCaCerts = () => {
-      return this.restAPI.get('/rest/certificates/ca').then((ca) => {
+      return connection.get('/rest/certificates/ca').then((ca) => {
         return write(caFile.file, ca);
       });
     };

@@ -35,20 +35,20 @@ export default class ServerHardwareListener extends Listener {
 
     this.title = "Server hardware (sh)";
     this.capabilities = [];
-    this.respond(/(?:turn|power) on (?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOn);
-    this.respond(/(?:turn|power) off (?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOff);
+    this.respond(/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOn);
+    this.respond(/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOff);
     this.capabilities.push(this.indent + "Power on/off a specific (server) hardware (e.g. turn on Encl1, bay 1).");
 
     this.respond(/(?:get|list|show) all (?:server ){0,1}hardware\.$/i, ::this.ListServerHardware);
     this.capabilities.push(this.indent + "List all (server) hardware (e.g. list all hardware).");
 
-    this.respond(/(?:get|list|show) (?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, ::this.ListServerHardwareUtilization);
+    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, ::this.ListServerHardwareUtilization);
     this.capabilities.push(this.indent + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
-    this.respond(/(?:get|list|show) (?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i, ::this.ListAllServerHardwareUtilization);
+    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i, ::this.ListAllServerHardwareUtilization);
     this.capabilities.push(this.indent + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
-    this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
+    this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
     this.capabilities.push(this.indent + "List server hardware by name (e.g. list Encl1, bay 1).");
 
     this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}hardware\.$/i, ::this.ListHardwareByStatus);
@@ -58,12 +58,12 @@ export default class ServerHardwareListener extends Listener {
     this.capabilities.push(this.indent + "List all powered on/off (server) hardware.");
   }
 
-  PowerOnHardware(id, msg, suppress) {
-    if(this.client.connection.isReadOnly()) {
+  PowerOnHardware(msg, suppress) {
+    if(this.client.isReadOnly()) {
       return this.transform.text(msg, "Not so fast...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
     }
     let startMessage = false;
-    return this.client.ServerHardware.setPowerState(id, "On").feedback((res) => {
+    return this.client.ServerHardware.setPowerState(msg.host, msg.serverId, "On").feedback((res) => {
       if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
         startMessage = true;
         this.transform.text(msg, "I am powering on " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + ", this may take some time.");
@@ -75,8 +75,8 @@ export default class ServerHardwareListener extends Listener {
     });
   }
 
-  PowerOffHardware(id, msg, suppress) {
-    if(this.client.connection.isReadOnly()) {
+  PowerOffHardware(msg, suppress) {
+    if(this.client.isReadOnly()) {
       return this.transform.text(msg, "Not so fast...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
     }
     let startMessage = false;
@@ -85,7 +85,7 @@ export default class ServerHardwareListener extends Listener {
     this.transform.text(msg, "How would you like to power off the blade? (@" + this.robot.name + " Momentary Press/@" + this.robot.name + " Press and Hold)");
 
     dialog.addChoice(/momentary press/i, () => {
-      return this.client.ServerHardware.setPowerState(id, "Off", "MomentaryPress").feedback((res, err) => {
+      return this.client.ServerHardware.setPowerState(msg.host, msg.serverId, "Off", "MomentaryPress").feedback((res, err) => {
         if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
           startMessage = true;
           this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering off " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + " with a Momentary Press. This may take some time.");
@@ -100,7 +100,7 @@ export default class ServerHardwareListener extends Listener {
     });
 
     dialog.addChoice(/press and hold/i, () => {
-      return this.client.ServerHardware.setPowerState(id, "Off", "PressAndHold").feedback((res, err) => {
+      return this.client.ServerHardware.setPowerState(msg.host, msg.serverId, "Off", "PressAndHold").feedback((res, err) => {
         if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
           startMessage = true;
           this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering off " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + " with Press and Hold. This may take some time.");
@@ -116,19 +116,17 @@ export default class ServerHardwareListener extends Listener {
   }
 
   PowerOn(msg) {
-    if(this.client.connection.isReadOnly()) {
+    if(this.client.isReadOnly()) {
       return this.transform.text(msg, "Not so fast...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
     }
 
     let dialog = this.switchBoard.startDialog(msg);
 
-    let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-hardware/" + msg.serverId);
-    let bladeName = deviceAndHyperlink.deviceName;
-    let bladeHyperlink = deviceAndHyperlink.hyperlink;
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
+    let deviceAndHyperlink = getDeviceNameAndHyperLink(msg.host + "/rest/server-hardware/" + msg.serverId);
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(deviceAndHyperlink.hyperlink, deviceAndHyperlink.deviceName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
     dialog.addChoice(/yes/i, () => {
-      this.PowerOnHardware(msg.serverId, msg).catch((err) => {
+      this.PowerOnHardware(msg).catch((err) => {
         return this.transform.error(msg, err);
       });
     });
@@ -139,19 +137,17 @@ export default class ServerHardwareListener extends Listener {
   }
 
   PowerOff(msg) {
-    if(this.client.connection.isReadOnly()) {
+    if(this.client.isReadOnly()) {
       return this.transform.text(msg, "I don't think I should be doing that if you are in readOnly mode...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
     }
 
     let dialog = this.switchBoard.startDialog(msg);
 
-    let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-hardware/" + msg.serverId);
-    let bladeName = deviceAndHyperlink.deviceName;
-    let bladeHyperlink = deviceAndHyperlink.hyperlink;
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade " + this.transform.hyperlink(bladeHyperlink, bladeName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
+    let deviceAndHyperlink = getDeviceNameAndHyperLink(msg.host + "/rest/server-hardware/" + msg.serverId);
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade " + this.transform.hyperlink(deviceAndHyperlink.hyperlink, deviceAndHyperlink.deviceName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
     dialog.addChoice(/yes/i, () => {
-      this.PowerOffHardware(msg.serverId, msg);
+      this.PowerOffHardware(msg);
     });
 
     dialog.addChoice(/no/i, () => {
@@ -168,7 +164,7 @@ export default class ServerHardwareListener extends Listener {
   }
 
   ListServerHardwareById(msg) {
-    this.client.ServerHardware.getServerHardware(msg.serverId).then((res) => {
+    this.client.ServerHardware.getServerHardware(msg.host, msg.serverId).then((res) => {
       return this.transform.send(msg, res);
     }).catch((err) => {
       return this.transform.error(msg, err);
@@ -213,11 +209,11 @@ export default class ServerHardwareListener extends Listener {
 
     let icMap = getLogicalInterconnectsMap();
 
-    let p1 = this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
+    let p1 = this.client.ServerHardware.getServerUtilization(msg.host, msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
       return buildD3Chart(this.robot, this.room, 'CPU', res.metricList);
     });
 
-    let p2 = this.client.ServerHardware.getServerHardware(msg.serverId).then((res) => {
+    let p2 = this.client.ServerHardware.getServerHardware(msg.host, msg.serverId).then((res) => {
       let promises = [];
       for (let serverInterconnectPortLink of res.serverInterconnectPortLinks) {
         let shInterconnectUri = serverInterconnectPortLink.replace(rtrim, ''); //remove statistics port to make lookup key
@@ -253,19 +249,19 @@ export default class ServerHardwareListener extends Listener {
 
     let icMap = getLogicalInterconnectsMap();
 
-    let p1 = this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AveragePower,PeakPower,PowerCap'}).then((res) => {
+    let p1 = this.client.ServerHardware.getServerUtilization(msg.host, msg.serverId, {fields: 'AveragePower,PeakPower,PowerCap'}).then((res) => {
       return Promise.all([res, buildD3Chart(this.robot, this.room, 'Power', res.metricList)]);
     });
 
-    let p2 = this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'AmbientTemperature'}).then((res) => {
+    let p2 = this.client.ServerHardware.getServerUtilization(msg.host, msg.serverId, {fields: 'AmbientTemperature'}).then((res) => {
       return Promise.all([res, buildD3Chart(this.robot, this.room, 'Temperature', res.metricList)]);
     });
 
-    let p3 = this.client.ServerHardware.getServerUtilization(msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
+    let p3 = this.client.ServerHardware.getServerUtilization(msg.host, msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
       return Promise.all([res, buildD3Chart(this.robot, this.room, 'CPU', res.metricList)]);
     });
 
-    let p4 = this.client.ServerHardware.getServerHardware(msg.serverId).then((res) => {
+    let p4 = this.client.ServerHardware.getServerHardware(msg.host, msg.serverId).then((res) => {
       let promises = [];
       for (let serverInterconnectPortLink of res.serverInterconnectPortLinks) {
         let shInterconnectUri = serverInterconnectPortLink.replace(rtrim, ''); //remove statistics port to make lookup key

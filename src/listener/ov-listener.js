@@ -31,9 +31,9 @@ import AlertsListener from './alerts-listener';
 import DefaultListener from './default-listener';
 import BotListener from './bot';
 import NotificationsFilter from './notifications-filter';
+const url = require('url');
 
 export default function(robot, client) {
-  const enhance = new Enhance(client.host);
   const transform = new ResourceTransforms(robot);
   const filter = new NotificationsFilter(robot);
 
@@ -49,18 +49,20 @@ export default function(robot, client) {
   new BotListener(robot, client, transform, dev, sh, sp, spt);
 
   // TODO: Bug This should not be bound here, probably want a NotificationsListener instead
-  // connect to the SCMB to emit notifications
+  // TODO This is a total hack, we need to pull the transformer out of the client
   robot.on('__hpe__notification__', function (message) {
-    //TODO This is a total hack, we need to pull the transformer out of the client
-    client.ClientConnection.__newSession__().then((auth) => {
-      return enhance.transformHyperlinks(auth, message);
-    }).then((resource) => {
-      let checkedMessage = filter.check(message);
-      if (typeof checkedMessage !== 'undefined' && checkedMessage.length > 0) {
-        transform.messageRoom(client.notificationsRoom, resource.resource);
-      }
-    }).catch((err) => {
-      robot.logger.error(err);
-    });
+    let uri = url.parse('https://' + message.resourceUri);
+    let auth = client.getAuthToken(uri.hostname);
+
+    const enhance = new Enhance(uri.hostname);
+
+    //remove host before transform
+    message.resourceUri = uri.path;
+    let resource = enhance.transformHyperlinks(auth, message);
+
+    let checkedMessage = filter.check(resource);
+    if (typeof checkedMessage !== 'undefined' && checkedMessage.length > 0) {
+      transform.messageRoom(client.notificationsRoom, resource.resource);
+    }
   });
 }

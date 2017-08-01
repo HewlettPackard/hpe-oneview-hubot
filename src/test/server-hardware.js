@@ -29,16 +29,26 @@ let sinon = require('sinon');
 let nock = require('nock');
 let Bluebird = require('bluebird');
 
+chai.should();
+
 describe('ServerHardware', () => {
   let oVClient;
   let serverHardware;
   beforeEach(() => {
     let oneviewConfig = {
-      applianceIp: 'localhost',
-      apiVersion: 300,
+      hosts: [{
+          applianceIp: "localhost",
+          apiVersion: 300,
+          userName: "admin",
+          password: "password",
+          doProxy: false,
+          proxyHost: "0.0.0.0",
+          proxyPort: 0
+        }],
+      notificationsFilters: [{"severity": "Critical"}],
+      pollingInterval: 30,
       readOnly: true,
-      pollingInterval: 60,
-      notificationsRoom: 'room'
+      notificationsRoom: "room"
     };
     oVClient = new OVClient(oneviewConfig, {});
     serverHardware = new ServerHardware(oVClient);
@@ -59,12 +69,12 @@ describe('ServerHardware', () => {
           }]
     };
 
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverHardwareResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverHardwareResponse));
     return serverHardware.getHardwareByPowerState("Off").then(function(data) {
+      data.members.length.should.equal(1);
       data.members[0].powerState.should.equal("Off");
     });
   }));
-
 
   it('get "on" hardware', sinon.test(function() {
 
@@ -81,9 +91,9 @@ describe('ServerHardware', () => {
           }]
     };
 
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverHardwareResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverHardwareResponse));
     return serverHardware.getHardwareByPowerState("On").then(function(data) {
-      data.type.should.equal("server-hardware-list");
+      data.members.length.should.equal(1);
       data.members[0].powerState.should.equal("On");
     });
   }));
@@ -101,9 +111,10 @@ describe('ServerHardware', () => {
               "status": "Critical",
           }]
     };
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverHardwareResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverHardwareResponse));
 
     return serverHardware.getHardwareByStatus("Critical").then(function(data) {
+      data.members.length.should.equal(1);
       data.members[0].status.should.equal("Critical");
     });
   }));
@@ -121,9 +132,10 @@ describe('ServerHardware', () => {
             "status": "Warning",
           }]
     };
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverHardwareResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverHardwareResponse));
 
     serverHardware.getHardwareByStatus("Warning").then(function(data) {
+      data.members.length.should.equal(1);
       data.members[0].status.should.equal("Warning");
     });
   }));
@@ -142,9 +154,10 @@ describe('ServerHardware', () => {
           }]
     };
 
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverHardwareResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverHardwareResponse));
 
     serverHardware.getHardwareByStatus("Disabled").then(function(data) {
+      data.members.length.should.equal(1);
       data.members[0].status.should.equal("Disabled");
     });
   }));
@@ -163,12 +176,12 @@ describe('ServerHardware', () => {
           }]
     };
 
-    sinon.stub(oVClient.connection, '__http__').returns(Bluebird.resolve(serverHardwareResponse));
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverHardwareResponse));
 
     serverHardware.getHardwareByStatus("OK").then(function(data) {
+      data.members.length.should.equal(1);
       data.members[0].status.should.equal("OK");
     });
   }));
-
 
 });

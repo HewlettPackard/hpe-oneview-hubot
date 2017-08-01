@@ -25,23 +25,36 @@ const uri = '/rest/alerts/';
 export default class Alerts {
   constructor (ov_client) {
     this.ov_client = ov_client;
+    this.connections = ov_client.getConnections();
   }
 
-  getNumberOfAlerts(count, filter) {
-    return this.ov_client.connection.get("/rest/alerts?view=alertSummary&count=" + count + "");
+  getNumberOfAlerts(count) {
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri + "?view=alertSummary&count=" + count + ""));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
 
   getFilteredAlerts(status, state, time) {
-    let baseQuery = "/rest/alerts?count=100&filter=";
-    let statusQuery = '';
-    let stateQuery = '';
-    let timeQuery = '';
+    let baseQuery = uri + "?count=100&filter=";
     if (status) {
       status = status.charAt(0).toUpperCase() + status.slice(1);
-      statusQuery = "\"severity EQ '" + status + "'\"";
+      let statusQuery = "\"severity EQ '" + status + "'\"";
       baseQuery += statusQuery;
     }
     if (state) {
+      let stateQuery = '';
       state = state.charAt(0).toUpperCase() + state.slice(1);
       if (status) {
         stateQuery += "&filter=";
@@ -52,6 +65,7 @@ export default class Alerts {
 
     var date = new Date();
     if (time) {
+      let timeQuery = '';
       time = time.toLowerCase();
       if (time === "last 7 days") {
         date.setDate(date.getDate() - 7);
@@ -69,7 +83,22 @@ export default class Alerts {
       timeQuery += "\"created GT '" + time + "'\"";
       baseQuery += timeQuery;
     }
-    return this.ov_client.connection.get(baseQuery);
+
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(baseQuery));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
 
 }
