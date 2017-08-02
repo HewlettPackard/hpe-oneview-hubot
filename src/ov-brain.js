@@ -35,7 +35,7 @@ export default class OneViewBrain {
     client.ServerHardware.getAllServerHardware().then((res) => {
       if (res && res.members) {
         for (let member of res.members) {
-          let uri = url.parse(member.hyperlink).hostname + '' + member.uri;
+          let uri = url.parse(member.hyperlink).hostname + member.uri;
           Lexer.addNamedDevice(member.name, uri,);
           Lexer.addNamedDevice(member.serialNumber, uri);
           resourcesMap.set(uri, {name: member.name, hyperlink: member.hyperlink, model: member.model});
@@ -61,7 +61,7 @@ export default class OneViewBrain {
     client.ServerProfileTemplates.getAllServerProfileTemplates().then((res) => {
       if (res && res.members) {
         for (let member of res.members) {
-          let uri = url.parse(member.hyperlink).hostname + '' + member.uri;
+          let uri = url.parse(member.hyperlink).hostname + member.uri;
           Lexer.addNamedDevice(member.name, uri);
           resourcesMap.set(uri, {name: member.name, hyperlink: member.hyperlink, model: undefined});
           robot.logger.info('Found server profile template: (Name: ' + member.name + ', URI: ' + uri + ')');
@@ -89,14 +89,14 @@ export default class OneViewBrain {
         let auth = client.getAuthToken(host);
 
         let model = message.resource.model;
-        let uri = host + '' + message.resource.uri;
+        let uri = host + message.resource.uri;
         Lexer.addNamedDevice(message.resource.name, uri);
         resourcesMap.set(uri, {name: message.resource.name, hyperlink: enhance.transformHyperlinks(auth, message.resource).hyperlink, model: model});
         robot.logger.debug('Adding named device: ' + message.resource.name + ' with uri: ' + uri);
 
         if (message.resource.serialNumberType === 'Virtual' && !message.resource.type.toLowerCase().includes('template')) {
           let host = url.parse('https://' + message.resourceUri).hostname;
-          let uri = host + '' + message.resource.uri;
+          let uri = host + message.resource.uri;
           Lexer.addNamedDevice(message.resource.serialNumber, uri);
           robot.logger.debug('Adding named device: ' + message.resource.name + ' with uri: ' + uri);
         }
@@ -108,7 +108,7 @@ export default class OneViewBrain {
         let auth = client.getAuthToken(host);
 
         let model = message.resource.model;
-        let uri = host + '' + message.resource.uri;
+        let uri = host + message.resource.uri;
         Lexer.updateNamedDevice(robot, message.resource.name, uri);
         this.__updateResourcesMap__(message, robot);
         robot.logger.debug('Updating named device: ' + message.resource.name + ' with uri: ' + uri);

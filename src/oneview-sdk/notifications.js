@@ -40,7 +40,7 @@ class MessageEmitter {
   onMessage(msg) {
     if (msg && msg.resource.type) {
       let event;
-      msg.resourceUri = this.host + '' + msg.resourceUri;
+      msg.resourceUri = this.host + msg.resourceUri;
       if (msg.resource.type.toLowerCase().includes('alertresource')) {
         event = '__hpe__notification__';
       }
@@ -102,7 +102,7 @@ export default class Notifications {
     this.client = client;
   }
 
-  //TODO fix
+  //TODO: Bug #22 Not working.  Need to perform an aysnc shutdown from the SCMB
   disconnect () {
     this.robot.logger.info('Disonnecting from SCMB');
     var exchange = this.connection.exchange('scmb', {type: 'topic'});
@@ -165,10 +165,10 @@ export default class Notifications {
       });
 
     }).catch((err) => {
-      this.robot.logger.error("Issue creating RabbitMQ connection, bot will not be able to push notifications", err);
+      this.robot.logger.error("Issue creating RabbitMQ connection.  Bot will not be able to push notifications", err);
     });
 
-    this.robot.logger.info('Connected to SCMB, waiting for messages');
+    this.robot.logger.info('Connected to SCMB. Waiting for messages.');
   }
 
   __initCerts__(host, keyFile, certFile, caFile) {

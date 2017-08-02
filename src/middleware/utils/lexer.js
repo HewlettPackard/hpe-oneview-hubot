@@ -73,7 +73,7 @@ export default class Lexer {
     const tSearch = search.trim();
     namedDevices.forEach((namedDevice) => {
       if (namedDevice.replacement === replacement) {
-        robot.logger.debug('Lexer updating named device: ' + namedDevice.search + ' from: ' + namedDevice.search + ' to: ' + search + ' with uri: ' + namedDevice.replacement);
+        robot.logger.debug('Updating named device: ' + namedDevice.search + ' from: ' + namedDevice.search + ' to: ' + search + ' with uri: ' + namedDevice.replacement);
         namedDevice.search = new RegExp('\\b' + search + '\\b', 'ig');
       }
     });

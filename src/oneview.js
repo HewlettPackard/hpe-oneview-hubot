@@ -42,7 +42,7 @@ const main = (robot) => {
   const client = new ovClient(oneviewConfig, robot);
 
   client.login(false).then(() => {
-    robot.logger.info('Logged into OV appliance(s).');
+    robot.logger.info('Logged into OneView.');
     new ovBrain(client, robot, Lexer);
     ovListener(robot, client);
     introBot();

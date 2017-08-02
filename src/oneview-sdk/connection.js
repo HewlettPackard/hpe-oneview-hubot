@@ -62,7 +62,7 @@ export default class Connection {
 
     const options = {
       method: 'GET',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       resolveWithFullResponse: true
@@ -82,7 +82,7 @@ export default class Connection {
 
     return this.__http__({
       method: 'POST',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
@@ -97,7 +97,7 @@ export default class Connection {
 
     return this.__http__({
       method: 'PUT',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
@@ -112,7 +112,7 @@ export default class Connection {
 
     return this.__http__({
       method: 'PATCH',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
@@ -127,7 +127,7 @@ export default class Connection {
 
     return this.__http__({
       method: 'DELETE',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       resolveWithFullResponse: true
@@ -223,7 +223,7 @@ export default class Connection {
      method: 'GET', json: true, headers: this.headers,
      uri: 'https://' + this.host + task.uri
    };
-   
+
    if (isTerminal(task)) {
      return new Promise((resolve, reject) => {
        if (!resourceUri || options.method === 'DELETE') {
