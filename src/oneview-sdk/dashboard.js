@@ -21,27 +21,89 @@ THE SOFTWARE.
 */
 
 const uri = '/rest/index/resources/aggregated?';
+const util = require('util');
 
 export default class Dashboard {
   constructor (ov_client) {
     this.ov_client = ov_client;
+    this.connections = ov_client.getConnections();
   }
 
   getAggregatedServerHardware() {
-    return this.ov_client.connection.get(uri + "category=server-hardware&attribute=status");
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri + "category=server-hardware&attribute=status"));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        for (let r of res) {
+          console.log(r.counts);
+        }
+
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
 
   getAggregatedServerProfiles() {
-    return this.ov_client.connection.get(uri + "category=server-profiles&attribute=status")
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri + "category=server-profiles&attribute=status"));
+    }
+
+    return Promise.all(promises).then(response => {
+      console.log('getAggregatedServerProfiles', response);
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
 
   getAggregatedAlerts() {
-    return this.ov_client.connection.get(uri + "category=alerts&userQuery='Active AND Locked'&attribute=status");
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri + "category=alerts&userQuery='Active AND Locked'&attribute=status"));
+    }
+
+    return Promise.all(promises).then(response => {
+      console.log('getAggregatedAlerts', response);
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
 
   getAggregatedServersWithProfiles() {
-    return this.ov_client.connection.get(uri + "category=server-hardware&attribute=state");
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri + "category=server-hardware&attribute=state"));
+    }
+
+    return Promise.all(promises).then(response => {
+      console.log('getAggregatedServersWithProfiles', response);
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
-
-
 }

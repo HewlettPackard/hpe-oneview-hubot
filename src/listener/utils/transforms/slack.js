@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 
 import { transform } from './resource-transformer';
+const url = require('url');
 
 function AttachmentTitle(resource) {
   if (resource.type) {
@@ -51,6 +52,11 @@ function AttachmentTitle(resource) {
 function ToAttachment(resource) {
   const transformedRes = transform(resource);
 
+  let host;
+  if (resource.hyperlink) {
+    host = url.parse(resource.hyperlink).hostname;
+  }
+
   let color = '';
   switch (transformedRes.type.startsWith('AlertResource') ? transformedRes.severity : transformedRes.status) {
     case 'OK':
@@ -69,7 +75,7 @@ function ToAttachment(resource) {
       break;
   }
 
-  const fields = transformedRes.buildSlackFields();
+  const fields = transformedRes.buildSlackFields(host);
   const pretext = transformedRes.pretext;
 
   return {

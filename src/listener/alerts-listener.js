@@ -66,8 +66,7 @@ export default class AlertsListener extends Listener {
         if (time != undefined) {
           if (time === "today") {
             message += " from " + time + ".";
-          }
-          else {
+          } else {
             message += " from the " + time + ".";
           }
         }

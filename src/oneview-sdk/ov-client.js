@@ -33,9 +33,13 @@ import notifications from './notifications';
 
 export default class OVClient {
   constructor(oneviewConfig, robot) {
-    this.host = oneviewConfig.applianceIp;
+    this.connections = new Map();
     this.robot = robot;
-    this.connection = new connection(oneviewConfig);
+    this.hosts = oneviewConfig.hosts;
+    for (let host of this.hosts) {
+      this.connections.set(host.applianceIp, new connection(host.applianceIp, host.apiVersion, host.doProxy, host.proxyHost, host.proxyPort));
+    }
+    this.readOnly = oneviewConfig.readOnly;
     this.pollingInterval = oneviewConfig.pollingInterval;
     this.server_hardware = new serverhardware(this);
     this.server_profiles = new serverprofiles(this);
@@ -43,53 +47,69 @@ export default class OVClient {
     this.dashboard = new dashboard(this);
     this.alerts = new alerts(this);
     this.logical_interconnects = new logicalinterconnects(this);
-    this.notifications = new notifications(oneviewConfig.applianceIp, this.connection, robot);
+    this.notifications = new notifications(this, robot);
     this.notificationsRoom = oneviewConfig.notificationsRoom;
     if (this.notificationsRoom === undefined) {
       this.notificationsRoom = 'clean-room';
     }
   }
 
-  login(credentials, reconnect) {
+  isReadOnly() {
+    return this.readOnly;
+  }
+
+  getConnections() {
+    return this.connections;
+  }
+
+  login(reconnect) {
+    let promises = [];
+    for (let host of this.hosts) {
+      promises.push(this.__performLogin__(reconnect, host));
+    }
+    return Promise.all(promises);
+  }
+
+  __performLogin__(reconnect, host) {
     let body =  {
       'authLoginDomain': undefined,
-      'password': credentials.password,
-      'userName': credentials.userName,
+      'password': host.password,
+      'userName': host.userName,
       'loginMsgAck': 'true'
     };
 
+    const connection = this.getConnections().get(host.applianceIp);
+
     const auth = () => {
-      return this.connection.post('/rest/login-sessions', body).then((res) => {
+      return connection.post('/rest/login-sessions', body).then((res) => {
         return res.sessionID;
       });
     };
 
     //TODO: This needs to be per user once we have a per user login-session
-    this.connection.__newSession__ = auth;
+    connection.__newSession__ = auth;
 
-    return auth().then((auth) => {
-      this.connection.headers.auth = auth;
-      this.connection.loggedIn = true;
-      return auth;
-    }).then(() => {
+    return auth().then((sessionToken) => {
+      connection.headers.auth = sessionToken;
+      connection.loggedIn = true;
+      return sessionToken;
+    }).then((sessionToken) => {
       if (!reconnect) {
-        this.notifications.__connect__();
+        this.notifications.__connect__(host.applianceIp);
       }
-      this.__pollAuthToken__(credentials);
+      this.__pollAuthToken__(host);
+      this.robot.logger.info('Successfully logged into host', host.applianceIp);
+      return sessionToken;
     });
   }
 
-  isLoggedIn() {
-    return this.connection.loggedIn;
-  }
-
-  getAuthToken() {
-    return this.connection.headers.auth;
-  }
-
-  //Need to make sure we don't confuse this with OneView connections
-  get ClientConnection() {
-    return this.connection;
+  getAuthToken(host) {
+    let token;
+    const connection = this.connections.get(host);
+    if (connection) {
+      token = connection.headers.auth;
+    }
+    return token;
   }
 
   get ServerHardware() {
@@ -105,7 +125,7 @@ export default class OVClient {
   }
 
   get Dashboard() {
-    return this.dashboard; 
+    return this.dashboard;
   }
 
   get Alerts() {
@@ -120,15 +140,15 @@ export default class OVClient {
     return this.notifications;
   }
 
-  __pollAuthToken__(credentials) {
+  __pollAuthToken__(host) {
     this.__delay__(this.pollingInterval * 60000).then(() => {
-      this.__checkToken__().then(() => {
-        this.robot.logger.debug('Existing OV auth token is still valid.');
-        this.__pollAuthToken__(credentials);
+      this.__checkToken__(host).then(() => {
+        this.robot.logger.debug('Existing OV auth token is still valid for host', host.applianceIp);
+        this.__pollAuthToken__(host);
       }).catch(() => {
-         this.robot.logger.info('Existing OV auth token appears to no longer be valid.  Creating new token now.');
-         this.login(credentials, true);
-         this.__pollAuthToken__(credentials);
+         this.robot.logger.info('Existing OV auth token appears to no longer be valid.  Creating new token now for host', host.applianceIp);
+         this.__performLogin__(host, true);
+         this.__pollAuthToken__(host);
        });
     }).catch((err) => {
       this.robot.logger.error(err);
@@ -143,15 +163,15 @@ export default class OVClient {
     });
   }
 
-  __checkToken__() {
+  __checkToken__(host) {
     return new Promise ((resolve, reject) => {
-      this.connection.headers['session-id'] = this.connection.headers.auth;
-      this.connection.get('/rest/sessions').then((res) => {
+      const connection = this.getConnections().get(host.applianceIp);
+      connection.headers['session-id'] = connection.headers.auth;
+      connection.get('/rest/sessions').then((res) => {
         resolve(res.sessionID);
       }).catch((err) => {
         reject(err);
       });
     });
   }
-
 }

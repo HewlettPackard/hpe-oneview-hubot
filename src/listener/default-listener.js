@@ -25,17 +25,13 @@ import Listener from "./base-listener";
 export default class DefaultListener extends Listener {
   constructor(robot, transform) {
     super(robot, undefined, transform);
-
     this.catchAll(::this.Fallback);
-
-    }
+  }
 
   Fallback(msg) {
     //if msg.done is true then the bot was not referenced in the text
     if (!msg.done) {
       return this.transform.text(msg, "I'm sorry, I didn't understand that. Try typing '@" + this.robot.name + " help' to see a list of my capabilities.");
     }
-
   }
-
 }

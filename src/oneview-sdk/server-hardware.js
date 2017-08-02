@@ -25,37 +25,81 @@ const uri = '/rest/server-hardware/';
 export default class ServerHardware {
   constructor (ov_client) {
     this.ov_client = ov_client;
+    this.connections = ov_client.getConnections();
   }
 
   getAllServerHardware(filter) {
-    return this.ov_client.connection.get(uri, filter);
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri, filter));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
 
-  getServerHardware(id) {
-    return this.ov_client.connection.get(id.startsWith(uri) ? id : uri + id);
+  getServerHardware(host, id) {
+    const connection = this.connections.get(host);
+    return connection.get(id.startsWith(uri) ? id : uri + id);
   }
 
-  setPowerState(id, state, control) {
+  setPowerState(host, id, state, control) {
+    const connection = this.connections.get(host);
     let body = {powerState:state};
     if (control) {
       body.powerControl = control;
     }
-    return this.ov_client.connection.put((id.startsWith(uri) ? id : uri + id) + '/powerState', body);
+    return connection.put((id.startsWith(uri) ? id : uri + id) + '/powerState', body);
   }
 
   getHardwareByPowerState(state) {
-    return this.ov_client.connection.get("/rest/server-hardware?filter=\"powerState=" + state + "\"");
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri + "?filter=\"powerState=" + state + "\""));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
 
-  getServerUtilization(id, filter) {
-    return this.ov_client.connection.get((id.startsWith(uri) ? id : uri + id) + '/utilization', filter);
+  getServerUtilization(host, id, filter) {
+    const connection = this.connections.get(host);
+    return connection.get((id.startsWith(uri) ? id : uri + id) + '/utilization', filter);
   }
 
   getHardwareByStatus(status) {
-      return this.ov_client.connection.get("/rest/server-hardware?filter=\"status=" + status + "\"");
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri + "?filter=\"status=" + status + "\""));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
-
-
 
   /*
   This function returns a response that contains both the server's interconnect port

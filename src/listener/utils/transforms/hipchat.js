@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 
 import { transform } from './resource-transformer';
+const url = require('url');
 
 function Title(resource) {
   if (resource.type) {
@@ -47,6 +48,10 @@ function Title(resource) {
 
 function ToOutput(resource) {
   const transformedRes = transform(resource);
+  let host;
+  if (resource.hyperlink) {
+    host = url.parse(resource.hyperlink).hostname;
+  }
 
   const title = Title(transformedRes);
 
@@ -57,7 +62,7 @@ function ToOutput(resource) {
   if(transformedRes.pretext) {
     output += transformedRes.pretext + '\n';
   }
-  output += transformedRes.buildHipChatOutput();
+  output += transformedRes.buildHipChatOutput(host);
   return output;
 }
 

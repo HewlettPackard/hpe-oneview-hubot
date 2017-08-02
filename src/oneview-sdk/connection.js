@@ -31,30 +31,23 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var useProxy = false;
 
 export default class Connection {
-  constructor(oneviewConfig){
-    this.session = undefined;
-    this.host = oneviewConfig.applianceIp;
-    this.cred = undefined;
-    this.apiVersion = oneviewConfig.apiVersion;
+  constructor(host, apiVersion, doProxy, proxyHost, proxyPort){
+    this.host = host;
+    this.apiVersion = apiVersion;
     this.enhance = new Enhance(this.host);
-    this.readOnly = oneviewConfig.readOnly;
     this.headers = {
-      'X-API-Version': oneviewConfig.apiVersion,
+      'X-API-Version': apiVersion,
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'auth': ''
     };
 
-    if (oneviewConfig.doProxy) {
+    if (doProxy) {
       useProxy = true;
-      this.setProxy(oneviewConfig.proxyHost, oneviewConfig.proxyPort);
+      this.setProxy(proxyHost, proxyPort);
     }
 
     this.loggedIn = false;
-  }
-
-  isReadOnly() {
-    return this.readOnly;
   }
 
   setProxy(proxyHost, proxyPort) {
@@ -69,7 +62,7 @@ export default class Connection {
 
     const options = {
       method: 'GET',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       resolveWithFullResponse: true
@@ -78,7 +71,7 @@ export default class Connection {
     if (filter) {
       options.qs = filter;
     }
-    
+
     return this.__http__(options);
   }
 
@@ -89,7 +82,7 @@ export default class Connection {
 
     return this.__http__({
       method: 'POST',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
@@ -104,7 +97,7 @@ export default class Connection {
 
     return this.__http__({
       method: 'PUT',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
@@ -119,7 +112,7 @@ export default class Connection {
 
     return this.__http__({
       method: 'PATCH',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
@@ -134,7 +127,7 @@ export default class Connection {
 
     return this.__http__({
       method: 'DELETE',
-      uri: 'https://' + this.host + '' + path,
+      uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
       resolveWithFullResponse: true

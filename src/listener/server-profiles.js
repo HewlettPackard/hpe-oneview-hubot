@@ -36,19 +36,18 @@ export default class ServerProfilesListener extends Listener {
     this.respond(/(?:get|list|show) all (?:server ){0,1}profiles\.$/i, ::this.ListServerProfiles);
     this.capabilities.push(this.indent + "Show all (server) profiles (e.g. show all profiles).");
 
-    this.respond(/(?:get|list|show) (?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerProfile);
+    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerProfile);
     this.capabilities.push(this.indent + "Show a specific (server) profile (e.g. show hadoop cluster).");
 
-    this.respond(/(?:get|list|show) (?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) compliance(?: preview){0,1}\.$/i, ::this.ListServerProfileCompliancePreview);
+    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) compliance(?: preview){0,1}\.$/i, ::this.ListServerProfileCompliancePreview);
     this.capabilities.push(this.indent + "Show a specific (server) profile compliance (e.g. show hadoop cluster compliance).");
 
-    this.respond(/(?:update|make) (?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) (?:compliance|compliant)\.$/i, ::this.HandleServerCompliantMessage);
+    this.respond(/(?:update|make) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) (?:compliance|compliant)\.$/i, ::this.HandleServerCompliantMessage);
     this.capabilities.push(this.indent + "Make/update a specific (server) profile compliance (e.g. make hadoop cluster compliant).");
 
-    this.respond(/(?:turn|power) on (?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOnServerProfile);
-    this.respond(/(?:turn|power) off (?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOffServerProfile);
+    this.respond(/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOnServerProfile);
+    this.respond(/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOffServerProfile);
     this.capabilities.push(this.indent + "Power on/off a specific (server) profile (e.g. turn on hadoop cluster).");
-
 
     this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}profiles\.$/i, ::this.ListProfilesByStatus);
     this.capabilities.push(this.indent + "List all critical/warning/ok/disabled (server) profiles (e.g. list all critical profiles).");
@@ -63,7 +62,7 @@ export default class ServerProfilesListener extends Listener {
   }
 
   ListServerProfile(msg) {
-    this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
+    this.client.ServerProfiles.getServerProfile(msg.host, msg.profileId).then((res) => {
       return this.transform.send(msg, res);
     }).catch((err) => {
       return this.transform.error(msg, err);
@@ -71,7 +70,7 @@ export default class ServerProfilesListener extends Listener {
   }
 
   ListServerProfileCompliancePreview(msg) {
-    this.client.ServerProfiles.getServerProfileCompliancePreview(msg.profileId).then((res) => {
+    this.client.ServerProfiles.getServerProfileCompliancePreview(msg.host, msg.profileId).then((res) => {
       return this.transform.send(msg, res);
     }).catch((err) => {
       return this.transform.error(msg, err);
@@ -96,9 +95,9 @@ export default class ServerProfilesListener extends Listener {
     });
   }
 
-  MakeServerProfileCompliant(profileId, msg, suppress) {
+  MakeServerProfileCompliant(id, msg, suppress) {
     let startMessage = false;
-    return this.client.ServerProfiles.updateServerProfileCompliance(profileId).feedback((res) => {
+    return this.client.ServerProfiles.updateServerProfileCompliance(msg.host, id).feedback((res) => {
       if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
         startMessage = true;
         this.transform.text(msg, "Hey " + msg.message.user.name + ", I am making " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + " compliant, this may take some time.");
@@ -111,13 +110,13 @@ export default class ServerProfilesListener extends Listener {
   }
 
   HandleServerCompliantMessage(msg) {
-    this.MakeServerProfileCompliant(msg.profileId, msg).catch((err) => {
+    this.MakeServerProfileCompliant(msg.profileId, msg, false).catch((err) => {
       return this.transform.error(msg, err);
     });
   }
 
   PowerOnServerProfile(msg) {
-    if(this.client.connection.isReadOnly()) {
+    if(this.client.isReadOnly()) {
       return this.transform.text(msg, "Hold on a sec...  You'll have to set readOnly mode to false in your config file first if you want to do that...   ");
     }
 
@@ -129,12 +128,13 @@ export default class ServerProfilesListener extends Listener {
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
     dialog.addChoice(/yes/i, () => {
-      this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
+      this.client.ServerProfiles.getServerProfile(msg.host, msg.profileId).then((res) => {
         if (res.serverHardwareUri === null) {
           return this.transform.text(msg, msg.message.user.name + ", " + this.transform.hyperlink(profileHyperlink, profileName) + " does not have any assigned server hardware to power on. Try assigning server hardware to the profile.");
         }
         else {
-          return this.serverHardware.PowerOnHardware(res.serverHardwareUri, msg);
+          msg.serverId = res.serverHardwareUri;
+          return this.serverHardware.PowerOnHardware(msg, false);
         }
 
       }).catch((err) => {
@@ -148,7 +148,7 @@ export default class ServerProfilesListener extends Listener {
   }
 
   PowerOffServerProfile(msg) {
-    if(this.client.connection.isReadOnly()) {
+    if(this.client.isReadOnly()) {
       return this.transform.text(msg, "Hold on a sec...  You'll have to set readOnly mode to false in your config file first if you want to do that...   ");
     }
 
@@ -160,12 +160,13 @@ export default class ServerProfilesListener extends Listener {
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
 
     dialog.addChoice(/yes/i, () => {
-      this.client.ServerProfiles.getServerProfile(msg.profileId).then((res) => {
+      this.client.ServerProfiles.getServerProfile(msg.host, msg.profileId).then((res) => {
         if (res.serverHardwareUri === null) {
           return this.transform.text(msg, msg.message.user.name + ", " + this.transform.hyperlink(profileHyperlink, profileName) + " does not have any assigned server hardware to power off. Try assigning server hardware to the profile.");
         }
         else {
-          return this.serverHardware.PowerOffHardware(res.serverHardwareUri, msg);
+          msg.serverId = res.serverHardwareUri;
+          return this.serverHardware.PowerOffHardware(msg, false);
         }
       }).catch((err) => {
         return this.transform.error(msg, err);

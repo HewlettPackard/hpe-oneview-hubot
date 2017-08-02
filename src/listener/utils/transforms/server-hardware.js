@@ -36,7 +36,7 @@ export default class ServerHardware extends Resource {
     }
   }
 
-  buildSlackFields() {
+  buildSlackFields(host) {
     let fields = [];
     let hasProfile = false;
     for (const field in this) {
@@ -54,7 +54,7 @@ export default class ServerHardware extends Resource {
       fields.push({
         title: 'Profile',
         short: true,
-        value: '<' + this.serverProfileHyperlink + '|' + getDeviceNameAndHyperLink(this.serverProfileUri).deviceName + '>'
+        value: '<' + this.serverProfileHyperlink + '|' + getDeviceNameAndHyperLink(host + this.serverProfileUri).deviceName + '>'
       });
       hasProfile = true;
     }
@@ -68,7 +68,7 @@ export default class ServerHardware extends Resource {
     return fields;
   }
 
-  buildHipChatOutput() {
+  buildHipChatOutput(host) {
     let output = '';
     let hasProfile = false;
     for (const field in this) {
@@ -78,7 +78,7 @@ export default class ServerHardware extends Resource {
       output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
     }
     if (this.serverProfileUri) {
-      output += '\t\u2022 Profile: ' +  getDeviceNameAndHyperLink(this.serverProfileUri).deviceName + '\n';
+      output += '\t\u2022 Profile: ' +  getDeviceNameAndHyperLink(host + this.serverProfileUri).deviceName + '\n';
       hasProfile = true;
     }
     if (!hasProfile) {

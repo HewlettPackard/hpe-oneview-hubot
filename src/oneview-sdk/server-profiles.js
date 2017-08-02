@@ -25,39 +25,74 @@ const uri = '/rest/server-profiles/';
 export default class ServerProfiles {
   constructor (ov_client) {
     this.ov_client = ov_client;
+    this.connections = ov_client.getConnections();
   }
 
   getAllServerProfiles(filter) {
-    return this.ov_client.connection.get(uri, filter);
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri, filter));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
 
-  getServerProfile(id) {
-    return this.ov_client.connection.get((id.startsWith(uri) ? id : uri + id));
+  getServerProfile(host, id) {
+    const connection = this.connections.get(host);
+    return connection.get(id.startsWith(uri) ? id : uri + id);
   }
 
   getProfilesByStatus(status) {
-      return this.ov_client.connection.get("/rest/server-profiles?filter=\"status=" + status + "\"");
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri + "?filter=\"status=" + status + "\""));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
   }
 
-  createServerProfile(profile) {
-    return this.ov_client.ClientConnection.post(uri, profile);
+  createServerProfile(host, profile) {
+    const connection = this.connections.get(host);
+    return connection.post(uri, profile);
   }
 
-  deleteServerProfile(id) {
-    return this.ov_client.ClientConnection.delete((id.startsWith(uri) ? id : uri + id));
+  deleteServerProfile(host, id) {
+    const connection = this.connections.get(host);
+    return connection.delete((id.startsWith(uri) ? id : uri + id));
   }
 
-  getServerProfileCompliancePreview(id){
-    return this.ov_client.connection.get((id.startsWith(uri) ? id : uri + id) + '/compliance-preview');
+  getServerProfileCompliancePreview(host, id){
+    const connection = this.connections.get(host);
+    return connection.get((id.startsWith(uri) ? id : uri + id) + '/compliance-preview');
   }
 
-  updateServerProfileCompliance(id) {
+  updateServerProfileCompliance(host, id) {
+    const connection = this.connections.get(host);
     let body = [{'op':'replace','path':'/templateCompliance','value':'Compliant'}];
-    return this.ov_client.connection.patch((id.startsWith(uri) ? id : uri + id), body);
+    return connection.patch((id.startsWith(uri) ? id : uri + id), body);
   }
 
-  getAvailableTargets(serverHardwareTypeUri, enclosureGroupUri) {
-    return this.ov_client.connection.get(uri + 'available-targets?serverHardwareTypeUri=' + serverHardwareTypeUri + '&enclosureGroupUri=' + enclosureGroupUri);
+  getAvailableTargets(host, serverHardwareTypeUri, enclosureGroupUri) {
+    const connection = this.connections.get(host);
+    return connection.get(uri + 'available-targets?serverHardwareTypeUri=' + serverHardwareTypeUri + '&enclosureGroupUri=' + enclosureGroupUri);
   }
 
 }
