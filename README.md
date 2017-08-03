@@ -8,17 +8,18 @@ Hubot script that interfaces with the OneView RESTful API and SCMB
 HPE OneView is a fresh approach to converged infrastructure management, inspired by
 the way you expect to work, with a single integrated view of your IT infrastructure.
 
-To get started with this project please read the [getting started WIKI](https://github.com/HewlettPackard/hpe-oneview-hubot/wiki/Getting-Started-for-Developers)
+To get started with this project please read the [getting started WIKI](wiki)
 
 ## Features
 
 * Single sign on to HPE OneView resources
 * Visualize HPE OneView hardware utilization
-* Rich support for Slack and HipChat
 * Support for HPE OneView push notifications and alerts
-* Display HPE OneView resources as raw JSON
+* Support for multiple OneView appliances
+* Rich support for Slack and HipChat
 
-![Alt text](/screenshots/slack-screen.png?raw=true "HPE OneView Hubot in Slack")
+![HPE OneView Hubot in Slack](/screenshots/slack-dashboard.PNG?raw=true)
+![HPE OneView Hubot in Slack](/screenshots/slack-mobile.png?raw=true)
 
 ## Contributing and Feature Requests
 
