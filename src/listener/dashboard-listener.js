@@ -23,6 +23,8 @@ THE SOFTWARE.
 import Listener from './base-listener';
 import { buildDashboard } from '../charting/show-dashboard';
 
+const util = require('util')
+
 export default class DashboardListener extends Listener {
   constructor(robot, client, transform) {
     super(robot, client, transform);
@@ -37,23 +39,24 @@ export default class DashboardListener extends Listener {
   }
 
   ShowOneViewDashboard(msg) {
-    this.transform.send(msg, "Oh I'm sorry the dashboard is broken!");
+    //this.transform.send(msg, "Oh I'm sorry the dashboard is broken!");
 
-    // this.transform.send(msg, "Ok " + msg.message.user.name + ", I am going to generate your dashboard. This might take a little while.\nFor a more comprehensive view, see " + this.transform.hyperlink("https://" + this.client.host + "/#/dashboard", "Dashboard"));
+    this.transform.send(msg, "Ok " + msg.message.user.name + ", I am going to generate your dashboard. This might take a little while.\nFor a more comprehensive view, see " + this.transform.hyperlink("https://" + this.client.host + "/#/dashboard", "Dashboard"));
 
-    // let promises = [];
+    let promises = [];
 
-    // promises.push(this.client.Dashboard.getAggregatedAlerts());
-    // promises.push(this.client.Dashboard.getAggregatedServerProfiles());
-    // promises.push(this.client.Dashboard.getAggregatedServerHardware());
-    // promises.push(this.client.Dashboard.getAggregatedServersWithProfiles());
+    promises.push(this.client.Dashboard.getAggregatedAlerts());
+    promises.push(this.client.Dashboard.getAggregatedServerProfiles());
+    promises.push(this.client.Dashboard.getAggregatedServerHardware());
+    promises.push(this.client.Dashboard.getAggregatedServersWithProfiles());
 
-    // Promise.all(promises).then((res) => {
-    //   buildDashboard(this.robot, this.room, res[0], res[1], res[2], res[3]);
-    // }).catch((err) => {
-    //   this.robot.logger.error("Error getting dashboard data", err);
-    //   this.transform.error(msg, err);
-    // });
+    Promise.all(promises).then((res) => {
+      console.log("RESPONSE IN DASHBOARD LISTENER" + util.inspect(res[0].members) + "\n " + util.inspect(res[1].members) + "\n " + util.inspect(res[2].members) + "\n " + util.inspect(res[3].members));
+      buildDashboard(this.robot, this.room, res[0], res[1], res[2], res[3]);
+    }).catch((err) => {
+      this.robot.logger.error("Error getting dashboard data", err);
+      this.transform.error(msg, err);
+    });
 
   }
 }

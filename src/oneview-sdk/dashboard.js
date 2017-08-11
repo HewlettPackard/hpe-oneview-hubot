@@ -36,12 +36,13 @@ export default class Dashboard {
     for (let connection of this.connections.values()) {
       promises.push(connection.get(uri + "category=server-hardware&attribute=status"));
     }
-
+    console.log("HERE");
     return Promise.all(promises).then(response => {
       for (let res of response) {
-        for (let r of res) {
-          console.log(r.counts);
-        }
+        resObj.members.push(...res);
+        // for (let r of res) {
+        //   console.log(r);
+        // }
 
       }
       return new Promise((resolve) => {
@@ -54,6 +55,8 @@ export default class Dashboard {
     let promises = [];
     let resObj = {'members': []};
 
+    console.log("HERE");
+
     for (let connection of this.connections.values()) {
       promises.push(connection.get(uri + "category=server-profiles&attribute=status"));
     }
@@ -61,7 +64,7 @@ export default class Dashboard {
     return Promise.all(promises).then(response => {
       console.log('getAggregatedServerProfiles', response);
       for (let res of response) {
-        resObj.members.push(...res.members);
+        resObj.members.push(...res);
       }
       return new Promise((resolve) => {
         resolve(resObj);
@@ -80,7 +83,7 @@ export default class Dashboard {
     return Promise.all(promises).then(response => {
       console.log('getAggregatedAlerts', response);
       for (let res of response) {
-        resObj.members.push(...res.members);
+        resObj.members.push(...res);
       }
       return new Promise((resolve) => {
         resolve(resObj);
@@ -99,7 +102,7 @@ export default class Dashboard {
     return Promise.all(promises).then(response => {
       console.log('getAggregatedServersWithProfiles', response);
       for (let res of response) {
-        resObj.members.push(...res.members);
+        resObj.members.push(...res);
       }
       return new Promise((resolve) => {
         resolve(resObj);
