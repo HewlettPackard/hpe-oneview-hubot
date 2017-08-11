@@ -26,9 +26,6 @@ const fs = require("fs");
 const svg2png = require("svg2png");
 
 
-const util = require('util')
-
-
 function __uploadPNG__(robot, room, fileName) {
   return new Promise((resolve, reject) => {
     if (robot.adapterName === 'slack') {

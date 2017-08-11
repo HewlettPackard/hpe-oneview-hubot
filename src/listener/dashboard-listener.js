@@ -38,8 +38,6 @@ export default class DashboardListener extends Listener {
   }
 
   ShowOneViewDashboard(msg) {
-    //this.transform.send(msg, "Oh I'm sorry the dashboard is broken!");
-
     this.transform.send(msg, "Ok " + msg.message.user.name + ", I am going to generate your dashboard. This might take a little while.\nFor a more comprehensive view, see " + this.transform.hyperlink("https://" + this.client.host + "/#/dashboard", "Dashboard"));
 
     let promises = [];
