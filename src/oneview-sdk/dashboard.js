@@ -21,7 +21,6 @@ THE SOFTWARE.
 */
 
 const uri = '/rest/index/resources/aggregated?';
-const util = require('util');
 
 export default class Dashboard {
   constructor (ov_client) {
@@ -36,14 +35,10 @@ export default class Dashboard {
     for (let connection of this.connections.values()) {
       promises.push(connection.get(uri + "category=server-hardware&attribute=status"));
     }
-    console.log("HERE");
+
     return Promise.all(promises).then(response => {
       for (let res of response) {
         resObj.members.push(...res);
-        // for (let r of res) {
-        //   console.log(r);
-        // }
-
       }
       return new Promise((resolve) => {
         resolve(resObj);
@@ -55,14 +50,11 @@ export default class Dashboard {
     let promises = [];
     let resObj = {'members': []};
 
-    console.log("HERE");
-
     for (let connection of this.connections.values()) {
       promises.push(connection.get(uri + "category=server-profiles&attribute=status"));
     }
 
     return Promise.all(promises).then(response => {
-      console.log('getAggregatedServerProfiles', response);
       for (let res of response) {
         resObj.members.push(...res);
       }
@@ -81,7 +73,6 @@ export default class Dashboard {
     }
 
     return Promise.all(promises).then(response => {
-      console.log('getAggregatedAlerts', response);
       for (let res of response) {
         resObj.members.push(...res);
       }
@@ -100,7 +91,6 @@ export default class Dashboard {
     }
 
     return Promise.all(promises).then(response => {
-      console.log('getAggregatedServersWithProfiles', response);
       for (let res of response) {
         resObj.members.push(...res);
       }

@@ -23,7 +23,6 @@ THE SOFTWARE.
 import Listener from './base-listener';
 import { buildDashboard } from '../charting/show-dashboard';
 
-const util = require('util')
 
 export default class DashboardListener extends Listener {
   constructor(robot, client, transform) {
@@ -51,7 +50,6 @@ export default class DashboardListener extends Listener {
     promises.push(this.client.Dashboard.getAggregatedServersWithProfiles());
 
     Promise.all(promises).then((res) => {
-      console.log("RESPONSE IN DASHBOARD LISTENER" + util.inspect(res[0].members) + "\n " + util.inspect(res[1].members) + "\n " + util.inspect(res[2].members) + "\n " + util.inspect(res[3].members));
       buildDashboard(this.robot, this.room, res[0], res[1], res[2], res[3]);
     }).catch((err) => {
       this.robot.logger.error("Error getting dashboard data", err);
