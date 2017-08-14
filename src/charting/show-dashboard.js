@@ -54,93 +54,129 @@ function __uploadPNG__(robot, room, fileName) {
 }
 
 function __transformProfileData__(aggregatedServerProfiles) {
-  let splits = aggregatedServerProfiles[0].counts.length;
-  let dataset = [];
-  let totalCount = 0;
-  if (splits === 0) {
-    dataset.push({ label: "No Profiles", count: 0, percent: 100} );
-  } else {
-    let slices = [];
-    for (let i = 0; i < splits; i++) {
-      slices.push(aggregatedServerProfiles[0].counts[i]);
-      totalCount += aggregatedServerProfiles[0].counts[i].count;
-    }
-    for (let j = 0; j < splits; j++) {
-      dataset.push({ label: slices[j].value, count: (slices[j].count), percent: (slices[j].count / totalCount) });
-    };
+  let aggregatedCounts = {'members': []};
+  for (let member of aggregatedServerProfiles.members) {
+    aggregatedCounts.members.push(...member.counts);
   }
 
-  return { splits: splits, totalCount: totalCount, dataset: dataset };
+  let profiles = {};
+  let newSeries = [];
+  let totalCount = 0;
+  let dataset = [];
+
+  aggregatedCounts.members.forEach(function(e) {
+    if(!profiles[e.value]) {
+      let label = e.value;
+      profiles[e.value] = 0;
+    }
+    profiles[e.value] += e.count;
+    totalCount += e.count;
+  })
+  let totalSplits = 0;
+  for (let key in profiles) {
+    dataset.push({ label: key, count: profiles[key], percent: profiles[key] / totalCount} );
+    totalSplits++;
+  }
+
+  return { splits: totalSplits, totalCount: totalCount, dataset: dataset };
 }
 
 function __transformHardwareData__(aggregatedServerHardware) {
-  let splits = aggregatedServerHardware[0].counts.length;
-  let dataset = [];
-  let totalCount = 0;
-  if (splits === 0) {
-    dataset.push( { label: "No Hardware", count: 0, percent: 100} );
-  } else {
-    let slices = [];
-    for (let i = 0; i < splits; i++) {
-      slices.push(aggregatedServerHardware[0].counts[i]);
-      totalCount += aggregatedServerHardware[0].counts[i].count;
-    };
-    for (let j = 0; j < splits; j++) {
-      dataset.push({ label: slices[j].value, count: (slices[j].count), percent: (slices[j].count / totalCount) });
-    };
+  let aggregatedCounts = {'members': []};
+  for (let member of aggregatedServerHardware.members) {
+    aggregatedCounts.members.push(...member.counts);
   }
 
-  return { splits: splits, totalCount: totalCount, dataset: dataset };
+  let hardware = {};
+  let newSeries = [];
+  let totalCount = 0;
+  let dataset = [];
+
+  aggregatedCounts.members.forEach(function(e) {
+    if(!hardware[e.value]) {
+      let label = e.value;
+      hardware[e.value] = 0;
+    }
+    hardware[e.value] += e.count;
+    totalCount += e.count;
+  })
+  let totalSplits = 0;
+  for (let key in hardware) {
+    if (key === "") {
+      dataset.push({ label: "Disabled", count: hardware[key], percent: hardware[key] / totalCount} );
+    } else {
+      dataset.push({ label: key, count: hardware[key], percent: hardware[key] / totalCount} );
+    }
+    totalSplits++;
+  }
+
+  return { splits: totalSplits, totalCount: totalCount, dataset: dataset };
 }
 
 function __transformAlertsData__(aggregatedAlerts) {
-  let splits = aggregatedAlerts[0].counts.length;
-  let dataset = [];
-  let totalCount = 0;
-  if (splits === 0) {
-    dataset.push({ label: "No Alerts", count: 0, percent: 100} );
-  }
-  else {
-    let slices = [];
-    for (let i = 0; i < splits; i++) {
-      slices.push(aggregatedAlerts[0].counts[i]);
-      totalCount += aggregatedAlerts[0].counts[i].count;
-    };
-    for (let j = 0; j < splits; j++) {
-      dataset.push({ label: slices[j].value, count: (slices[j].count), percent: (slices[j].count / totalCount) });
-    };
+  let aggregatedCounts = {'members': []};
+  for (let member of aggregatedAlerts.members) {
+    aggregatedCounts.members.push(...member.counts);
   }
 
-  return { splits: splits, totalCount: totalCount, dataset: dataset };
+  let alerts = {};
+  let newSeries = [];
+  let totalCount = 0;
+  let dataset = [];
+
+  aggregatedCounts.members.forEach(function(e) {
+    if(!alerts[e.value]) {
+      let label = e.value;
+      alerts[e.value] = 0;
+    }
+    alerts[e.value] += e.count;
+    totalCount += e.count;
+  })
+  let totalSplits = 0;
+  for (let key in alerts) {
+    dataset.push({ label: key, count: alerts[key], percent: alerts[key] / totalCount} );
+    totalSplits++;
+  }
+
+  return { splits: totalSplits, totalCount: totalCount, dataset: dataset };
 }
 
 function __transformHardwareWithProfilesData__(aggregatedHardwareWithProfiles) {
-  let splits = aggregatedHardwareWithProfiles[0].counts.length;
-  let dataset = [];
-  let totalCount = 0;
-  if (splits === 0) {
-    dataset.push({ label: "No Hardware", count: 0, percent: 100} );
-  }
-  else {
-    let slices = [];
-    for (let i = 0; i < splits; i++) {
-      slices.push(aggregatedHardwareWithProfiles[0].counts[i]);
-      totalCount += aggregatedHardwareWithProfiles[0].counts[i].count;
-    }
-    for (let j = 0; j < splits; j++) {
-      if (slices[j].value == "ProfileApplied") {
-        dataset.push({ label: "Has Profile", count: (slices[j].count), percent: (slices[j].count / totalCount) });
-      }
-      else if (slices[j].value == "NoProfileApplied") {
-        dataset.push({ label: "No Profile", count: (slices[j].count), percent: (slices[j].count / totalCount) });
-      }
-      else {
-        dataset.push({ label: "Unmanaged", count: (slices[j].count), percent: (slices[j].count / totalCount ) });
-      }
-    };
+
+  let aggregatedCounts = {'members': []};
+  for (let member of aggregatedHardwareWithProfiles.members) {
+    aggregatedCounts.members.push(...member.counts);
   }
 
-  return { splits: splits, totalCount: totalCount, dataset: dataset };
+  let hardwareWithProfiles = {};
+  let newSeries = [];
+  let totalCount = 0;
+  let dataset = [];
+
+  aggregatedCounts.members.forEach(function(e) {
+    if(!hardwareWithProfiles[e.value]) {
+      let label = e.value;
+      hardwareWithProfiles[e.value] = 0;
+    }
+    hardwareWithProfiles[e.value] += e.count;
+    totalCount += e.count;
+  })
+  let totalSplits = 0;
+  let temp = "";
+  for (let key in hardwareWithProfiles) {
+    if (key === "ProfileApplied") {
+      temp = "Has Profile";
+    }  else if (key === "NoProfileApplied") {
+      temp = "No Profile";
+    } else  {
+      temp = "Unmanaged";
+    }
+    dataset.push({ label: temp, count: hardwareWithProfiles[key], percent: hardwareWithProfiles[key] / totalCount} );
+
+    totalSplits++;
+  }
+
+  return { splits: totalSplits, totalCount: totalCount, dataset: dataset };
 }
 
 function __addHeadersAndLines__(svg) {
@@ -222,8 +258,8 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
 
     //color scheme
     let color1 = d3.scaleOrdinal()
-        .domain(["Critical", "OK", "Warning", "No Profiles", "No Alerts", "No Hardware", "Has Profile", "No Profile", "UNKNOWN", "Unmanaged"])
-        .range(['#FF454F', '#01A982', '#FFD042', '#C6C9CA', '#C6C9CA', '#C6C9CA', '#425563', '#C6C9CA', '#C6C9CA', '#80746E']);
+        .domain(["Critical", "OK", "Warning", "No Profiles", "No Alerts", "No Hardware", "Has Profile", "No Profile", "UNKNOWN", "Unmanaged", "Disabled"])
+        .range(['#FF454F', '#01A982', '#FFD042', '#C6C9CA', '#C6C9CA', '#C6C9CA', '#425563', '#C6C9CA', '#C6C9CA', '#80746E', '#C6C9CA']);
 
     //arc used in the generation of all the pies
     let arc = d3.arc()
