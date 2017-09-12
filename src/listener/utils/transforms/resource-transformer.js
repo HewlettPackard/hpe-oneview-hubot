@@ -27,18 +27,18 @@ import ServerHardware from './server-hardware';
 import ServerProfileCompliancePreview from './server-profile-compliance-preview';
 
 export function transform(oneViewResource) {
-  let oneViewResourceStr = oneViewResource.type.toLowerCase();
+  let oneViewResourceType = oneViewResource.type.toLowerCase();
 
   switch(true) {
-    case oneViewResourceStr.startsWith('serverprofilecompliancepreview'):
+    case oneViewResourceType.startsWith('serverprofilecompliancepreview'):
       return new ServerProfileCompliancePreview(oneViewResource);
-    case oneViewResourceStr.startsWith('server-hardware'):
+    case oneViewResourceType.startsWith('server-hardware'):
       return new ServerHardware(oneViewResource);
-    case oneViewResourceStr.startsWith('serverprofiletemplate'):
+    case oneViewResourceType.startsWith('serverprofiletemplate'):
       return new ServerProfileTemplate(oneViewResource);
-    case oneViewResourceStr.startsWith('alertresource'):
+    case oneViewResourceType.startsWith('alertresource'):
       return new Alert(oneViewResource);
-    case oneViewResourceStr.startsWith('serverprofile'):
+    case oneViewResourceType.startsWith('serverprofile'):
       return new ServerProfile(oneViewResource);
   }
 }
