@@ -27,16 +27,18 @@ import ServerHardware from './server-hardware';
 import ServerProfileCompliancePreview from './server-profile-compliance-preview';
 
 export function transform(oneViewResource) {
-  if (oneViewResource.type.toLowerCase().startsWith('serverprofile') && !oneViewResource.type.toLowerCase().startsWith('serverprofilecompliancepreview')
-            && !oneViewResource.type.toLowerCase().startsWith('serverprofiletemplate')) {
-    return new ServerProfile(oneViewResource);
-  } else if (oneViewResource.type.toLowerCase().startsWith('alertresource')) {
-    return new Alert(oneViewResource);
-  } else if (oneViewResource.type.toLowerCase().startsWith('serverprofiletemplate')) {
-    return new ServerProfileTemplate(oneViewResource);
-  } else if (oneViewResource.type.toLowerCase().startsWith('server-hardware')) {
-    return new ServerHardware(oneViewResource);
-  } else if (oneViewResource.type.toLowerCase().startsWith('serverprofilecompliancepreview')) {
-    return new ServerProfileCompliancePreview(oneViewResource);
+  let oneViewResourceType = oneViewResource.type.toLowerCase();
+
+  switch(true) {
+    case oneViewResourceType.startsWith('serverprofilecompliancepreview'):
+      return new ServerProfileCompliancePreview(oneViewResource);
+    case oneViewResourceType.startsWith('server-hardware'):
+      return new ServerHardware(oneViewResource);
+    case oneViewResourceType.startsWith('serverprofiletemplate'):
+      return new ServerProfileTemplate(oneViewResource);
+    case oneViewResourceType.startsWith('alertresource'):
+      return new Alert(oneViewResource);
+    case oneViewResourceType.startsWith('serverprofile'):
+      return new ServerProfile(oneViewResource);
   }
 }
