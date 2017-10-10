@@ -33,29 +33,29 @@ export default class ServerProfileTemplateListener extends Listener {
 
     this.switchBoard = new Conversation(robot);
 
-    this.title = "Server Profile Template (spt)";
+    this.title = "Server Profile Template";
     this.capabilities = [];
     this.respond(/(?:get|list|show) all (?:server profile ){0,1}templates\.$/i, ::this.ListServerProfileTemplates);
-    this.capabilities.push(this.indent + "Show all (server) profile templates (e.g. show all templates).");
+    this.capabilities.push(this.BULLET + "Show all (server) profile templates (e.g. show all templates).");
 
     this.respond(/(?:get|list|show) available (?:hardware|targets) for (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.GetAvailableTargets);
-    this.capabilities.push(this.indent + "Show available targets for a server profile template (e.g. show available targets for docker swarm).");
+    this.capabilities.push(this.BULLET + "Show available targets for a server profile template (e.g. show available targets for docker swarm).");
 
     this.respond(/(?:get|list|show) profile[s]{0,1} (?:using|deployed from|deployed by) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.GetDeployedProfiles);
-    this.capabilities.push(this.indent + "Show profile(s) using a server profile template (e.g. show profile using docker swarm).");
+    this.capabilities.push(this.BULLET + "Show profile(s) using a server profile template (e.g. show profile using docker swarm).");
 
     this.respond(/(?:deploy|create) (:<count>\d+) profile[s]{0,1} (?:from|for|using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.DeployProfiles);
-    this.capabilities.push(this.indent + "Create profile(s) using a server profile template (e.g. create profile for docker swarm).");
+    this.capabilities.push(this.BULLET + "Create profile(s) using a server profile template (e.g. create profile for docker swarm).");
 
     this.respond(/(?:flex|grow)(?: the)? (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i, ::this.DeployProfiles);
-    this.capabilities.push(this.indent + "Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).");
+    this.capabilities.push(this.BULLET + "Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).");
 
     this.respond(/(?:undeploy|remove) (:<count>\d+) profile[s]{0,1} (?:from|that were deployed from|that were using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.UnDeployProfiles);
     this.respond(/(?:undeploy|remove) (:<count>\d+) server[s]{0,1} (?:from|that were deployed from|that were using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.UnDeployProfiles);
-    this.capabilities.push(this.indent + "Remove a number of profiles/servers from a profile template (e.g. remove 2 profiles from docker swarm).");
+    this.capabilities.push(this.BULLET + "Remove a number of profiles/servers from a profile template (e.g. remove 2 profiles from docker swarm).");
 
     this.respond(/(?:fix)(?: all)? compliance(?: issues)? for (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.FixCompliance);
-    this.capabilities.push(this.indent + "Fix compliance for a profile template (e.g. fix compliance for docker swarm).");
+    this.capabilities.push(this.BULLET + "Fix compliance for a profile template (e.g. fix compliance for docker swarm).");
   }
 
   __getAvailableTargets__(msg, target) {
@@ -110,7 +110,8 @@ export default class ServerProfileTemplateListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy " + this.transform.makePlural(msg.count, 'profile') + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy " + this.transform.makePlural(msg.count, 'profile') + 
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");    
 
     dialog.addChoice(/yes/i, () => {
       var template = null;
@@ -161,7 +162,8 @@ export default class ServerProfileTemplateListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to un-deploy " + this.transform.makePlural(msg.count, 'profile') + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to un-deploy " + this.transform.makePlural(msg.count, 'profile') + 
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");    
 
     dialog.addChoice(/yes/i, () => {
       var template = null;
@@ -224,7 +226,8 @@ export default class ServerProfileTemplateListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
 
     let nameAndHyperlink = getDeviceNameAndHyperLink(host + "/rest/server-profile-templates/" + msg.templateId);
-    this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template " + this.transform.hyperlink(nameAndHyperlink.hyperlink, nameAndHyperlink.deviceName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
+    this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template " + this.transform.hyperlink(nameAndHyperlink.hyperlink, nameAndHyperlink.deviceName) + 
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");    
 
     dialog.addChoice(/yes/i, () => {
       var template = null;

@@ -33,7 +33,7 @@ export default class DashboardListener extends Listener {
     this.room = client.notificationsRoom;
 
     this.respond(/show (?:oneview ){0,1}(?:dashboard|status).$/i, ::this.ShowOneViewDashboard);
-    this.capabilities.push(this.indent + "show (OneView) dashboard");
+    this.capabilities.push(this.BULLET + "show (OneView) dashboard");
 
   }
 
