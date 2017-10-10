@@ -46,7 +46,7 @@ export default class ServerHardwareListener extends Listener {
     this.capabilities.push(this.indent + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
     this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i, ::this.ListAllServerHardwareUtilization);
-    this.capabilities.push(this.indent + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
+    this.capabilities.push(this.indent + "List all server hardware utilization (e.g. list Encl1, bay 1 all utilization).");
 
     this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
     this.capabilities.push(this.indent + "List server hardware by name (e.g. list Encl1, bay 1).");
