@@ -44,7 +44,7 @@ export default class Listener {
     this.robot = robot;
     this.client = client;
     this.transform = transform;
-    this.indent = '\t\u2022 ';
+    this.BULLET = '\t\u2022 ';
 
     if (! registeredMiddleware) {
       registeredMiddleware = true;
