@@ -46,7 +46,7 @@ export default class ServerHardwareListener extends Listener {
     this.capabilities.push(this.BULLET + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
     this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i, ::this.ListAllServerHardwareUtilization);
-    this.capabilities.push(this.BULLET + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
+    this.capabilities.push(this.BULLET + "List all server hardware utilization (e.g. list Encl1, bay 1 all utilization).");
 
     this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
     this.capabilities.push(this.BULLET + "List server hardware by name (e.g. list Encl1, bay 1).");
@@ -209,7 +209,7 @@ export default class ServerHardwareListener extends Listener {
   }
 
   ListServerHardwareUtilization(msg) {
-    this.transform.send(msg, "Ok " + msg.message.user.name + " I'm going to create the CPU and network utilization charts, this can some time.");
+    this.transform.send(msg, "Ok " + msg.message.user.name + " I'm going to create the CPU and network utilization charts. This can take quite some time.");
 
     let icMap = getLogicalInterconnectsMap();
 
@@ -249,7 +249,7 @@ export default class ServerHardwareListener extends Listener {
   }
 
   ListAllServerHardwareUtilization(msg) {
-    this.transform.send(msg, msg.message.user.name + " I'm going to create all of the server utilization charts including CPU, temp, power and network utilization.  This can take quite some time.");
+    this.transform.send(msg, msg.message.user.name + " I'm going to create all of the server utilization charts including CPU, temp, power and network utilization. This can take quite some time.");
 
     let icMap = getLogicalInterconnectsMap();
 
