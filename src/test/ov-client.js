@@ -66,10 +66,10 @@ describe('OVClient', () => {
 
   it('login failure', () => {
     nock('https://localhost')
-      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .post('/rest/login-sessions', {"userName": "admin", "password": "password","loginMsgAck": "true"})
       .reply(503, {sessionID: ''});
     nock('https://localhost2')
-      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .post('/rest/login-sessions', {"userName": "admin", "password": "password","loginMsgAck": "true"})
       .reply(503, {sessionID: ''});
 
     return oVClient.login(true).then(() => {
@@ -82,10 +82,10 @@ describe('OVClient', () => {
 
   it('login success', () => {
     nock('https://localhost')
-      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .post('/rest/login-sessions', {"userName": "admin", "password": "password","loginMsgAck": "true"})
       .reply(200, {sessionID: 'ASD-1231-asd_Ll'});
     nock('https://localhost2')
-      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .post('/rest/login-sessions', {"userName": "admin", "password": "password","loginMsgAck": "true"})
       .reply(200, {sessionID: 'ASD-1231-asd_L2'});
 
     return oVClient.login(true).then(() => {
@@ -96,10 +96,10 @@ describe('OVClient', () => {
 
   it('getAuthToken', () => {
     nock('https://localhost')
-      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .post('/rest/login-sessions', {"userName": "admin", "password": "password","loginMsgAck": "true"})
       .reply(200, {sessionID: 'ASD-1231-asd_Ll'});
     nock('https://localhost2')
-      .post('/rest/login-sessions', {userName: 'admin', password: 'password'})
+      .post('/rest/login-sessions', {"userName": "admin", "password": "password","loginMsgAck": "true"})
       .reply(200, {sessionID: 'ASD-1231-asd_L2'});
 
     return oVClient.login(true).then(() => {
