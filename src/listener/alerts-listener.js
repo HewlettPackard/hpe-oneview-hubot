@@ -33,10 +33,10 @@ export default class AlertsListener extends Listener {
     this.title = "Alerts";
     this.capabilities = [];
     this.respond(/(?:get|list|show) last (:<count>[0-9]*?) alerts\.$/i, ::this.ListNumberOfAlerts);
-    this.capabilities.push(this.indent + "List last [insert #] alerts (e.g. list last 10 alerts)");
+    this.capabilities.push(this.BULLET + "List last [insert #] alerts (e.g. list last 10 alerts)");
 
     this.respond(/(?:get|list|show) all (:<state>active|locked|cleared){0,1}(?: ?)(:<status>critical|warning|ok|disabled){0,1}(?: ?)alerts(?: from ){0,1}(:<time>today|last 7 days|last 30 days){0,1}\.$/i, ::this.ListFilteredAlerts);
-    this.capabilities.push(this.indent + "List all active/locked/cleared critical/warning/ok/disabled alerts from today/last 7 days/last 30 days (e.g. list all (critical) (active) alerts (from today)) ")
+    this.capabilities.push(this.BULLET + "List all active/locked/cleared critical/warning/ok/disabled alerts from today/last 7 days/last 30 days (e.g. list all (critical) (active) alerts (from today)) ")
   }
 
   ListNumberOfAlerts(msg) {

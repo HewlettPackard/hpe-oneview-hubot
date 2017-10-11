@@ -26,6 +26,8 @@ import ovClient from './oneview-sdk/ov-client';
 import ovBrain from './ov-brain';
 import configLoader from './config-loader';
 
+const BULLET = '\n\t\u2022 ';
+
 const main = (robot) => {
   // load OneView configuration data from external file
   let oneviewConfig = configLoader(robot);
@@ -56,9 +58,9 @@ const main = (robot) => {
             robot.messageRoom('#' + client.notificationsRoom,
               "Hello, I'm " + robot.name + "! "
               +"Your OneView instance is currently showing:"
-              + "\n\t\u2022" + sh.members.length + " server(s)"
-              + "\n\t\u2022" + sp.members.length + " server profile(s)"
-              + "\n\t\u2022" + spt.members.length +" server profile template(s)"
+              + BULLET + sh.members.length + " server(s)."
+              + BULLET + sp.members.length + " server profile(s)."
+              + BULLET + spt.members.length +" server profile template(s)."
               + "\nHow can I assist you? Type '@" + robot.name
               + " help' to learn what I can do.");
           });

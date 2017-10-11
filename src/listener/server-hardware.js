@@ -33,29 +33,29 @@ export default class ServerHardwareListener extends Listener {
     this.switchBoard = new Conversation(robot);
     this.room = client.notificationsRoom;
 
-    this.title = "Server hardware (sh)";
+    this.title = "Server hardware";
     this.capabilities = [];
     this.respond(/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOn);
     this.respond(/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOff);
-    this.capabilities.push(this.indent + "Power on/off a specific (server) hardware (e.g. turn on Encl1, bay 1).");
+    this.capabilities.push(this.BULLET + "Power on/off a specific (server) hardware (e.g. turn on Encl1, bay 1).");
 
     this.respond(/(?:get|list|show) all (?:server ){0,1}hardware\.$/i, ::this.ListServerHardware);
-    this.capabilities.push(this.indent + "List all (server) hardware (e.g. list all hardware).");
+    this.capabilities.push(this.BULLET + "List all (server) hardware (e.g. list all hardware).");
 
     this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, ::this.ListServerHardwareUtilization);
-    this.capabilities.push(this.indent + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
+    this.capabilities.push(this.BULLET + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
     this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i, ::this.ListAllServerHardwareUtilization);
-    this.capabilities.push(this.indent + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
+    this.capabilities.push(this.BULLET + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
     this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
-    this.capabilities.push(this.indent + "List server hardware by name (e.g. list Encl1, bay 1).");
+    this.capabilities.push(this.BULLET + "List server hardware by name (e.g. list Encl1, bay 1).");
 
     this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}hardware\.$/i, ::this.ListHardwareByStatus);
-    this.capabilities.push(this.indent + "List all critical/warning/ok/disabled (server) hardware (e.g. list all critical hardware).");
+    this.capabilities.push(this.BULLET + "List all critical/warning/ok/disabled (server) hardware (e.g. list all critical hardware).");
 
     this.respond(/(?:get|list|show) (?:all ){0,1}(:<powerState>powered on|powered off*?) (?:server ){0,1}hardware\.$/i, ::this.ListHardwareByPowerState);
-    this.capabilities.push(this.indent + "List all powered on/off (server) hardware.");
+    this.capabilities.push(this.BULLET + "List all powered on/off (server) hardware.");
   }
 
   PowerOnHardware(msg, suppress) {
@@ -82,7 +82,8 @@ export default class ServerHardwareListener extends Listener {
     let startMessage = false;
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "How would you like to power off the blade? (@" + this.robot.name + " Momentary Press/@" + this.robot.name + " Press and Hold)");
+    this.transform.text(msg, "How would you like to power off the blade?\n" + 
+    this.BULLET + "@" + this.robot.name + " Momentary Press\n" + this.BULLET + "@" + this.robot.name + " Press and Hold");
 
     dialog.addChoice(/momentary press/i, () => {
       return this.client.ServerHardware.setPowerState(msg.host, msg.serverId, "Off", "MomentaryPress").feedback((res, err) => {
@@ -123,8 +124,10 @@ export default class ServerHardwareListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
 
     let deviceAndHyperlink = getDeviceNameAndHyperLink(msg.host + "/rest/server-hardware/" + msg.serverId);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(deviceAndHyperlink.hyperlink, deviceAndHyperlink.deviceName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
-
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(deviceAndHyperlink.hyperlink, deviceAndHyperlink.deviceName) + 
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
+    
+    
     dialog.addChoice(/yes/i, () => {
       this.PowerOnHardware(msg).catch((err) => {
         return this.transform.error(msg, err);
@@ -144,7 +147,8 @@ export default class ServerHardwareListener extends Listener {
     let dialog = this.switchBoard.startDialog(msg);
 
     let deviceAndHyperlink = getDeviceNameAndHyperLink(msg.host + "/rest/server-hardware/" + msg.serverId);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade " + this.transform.hyperlink(deviceAndHyperlink.hyperlink, deviceAndHyperlink.deviceName) + ".  Are you sure you want to do this? (@" + this.robot.name + " yes/@" + this.robot.name + " no)");
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade " + this.transform.hyperlink(deviceAndHyperlink.hyperlink, deviceAndHyperlink.deviceName) + 
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
 
     dialog.addChoice(/yes/i, () => {
       this.PowerOffHardware(msg);

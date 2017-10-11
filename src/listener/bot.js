@@ -22,8 +22,6 @@ THE SOFTWARE.
 
 import Listener from './base-listener';
 
-const BULLET = '\t\u2022 ';
-
 export default class BotListener extends Listener {
   constructor(robot, client, transform, developer,
     serverHardware, serverProfiles, serverProfileTemplate) {
@@ -38,10 +36,10 @@ export default class BotListener extends Listener {
 
     this.respond(/help\.$/i, ::this.ListActions);
     this.respond(/What can you do(?: for me){0,1}\.$/i, ::this.ListActions);
-    this.capabilities.push(this.indent + "Help (Show list of areas of help).");
+    this.capabilities.push(this.BULLET + "Help (Show list of areas of help).");
 
     this.respond(/(:<text>[a-zA-Z][a-z A-Z]*?) help\.$/i, ::this.ListActionsFor);
-    this.capabilities.push(this.indent + "<text> Help (Show help in a specific area).");
+    this.capabilities.push(this.BULLET + "<text> Help (Show help in a specific area).");
 
   }
 
@@ -51,10 +49,10 @@ export default class BotListener extends Listener {
 
   GetActions() {
     return "What can I help you with today? Here's just a few things I can do:\n" +
-      BULLET + this.serverProfiles.title + " help.\n" +
-      BULLET + this.serverProfileTemplate.title + " help.\n" +
-      BULLET + this.serverHardware.title + " help.\n";
-//      BULLET + this.developer.capabilitiesHeader + "\n" +
+      this.BULLET + this.serverProfiles.title + " help" + " (e.g. sp help).\n" +
+      this.BULLET + this.serverProfileTemplate.title + " help" + " (e.g. spt help).\n" +
+      this.BULLET + this.serverHardware.title + " help" + " (e.g. sh help).\n";
+    //  BULLET + this.developer.capabilitiesHeader + "\n" +
   }
 
   ListAllActions(msg) {
