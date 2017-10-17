@@ -23,6 +23,7 @@ THE SOFTWARE.
 import HipChatTransform from './transforms/hipchat';
 import ShellTransform from './transforms/shell';
 import SlackTransform from './transforms/slack';
+import FlowdockTransform from './transforms/flowdock';
 
 //From: http://stackoverflow.com/questions/591857/how-can-i-get-a-javascript-stack-trace-when-i-throw-an-exception
 function st() {
@@ -59,6 +60,8 @@ export default class ResourceTransforms {
       this.provider = new SlackTransform();
     } else if (robot.adapterName === 'hipchat') {
       this.provider = new HipChatTransform();
+    } else if (robot.adapterName == 'flowdock') {
+      this.provider = new FlowdockTransform();
     } else {
       this.provider = new ShellTransform();
     }
