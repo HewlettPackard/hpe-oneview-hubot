@@ -34,6 +34,23 @@ export default class Alert extends Resource {
     }
   }
 
+  buildFlowdockOutput() {
+    let output = '';
+    for (const field in this) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      if (field === 'associatedResource') {
+        output += '\t\u2022 Resource: ' + this[field].resourceName + '\n';
+      } else {
+        output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
+      }
+    }
+    //Add status to output only for Flowdock
+    output += '\t\u2022 Severity: ' +  this.severity + '\n';
+    return output;
+  }
+
   buildSlackFields() {
     let fields = [];
     for (const field in this) {

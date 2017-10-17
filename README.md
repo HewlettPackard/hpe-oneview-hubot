@@ -16,7 +16,7 @@ To get started with this project please read the [getting started WIKI](https://
 * Visualize HPE OneView hardware utilization
 * Support for HPE OneView push notifications and alerts
 * Support for multiple OneView appliances
-* Rich support for Slack and HipChat
+* Rich support for Slack, HipChat and Flowdock
 
 ![HPE OneView Hubot in Slack](/screenshots/slack-dashboard.PNG?raw=true)
 ![HPE OneView Hubot in Slack](/screenshots/slack-mobile.png?raw=true)

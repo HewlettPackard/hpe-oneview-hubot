@@ -36,6 +36,28 @@ export default class ServerHardware extends Resource {
     }
   }
 
+  buildFlowdockOutput(host) {
+    let output = '';
+    let hasProfile = false;
+    for (const field in this) {
+      if (this.__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
+    }
+    if (this.serverProfileUri) {
+      output += '\t\u2022 Profile: ' +  getDeviceNameAndHyperLink(host + this.serverProfileUri).deviceName + '\n';
+      hasProfile = true;
+    }
+    if (!hasProfile) {
+      output += '\t\u2022 Profile: Available for deployment\n';
+    }
+    //Add status to output only for Flowdock
+    output += '\t\u2022 Status: ' +  this.status + '\n';
+
+    return output;
+  }
+
   buildSlackFields(host) {
     let fields = [];
     let hasProfile = false;

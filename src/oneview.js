@@ -55,7 +55,15 @@ const main = (robot) => {
       client.ServerProfiles.getAllServerProfiles().then((sp) => {
         client.ServerProfileTemplates.getAllServerProfileTemplates()
           .then((spt) => {
-            robot.messageRoom('#' + client.notificationsRoom,
+            let room = '';
+
+            if (robot.adapterName === 'flowdock') {
+              room = client.notificationsRoom;
+            } else {
+              room = '#' + client.notificationsRoom;
+            }
+
+            robot.messageRoom(room,
               "Hello, I'm " + robot.name + "! "
               +"Your OneView instance is currently showing:"
               + BULLET + sh.members.length + " server(s)."
