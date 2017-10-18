@@ -34,7 +34,7 @@ export default class Alert extends Resource {
     }
   }
 
-  buildFlowdockOutput() {
+  buildPlainTextOutput() {
     let output = '';
     for (const field in this) {
       if (this.__isNonDisplayField__(field) || !this[field]) {
@@ -46,7 +46,7 @@ export default class Alert extends Resource {
         output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
       }
     }
-    //Add status to output only for Flowdock
+    //Add status to output only for Flowdock and Hipchat
     output += '\t\u2022 Severity: ' +  this.severity + '\n';
     return output;
   }
@@ -73,23 +73,6 @@ export default class Alert extends Resource {
       }
     }
     return fields;
-  }
-
-  buildHipChatOutput() {
-    let output = '';
-    for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
-        continue;
-      }
-      if (field === 'associatedResource') {
-        output += '\t\u2022 Resource: ' + this[field].resourceName + '\n';
-      } else {
-        output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
-      }
-    }
-    //Add status to output only for HipChat
-    output += '\t\u2022 Severity: ' +  this.severity + '\n';
-    return output;
   }
 
   __isNonDisplayField__(field){

@@ -179,6 +179,7 @@ export default class ServerHardwareListener extends Listener {
     let status = msg.status.toLowerCase();
     status = status.charAt(0).toUpperCase() + status.slice(1);
     this.client.ServerHardware.getHardwareByStatus(status).then((res) => {
+
       if (res.count === 0) {
         return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades with a " + msg.status.toLowerCase() + " status.");
       }

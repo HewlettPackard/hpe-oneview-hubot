@@ -62,7 +62,15 @@ export default function(robot, client) {
 
     let checkedMessage = filter.check(resource);
     if (typeof checkedMessage !== 'undefined' && checkedMessage.length > 0) {
-      transform.messageRoom(client.notificationsRoom, resource.resource);
+      let room = '';
+
+      if (robot.adapterName === 'flowdock') {
+        room = client.notificationsRoom;
+      } else {
+        room = '#' + client.notificationsRoom;
+      }
+
+      transform.messageRoom(room, resource.resource);
     }
   });
 }

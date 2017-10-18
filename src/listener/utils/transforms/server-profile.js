@@ -36,7 +36,7 @@ export default class ServerProfile extends Resource {
     }
   }
 
-  buildFlowdockOutput(host) {
+  buildPlainTextOutput(host) {
     let output = '';
     for (const field in this) {
       if (this.__isNonDisplayField__(field) || !this[field]) {
@@ -48,7 +48,8 @@ export default class ServerProfile extends Resource {
       output += '\t\u2022 Server Hardware: ' + getDeviceNameAndHyperLink(host + this.serverHardwareUri).deviceName + '\n';
       output += '\t\u2022 Hardware Model: ' + getHardwareModel(host + this.serverHardwareUri) + '\n';
     }
-    //Add status to output only for Flowdock
+    
+    //Add status to output only for Flowdock and Hipchat
     output += '\t\u2022 Status: ' +  this.status + '\n';
     return output;
   }
@@ -81,24 +82,7 @@ export default class ServerProfile extends Resource {
 
     return fields;
   }
-
-  buildHipChatOutput(host) {
-    let output = '';
-    for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
-        continue;
-      }
-      output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
-    }
-    if (this.serverHardwareUri) {
-      output += '\t\u2022 Server Hardware: ' + getDeviceNameAndHyperLink(host + this.serverHardwareUri).deviceName + '\n';
-      output += '\t\u2022 Hardware Model: ' + getHardwareModel(host + this.serverHardwareUri) + '\n';
-    }
-    //Add status to output only for HipChat
-    output += '\t\u2022 Status: ' +  this.status + '\n';
-    return output;
-  }
-
+  
   __isNonDisplayField__(field){
     var nonDisplayFields = ['name', 'type', 'status', 'serverhardwareuri', 'serverhardwarehyperlink', 'hyperlink', 'state'];
     return nonDisplayFields.includes(field.toLowerCase());

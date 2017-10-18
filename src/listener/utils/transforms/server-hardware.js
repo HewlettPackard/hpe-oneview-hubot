@@ -36,7 +36,7 @@ export default class ServerHardware extends Resource {
     }
   }
 
-  buildFlowdockOutput(host) {
+  buildPlainTextOutput(host) {
     let output = '';
     let hasProfile = false;
     for (const field in this) {
@@ -52,7 +52,7 @@ export default class ServerHardware extends Resource {
     if (!hasProfile) {
       output += '\t\u2022 Profile: Available for deployment\n';
     }
-    //Add status to output only for Flowdock
+    //Add status to output only for Flowdock and Hipchat
     output += '\t\u2022 Status: ' +  this.status + '\n';
 
     return output;
@@ -88,28 +88,6 @@ export default class ServerHardware extends Resource {
       });
     }
     return fields;
-  }
-
-  buildHipChatOutput(host) {
-    let output = '';
-    let hasProfile = false;
-    for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
-        continue;
-      }
-      output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
-    }
-    if (this.serverProfileUri) {
-      output += '\t\u2022 Profile: ' +  getDeviceNameAndHyperLink(host + this.serverProfileUri).deviceName + '\n';
-      hasProfile = true;
-    }
-    if (!hasProfile) {
-      output += '\t\u2022 Profile: Available for deployment\n';
-    }
-    //Add status to output only for HipChat
-    output += '\t\u2022 Status: ' +  this.status + '\n';
-
-    return output;
   }
 
   __isNonDisplayField__(field){
