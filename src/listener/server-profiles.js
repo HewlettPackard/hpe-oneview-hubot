@@ -81,7 +81,7 @@ export default class ServerProfilesListener extends Listener {
     let status = msg.status.toLowerCase();
     status = status.charAt(0).toUpperCase() + status.slice(1);
     this.client.ServerProfiles.getProfilesByStatus(status).then((res) => {
-      if (res.count === 0) {
+      if (res.members.length === 0) {
         return this.transform.text(msg, msg.message.user.name + ", I didn't find any profiles with a " + msg.status.toLowerCase() + " status.");
       } else {
         if (msg.status.toLowerCase() === "ok") {

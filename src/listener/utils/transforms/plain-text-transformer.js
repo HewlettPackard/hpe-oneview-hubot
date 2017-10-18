@@ -103,8 +103,8 @@ export default class PlainTextTransform {
 
     const out = output(resource).join('\n');
     if (text) {
-      msg.send(out);
-    }
+      msg.send(text);
+    } 
 
     msg.send(out);
   }

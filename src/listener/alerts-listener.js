@@ -54,7 +54,7 @@ export default class AlertsListener extends Listener {
     let time = msg.time;
 
     this.client.Alerts.getFilteredAlerts(status, state, time).then((res) => {
-      if (res.count === 0) {
+      if (res.members.length === 0) {
         let message = "I didn't find any ";
         if (status != undefined) {
           message += status + " ";
