@@ -55,12 +55,10 @@ const main = (robot) => {
       client.ServerProfiles.getAllServerProfiles().then((sp) => {
         client.ServerProfileTemplates.getAllServerProfileTemplates()
           .then((spt) => {
-            let room = '';
+            let room = '#' + client.notificationsRoom;
 
             if (robot.adapterName === 'flowdock') {
               room = client.notificationsRoom;
-            } else {
-              room = '#' + client.notificationsRoom;
             }
 
             robot.messageRoom(room,

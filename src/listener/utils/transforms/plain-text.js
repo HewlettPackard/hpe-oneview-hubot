@@ -62,7 +62,7 @@ function ToOutput(resource) {
   if(transformedRes.pretext) {
     output += transformedRes.pretext + '\n';
   }
-  output += transformedRes.buildFlowdockOutput(host);
+  output += transformedRes.buildPlainTextOutput(host);
   return output;
 }
 
@@ -77,7 +77,8 @@ function output(resource) {
   return [];
 }
 
-export default class FlowdockTransform {
+// PlainTextTransform it's a common transformer to HipChat and Flowdock.
+export default class PlainTextTransform {
   hyperlink(uri, name) {
     return name ? name : uri;
   }
@@ -100,8 +101,8 @@ export default class FlowdockTransform {
 
     const out = output(resource).join('\n');
     if (text) {
-      msg.send(out);
-    }
+      msg.send(text);
+    } 
 
     msg.send(out);
   }
@@ -137,6 +138,10 @@ export default class FlowdockTransform {
   }
 
   getProviderName() {
-    return 'Flowdock';
+    if (robot.adapterName === 'flowdock') {
+      return 'Flowdock';
+    } else {
+      return 'HipChat';      
+    }
   }
 }

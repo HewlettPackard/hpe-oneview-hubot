@@ -36,7 +36,7 @@ export default class ServerProfileCompliancePreview extends Resource {
     }
   }
 
-  buildFlowdockOutput() {
+  buildPlainTextOutput() {
     let output = '';
     for (const field in this) {
       if (this.__isNonDisplayField__(field) || !this[field]) {
@@ -75,25 +75,6 @@ export default class ServerProfileCompliancePreview extends Resource {
       });
     }
     return fields;
-  }
-
-  buildHipChatOutput() {
-    let output = '';
-    for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
-        continue;
-      }
-      let value = '';
-      if (Array.isArray(this[field])) {
-        value = this[field].join("\n");
-      } else {
-        value = this[field];
-      }
-      if (value) {
-        output += this.camelCaseToTitleCase(field) + ':\n' + value + '\n';
-      }
-    }
-    return output;
   }
 
   __isNonDisplayField__(field){

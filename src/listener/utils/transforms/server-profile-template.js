@@ -32,7 +32,7 @@ export default class ServerProfileTemplate extends Resource {
     }
   }
 
-  buildFlowdockOutput() {
+  buildPlainTextOutput() {
     let output = '';
     for (const field in this) {
       if (this.__isNonDisplayField__(field) || !this[field]) {
@@ -57,17 +57,6 @@ export default class ServerProfileTemplate extends Resource {
       });
     }
     return fields;
-  }
-
-  buildHipChatOutput() {
-    let output = '';
-    for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
-        continue;
-      }
-      output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
-    }
-    return output;
   }
 
   __isNonDisplayField__(field){

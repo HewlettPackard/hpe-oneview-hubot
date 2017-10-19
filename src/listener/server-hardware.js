@@ -179,14 +179,15 @@ export default class ServerHardwareListener extends Listener {
     let status = msg.status.toLowerCase();
     status = status.charAt(0).toUpperCase() + status.slice(1);
     this.client.ServerHardware.getHardwareByStatus(status).then((res) => {
-      if (res.count === 0) {
-        return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades with a " + msg.status.toLowerCase() + " status.");
+
+      if (res.members.length === 0) {
+        return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades with a " + status.toUpperCase() + " status.");
       }
       else {
-        if (msg.status.toLowerCase() === "ok") {
-          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + msg.status.toUpperCase() + " status.");
+        if (status.toLowerCase() === "ok") {
+          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + status.toUpperCase() + " status.");
         } else {
-          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have a " + msg.status.toLowerCase() + " status.");
+          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have a " + status.toUpperCase() + " status.");
         }
       }
     }).catch((err) => {
@@ -198,7 +199,7 @@ export default class ServerHardwareListener extends Listener {
     let status = msg.powerState.substring(8, msg.powerState.length);
     status = status.charAt(0).toUpperCase() + status.slice(1);
     this.client.ServerHardware.getHardwareByPowerState(status).then((res) => {
-      if (res.count === 0) {
+      if (res.members.length === 0) {
         return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades that are powered " + status.toLowerCase() + ".");
       } else {
         return this.transform.send(msg, res, "Okay, " + msg.message.user.name + ", the following blades are powered " + status.toLowerCase() + ".");
