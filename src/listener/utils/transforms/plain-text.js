@@ -77,9 +77,7 @@ function output(resource) {
   return [];
 }
 
-/**
- * PlainTextTransform it's a commom transformer to HipChat and Flowdock.
- */
+// PlainTextTransform it's a common transformer to HipChat and Flowdock.
 export default class PlainTextTransform {
   hyperlink(uri, name) {
     return name ? name : uri;

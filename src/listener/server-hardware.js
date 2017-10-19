@@ -181,13 +181,13 @@ export default class ServerHardwareListener extends Listener {
     this.client.ServerHardware.getHardwareByStatus(status).then((res) => {
 
       if (res.members.length === 0) {
-        return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades with a " + status.toLowerCase() + " status.");
+        return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades with a " + status.toUpperCase() + " status.");
       }
       else {
         if (status.toLowerCase() === "ok") {
-          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + status.toLowerCase() + " status.");
+          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + status.toUpperCase() + " status.");
         } else {
-          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have a " + status.toLowerCase() + " status.");
+          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have a " + status.toUpperCase() + " status.");
         }
       }
     }).catch((err) => {

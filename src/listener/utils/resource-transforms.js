@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import PlainTextTransform from './transforms/plain-text-transformer';
+import PlainTextTransform from './transforms/plain-text';
 import ShellTransform from './transforms/shell';
 import SlackTransform from './transforms/slack';
 
