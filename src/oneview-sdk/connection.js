@@ -21,12 +21,10 @@ THE SOFTWARE.
 */
 
 import request from 'request-promise';
+import https from 'https';
 import PromiseFeedback from './utils/emitter';
 import Enhance from './utils/enhance';
 import { isTerminal } from './tasks';
-
-//TODO this is global to the NodeJS process we probably want to figure out a cleaner way to do this
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 var useProxy = false;
 
@@ -41,6 +39,8 @@ export default class Connection {
       'Content-Type': 'application/json',
       'auth': ''
     };
+
+    this.agent = new https.Agent({rejectUnauthorized: false});
 
     if (doProxy) {
       useProxy = true;
@@ -65,7 +65,8 @@ export default class Connection {
       uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
-      resolveWithFullResponse: true
+      resolveWithFullResponse: true,
+      agent: this.agent
     };
 
     if (filter) {
@@ -86,8 +87,10 @@ export default class Connection {
       json: true,
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
-      resolveWithFullResponse: true
+      resolveWithFullResponse: true,
+      agent: this.agent
     });
+    
   }
 
   put(path, body) {
@@ -101,7 +104,8 @@ export default class Connection {
       json: true,
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
-      resolveWithFullResponse: true
+      resolveWithFullResponse: true,
+      agent: this.agent
     });
   }
 
@@ -116,7 +120,8 @@ export default class Connection {
       json: true,
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
-      resolveWithFullResponse: true
+      resolveWithFullResponse: true,
+      agent: this.agent
     });
   }
 
@@ -130,7 +135,8 @@ export default class Connection {
       uri: 'https://' + this.host + path,
       json: true,
       headers: this.headers,
-      resolveWithFullResponse: true
+      resolveWithFullResponse: true,
+      agent: this.agent
     });
   }
 
@@ -187,7 +193,8 @@ export default class Connection {
       method: 'GET',
       json: true,
       headers: this.headers,
-      uri: 'https://' + this.host + uri
+      uri: 'https://' + this.host + uri,
+      agent: this.agent
     });
   }
 
@@ -221,7 +228,8 @@ export default class Connection {
    let resourceUri = task.associatedResource.resourceUri;
    const fetch = {
      method: 'GET', json: true, headers: this.headers,
-     uri: 'https://' + this.host + task.uri
+     uri: 'https://' + this.host + task.uri,
+     agent: this.agent
    };
 
    if (isTerminal(task)) {
