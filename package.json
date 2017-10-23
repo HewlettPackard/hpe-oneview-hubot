@@ -13,11 +13,12 @@
     "url": "https://github.com/HewlettPackard/hpe-oneview-hubot/issues"
   },
   "dependencies": {
-    "hubot-flowdock": ">= 0.0.1",
     "amqp": "^0.2.6",
     "d3": "^4.2.7",
     "fuzzyset.js": "0.0.1",
+    "https": "^1.0.0",
     "hubot-conversation": "^1.1.1",
+    "hubot-flowdock": ">= 0.0.1",
     "jsdom": "^9.8.0",
     "nlp_compromise": "^6.5.0",
     "request": "^2.75.0",
