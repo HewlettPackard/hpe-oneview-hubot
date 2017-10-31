@@ -66,7 +66,8 @@ export default class Connection {
       json: true,
       headers: this.headers,
       resolveWithFullResponse: true,
-      agent: this.agent
+      agent: this.agent,
+      rejectUnauthorized: false
     };
 
     if (filter) {
@@ -88,7 +89,8 @@ export default class Connection {
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
       resolveWithFullResponse: true,
-      agent: this.agent
+      agent: this.agent,
+      rejectUnauthorized: false
     });
     
   }
@@ -105,7 +107,8 @@ export default class Connection {
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
       resolveWithFullResponse: true,
-      agent: this.agent
+      agent: this.agent,
+      rejectUnauthorized: false
     });
   }
 
@@ -121,7 +124,8 @@ export default class Connection {
       headers: this.headers,
       body: this.enhance.removeHyperlinks(body),
       resolveWithFullResponse: true,
-      agent: this.agent
+      agent: this.agent,
+      rejectUnauthorized: false
     });
   }
 
@@ -136,7 +140,8 @@ export default class Connection {
       json: true,
       headers: this.headers,
       resolveWithFullResponse: true,
-      agent: this.agent
+      agent: this.agent,
+      rejectUnauthorized: false
     });
   }
 
@@ -194,7 +199,8 @@ export default class Connection {
       json: true,
       headers: this.headers,
       uri: 'https://' + this.host + uri,
-      agent: this.agent
+      agent: this.agent,
+      rejectUnauthorized: false
     });
   }
 
@@ -229,7 +235,8 @@ export default class Connection {
    const fetch = {
      method: 'GET', json: true, headers: this.headers,
      uri: 'https://' + this.host + task.uri,
-     agent: this.agent
+     agent: this.agent,
+     rejectUnauthorized: false
    };
 
    if (isTerminal(task)) {
