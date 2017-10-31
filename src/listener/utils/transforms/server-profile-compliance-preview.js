@@ -19,10 +19,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const Resource = require('./resource');
 
-import Resource from './resource';
-
-export default class ServerProfileCompliancePreview extends Resource {
+class ServerProfileCompliancePreview extends Resource {
 
   constructor(oneViewResource) {
     if (oneViewResource) {
@@ -39,7 +38,7 @@ export default class ServerProfileCompliancePreview extends Resource {
   buildPlainTextOutput() {
     let output = '';
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       let value = '';
@@ -58,7 +57,7 @@ export default class ServerProfileCompliancePreview extends Resource {
   buildSlackFields() {
     let fields = [];
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       let value = '';
@@ -76,9 +75,11 @@ export default class ServerProfileCompliancePreview extends Resource {
     }
     return fields;
   }
-
-  __isNonDisplayField__(field){
-    var nonDisplayFields = ['type', 'status', 'pretext', 'hyperlink'];
-    return nonDisplayFields.includes(field.toLowerCase());
-  }
 }
+
+function __isNonDisplayField__(field){
+  let nonDisplayFields = ['type', 'status', 'pretext', 'hyperlink'];
+  return nonDisplayFields.includes(field.toLowerCase());
+}
+
+module.exports = ServerProfileCompliancePreview;

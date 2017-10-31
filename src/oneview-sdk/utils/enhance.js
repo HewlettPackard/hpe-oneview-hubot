@@ -19,11 +19,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 const uriSplitter = /^(.*)uri$/i;
 const hyperlinkDetector = /^.*hyperlink$/i;
 
-export default class ResourceEnhancer {
+class ResourceEnhancer {
   constructor(host) {
     this.host = host;
   }
@@ -47,7 +46,7 @@ export default class ResourceEnhancer {
         }
       });
 
-      for (var i = 0, len = remove.length; i < len; i++) {
+      for (let i = 0, len = remove.length; i < len; i++) {
         delete obj[remove[i]];
       }
     }
@@ -74,65 +73,67 @@ export default class ResourceEnhancer {
               newKey = match[1] + 'Hyperlink';
             }
 
-            obj[newKey] = 'https://' + this.host + '/#/' + this.__guiRoute__(val) + val + (auth ? '?s_sid=' + auth : '');
+            obj[newKey] = 'https://' + this.host + '/#/' + __guiRoute__(val) + val + (auth ? '?s_sid=' + auth : '');
           }
         }
       });
       if (obj.type && obj.type.toLowerCase().startsWith('server-hardware')) {
-        this.__addSHInterconnectDowlinkHyperlinks__(obj);
+        __addSHInterconnectDowlinkHyperlinks__(obj);
       }
     }
     return obj;
   }
+}
 
-  __addSHInterconnectDowlinkHyperlinks__(obj){
-    if (obj.portMap && obj.portMap.deviceSlots) {
-      let serverInterconnectPortLinks = [];
-      for (let slot of obj.portMap.deviceSlots) {
-        if (slot.physicalPorts && slot.physicalPorts.length > 0) {
-          for (let physicalPort of slot.physicalPorts) {
-            serverInterconnectPortLinks.push(physicalPort.physicalInterconnectUri + '/statistics/d' + physicalPort.interconnectPort);
-          }
+function __addSHInterconnectDowlinkHyperlinks__(obj){
+  if (obj.portMap && obj.portMap.deviceSlots) {
+    let serverInterconnectPortLinks = [];
+    for (let slot of obj.portMap.deviceSlots) {
+      if (slot.physicalPorts && slot.physicalPorts.length > 0) {
+        for (let physicalPort of slot.physicalPorts) {
+          serverInterconnectPortLinks.push(physicalPort.physicalInterconnectUri + '/statistics/d' + physicalPort.interconnectPort);
         }
       }
-      obj.serverInterconnectPortLinks = serverInterconnectPortLinks;
     }
-  }
-
-  __guiRoute__(uri) {
-    if (uri.startsWith('/rest/server-hardware/')) {
-      return 'server-hardware/show/overview/r';
-    }
-
-    if (uri.startsWith('/rest/server-profiles/')) {
-      return 'profiles/show/overview/r';
-    }
-
-    if (uri.startsWith('/rest/server-profile-templates/')) {
-      return 'profile-templates/show/overview/r';
-    }
-
-    if (uri.startsWith('/rest/enclosures/')) {
-      return 'enclosure/show/overview/r';
-    }
-
-    if (uri.startsWith('/rest/server-hardware-types/')) {
-      return 'server-hardware-types/show/general/r';
-    }
-
-    if (uri.startsWith('/rest/logical-enclosures/')) {
-      return 'logicalenclosures/show/overview/r';
-    }
-
-    if (uri.startsWith('/rest/enclosure-groups/')) {
-      return 'enclosuregroups/show/interconectbayconfiguration/r';
-    }
-
-    if (uri.startsWith('/rest/alerts') || uri.startsWith('/rest/tasks/')) {
-      return 'activity/r';
-    }
-
-    //TODO Fill in the rest of the OneView resource views
-    return '';
+    obj.serverInterconnectPortLinks = serverInterconnectPortLinks;
   }
 }
+
+function __guiRoute__(uri) {
+  if (uri.startsWith('/rest/server-hardware/')) {
+    return 'server-hardware/show/overview/r';
+  }
+
+  if (uri.startsWith('/rest/server-profiles/')) {
+    return 'profiles/show/overview/r';
+  }
+
+  if (uri.startsWith('/rest/server-profile-templates/')) {
+    return 'profile-templates/show/overview/r';
+  }
+
+  if (uri.startsWith('/rest/enclosures/')) {
+    return 'enclosure/show/overview/r';
+  }
+
+  if (uri.startsWith('/rest/server-hardware-types/')) {
+    return 'server-hardware-types/show/general/r';
+  }
+
+  if (uri.startsWith('/rest/logical-enclosures/')) {
+    return 'logicalenclosures/show/overview/r';
+  }
+
+  if (uri.startsWith('/rest/enclosure-groups/')) {
+    return 'enclosuregroups/show/interconectbayconfiguration/r';
+  }
+
+  if (uri.startsWith('/rest/alerts') || uri.startsWith('/rest/tasks/')) {
+    return 'activity/r';
+  }
+
+  //TODO Fill in the rest of the OneView resource views
+  return '';
+}
+
+module.exports = ResourceEnhancer;

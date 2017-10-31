@@ -19,11 +19,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const nlp_compromise = require('nlp_compromise');
+const Lexer = require('../src/middleware/utils/lexer');
+const runNLP = require('../src/middleware/nlp-middleware').runNLP;
+const lex = new Lexer(nlp_compromise);
 
-import { runNLP } from '../middleware/nlp-middleware';
-import { Lexer } from '../middleware/nlp-middleware';
 let chai = require('chai');
 let sinon = require('sinon');
+let Bluebird = require('bluebird');
 
 chai.should();
 
@@ -34,15 +37,15 @@ describe('NLP Middleware', () => {
   };
 
   //add a template
-  Lexer.addNamedDevice('template1', '/rest/server-profile-templates/ad51166f', 'name', 'https://10.1.1.1/#/profile-templates/show/overview/r/rest/server-profile-templates/ad51166f?s_sid=LTE', undefined);
+  lex.addNamedDevice('template1', '/rest/server-profile-templates/ad51166f', 'name', 'https://10.1.1.1/#/profile-templates/show/overview/r/rest/server-profile-templates/ad51166f?s_sid=LTE', undefined);
   //add a blade
-  Lexer.addNamedDevice('0000A661, bay 2', '/rest/server-hardware/30303437', 'name', 'https://10.1.1.1/#/server-hardware/show/overview/r/rest/server-hardware/30303437?s_sid=LTE', 'HPE Synergy Compute Module');
+  lex.addNamedDevice('0000A661, bay 2', '/rest/server-hardware/30303437', 'name', 'https://10.1.1.1/#/server-hardware/show/overview/r/rest/server-hardware/30303437?s_sid=LTE', 'HPE Synergy Compute Module');
   //add a profile
-  Lexer.addNamedDevice('profile1', '/rest/server-profiles/eb13eab1', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab1?s_sid=LTE', undefined);
+  lex.addNamedDevice('profile1', '/rest/server-profiles/eb13eab1', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab1?s_sid=LTE', undefined);
   //add a complex profile
-  Lexer.addNamedDevice('profile1 - 0000A661, bay 2', '/rest/server-profiles/eb13eab2', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab2?s_sid=LTE', undefined);
+  lex.addNamedDevice('profile1 - 0000A661, bay 2', '/rest/server-profiles/eb13eab2', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab2?s_sid=LTE', undefined);
   //add a complex profile
-  Lexer.addNamedDevice('profile1 - docker', '/rest/server-profiles/eb13eab3', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab3?s_sid=LTE', undefined);
+  lex.addNamedDevice('profile1 - docker', '/rest/server-profiles/eb13eab3', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab3?s_sid=LTE', undefined);
 
   it('runNLP simple template', () => {
     const Message = {
@@ -53,7 +56,7 @@ describe('NLP Middleware', () => {
       room: 'Shell'
     };
 
-    runNLP(Message, logger);
+    runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-profile-templates/ad51166f.');
     Message.original_text.should.equal('@hubot show template1');
     Message.nlp.raw_text.should.equal('@hubot show /rest/server-profile-templates/ad51166f.');
@@ -68,7 +71,7 @@ describe('NLP Middleware', () => {
       room: 'Shell'
     };
 
-    runNLP(Message, logger);
+    runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab1.');
     Message.original_text.should.equal('@hubot show profile1');
     Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab1.');
@@ -83,7 +86,7 @@ describe('NLP Middleware', () => {
       room: 'Shell'
     };
 
-    runNLP(Message, logger);
+    runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-hardware/30303437.');
     Message.original_text.should.equal('@hubot show 0000A661, bay 2');
     Message.nlp.raw_text.should.equal('@hubot show /rest/server-hardware/30303437.');
@@ -98,7 +101,7 @@ describe('NLP Middleware', () => {
       room: 'Shell'
     };
 
-    runNLP(Message, logger);
+    runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab3.');
     Message.original_text.should.equal('@hubot show profile1 - docker');
     Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab3.');
@@ -113,7 +116,7 @@ describe('NLP Middleware', () => {
       room: 'Shell'
     };
 
-    runNLP(Message, logger);
+    runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab2.');
     Message.original_text.should.equal('@hubot show profile1 - 0000A661, bay 2');
     Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab2.');

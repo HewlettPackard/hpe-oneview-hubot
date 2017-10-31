@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 const uri = '/rest/alerts/';
 
-export default class Alerts {
+class Alerts {
   constructor (ov_client) {
     this.ov_client = ov_client;
     this.connections = ov_client.getConnections();
@@ -63,7 +63,7 @@ export default class Alerts {
       baseQuery += stateQuery;
     }
 
-    var date = new Date();
+    let date = new Date();
     if (time) {
       let timeQuery = '';
       time = time.toLowerCase();
@@ -101,4 +101,6 @@ export default class Alerts {
     });
   }
 
-}
+};
+
+module.exports = Alerts;

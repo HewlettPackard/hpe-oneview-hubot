@@ -1,8 +1,7 @@
-import gulp from 'gulp';
-import babel from 'gulp-babel';
-import tasks from 'gulp-task-listing';
-import util from 'gulp-util';
-import del from 'del';
+const gulp = require('gulp');
+const tasks = require('gulp-task-listing');
+const util = require('gulp-util');
+const del = require('del');
 
 // Add a task to render registered tasks when user types 'gulp help'
 gulp.task('help', tasks);
@@ -29,8 +28,8 @@ function templates() {
 
 function build() {
   const dir = output();
-  util.log('Compiling javascript to', dir);
-  return gulp.src('src/**/*.js').pipe(babel()).pipe(gulp.dest(dir));
+  util.log('Copying javascript to', dir);
+  return gulp.src('src/**/*.js').pipe(gulp.dest(dir));
 }
 
 gulp.task('clean', function() {

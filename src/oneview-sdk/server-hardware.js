@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 const uri = '/rest/server-hardware/';
 
-export default class ServerHardware {
+class ServerHardware {
   constructor (ov_client) {
     this.ov_client = ov_client;
     this.connections = ov_client.getConnections();
@@ -107,9 +107,11 @@ export default class ServerHardware {
   @param server hardware interconnect port statistics uri
   @param server hardware logical interconnect uri
   */
-  getServerNetworkUtilization(shInterconnectPortStatisticsUri, shLogicalInterconnectUri) {
+  getServerNetworkUtilization(shInterconnectPortStatisticsUri, shLogicalInterconnectUri) {    
     return this.ov_client.connection.get(shInterconnectPortStatisticsUri).then((res) => {
       return Promise.all([res, this.ov_client.LogicalInterconnects.getLogicalInterconnectTelemetryConfiguration(shLogicalInterconnectUri)]);
     });
   }
-}
+};
+
+module.exports = ServerHardware;

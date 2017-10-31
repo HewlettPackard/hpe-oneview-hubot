@@ -19,94 +19,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-import { transform } from './resource-transformer';
+const transform = require('./resource-transformer');
 const url = require('url');
+let ov_brain;
 
-function AttachmentTitle(resource) {
-  if (resource.type) {
-    if (resource.type.startsWith('AlertResource')) {
-      if (resource.alertTypeID && resource.alertTypeID.startsWith("Trap")) {
-        return "Trap: " + resource.description;
-      }
-      return resource.description;
-    }
-
-    if (resource.type.startsWith('server-hardware')) {
-      return 'Server Hardware: ' + resource.name
-    }
-
-    if (resource.type.startsWith('ServerProfileTemplate')) {
-      return 'Profile Template: ' + resource.name
-    }
-
-    if (resource.type.startsWith('ServerProfile') && !resource.type.startsWith('ServerProfileCompliancePreview')) {
-      return 'Profile: ' + resource.name
-    }
+class SlackTransform {
+  constructor(brain) {
+    ov_brain = brain;
   }
 
-  //Fall-back as clean as we can, resort to URI as all objects are guaranteed to have that
-  return resource.name || resource.uri;
-}
-
-function ToAttachment(resource) {
-  const transformedRes = transform(resource);
-
-  let host;
-  if (resource.hyperlink) {
-    host = url.parse(resource.hyperlink).hostname;
-  }
-
-  let color = '';
-  switch (transformedRes.type.startsWith('AlertResource') ? transformedRes.severity : transformedRes.status) {
-    case 'OK':
-      color = '#01A982'//OneView Green Status
-      break;
-    case 'Warning':
-      color = '#FFD042'//OneView Yellow Status
-      break;
-    case 'Critical':
-      color = '#FF454F'//OneView Red Status
-      break;
-    case 'Disabled':
-    case 'Unknown':
-    default:
-      color = '#CCCCCC'//OneView Grey Status
-      break;
-  }
-
-  const fields = transformedRes.buildSlackFields(host);
-  const pretext = transformedRes.pretext;
-
-  return {
-    title: AttachmentTitle(transformedRes),
-    title_link: transformedRes.hyperlink,
-    color: color,
-    //fallback: TODO: Describe object as text,
-    fields: fields,
-    text: '',
-    pretext: pretext,
-  };
-}
-
-function attachments(resource) {
-  if (Array.isArray(resource)) {
-    return resource.map(ToAttachment);
-  } else if (resource.members) {
-    return resource.members.map(ToAttachment);
-  } else {
-    return [ToAttachment(resource)];
-  }
-  return [];
-}
-
-export default class SlackTransform {
   hyperlink(uri, name) {
     return '<' + uri + '|' + name + '>';
   }
 
   list(lines) {
-    for (var i = 0; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
       lines[i] = '  • ' + lines[i];
     }
     return lines;
@@ -122,7 +49,7 @@ export default class SlackTransform {
     }
 
     const message = {
-      attachments: attachments(resource)
+      attachments: __attachments__(resource)
     };
 
     if (text) {
@@ -134,7 +61,7 @@ export default class SlackTransform {
 
   messageRoom(robot, room, resource, text) {
     const message = {
-      attachments: attachments(resource)
+      attachments: __attachments__(resource)
     };
 
     if (text) {
@@ -179,3 +106,83 @@ export default class SlackTransform {
     return 'Slack';
   }
 }
+
+function __attachmentTitle__(resource) {
+  if (resource.type) {
+    if (resource.type.startsWith('AlertResource')) {
+      if (resource.alertTypeID && resource.alertTypeID.startsWith("Trap")) {
+        return "Trap: " + resource.description;
+      }
+      return resource.description;
+    }
+
+    if (resource.type.startsWith('server-hardware')) {
+      return 'Server Hardware: ' + resource.name;
+    }
+
+    if (resource.type.startsWith('ServerProfileTemplate')) {
+      return 'Profile Template: ' + resource.name;
+    }
+
+    if (resource.type.startsWith('ServerProfile') && !resource.type.startsWith('ServerProfileCompliancePreview')) {
+      return 'Profile: ' + resource.name;
+    }
+  }
+
+  //Fall-back as clean as we can, resort to URI as all objects are guaranteed to have that
+  return resource.name || resource.uri;
+}
+
+function __toAttachment__(resource) {
+  const transformedRes = transform(resource, ov_brain);
+
+  let host;
+  if (resource.hyperlink) {
+    host = url.parse(resource.hyperlink).hostname;
+  }
+
+  let color = '';
+  switch (transformedRes.type.startsWith('AlertResource') ? transformedRes.severity : transformedRes.status) {
+    case 'OK':
+      color = '#01A982'; //OneView Green Status
+      break;
+    case 'Warning':
+      color = '#FFD042'; //OneView Yellow Status
+      break;
+    case 'Critical':
+      color = '#FF454F'; //OneView Red Status
+      break;
+    case 'Disabled':
+    case 'Unknown':
+    default:
+      color = '#CCCCCC'; //OneView Grey Status
+      break;
+  }
+
+  const fields = transformedRes.buildSlackFields(host);
+  const pretext = transformedRes.pretext;
+
+  return {
+    title: __attachmentTitle__(transformedRes),
+    title_link: transformedRes.hyperlink,
+    color: color,
+    //fallback: TODO: Describe object as text,
+    fields: fields,
+    text: '',
+    pretext: pretext,
+  };
+}
+
+function __attachments__(resource) {
+  if (Array.isArray(resource)) {
+    return resource.map(__toAttachment__);
+  } else if (resource.members) {
+    return resource.members.map(__toAttachment__);
+  } else {
+    return [__toAttachment__(resource)];
+  }
+  return [];
+}
+
+
+module.exports = SlackTransform;

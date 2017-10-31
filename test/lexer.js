@@ -19,9 +19,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-import nlp from 'nlp_compromise';
-import Lexer from '../middleware/utils/lexer';
+const nlp = require('nlp_compromise');
+const Lexer = require('../src/middleware/utils/lexer');
 
 const lex = new Lexer(nlp);
 let chai = require('chai');

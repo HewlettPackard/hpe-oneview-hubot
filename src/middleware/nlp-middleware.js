@@ -19,17 +19,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const nlp_compromise = require('nlp_compromise');
+const SpellCheck = require('./utils/spell-check');
+const Lexer = require('./utils/lexer');
 
-import nlp from 'nlp_compromise';
+// Matches whenever there are more than 1 space between words
+const wordSpacer = /\b\s\s+\b/g;
 
-import SpellCheck from './utils/spell-check';
-import Lexer from './utils/lexer';
+// Matches sentence punctuation (use a negative look ahead to ignore doubles #.#
+const sentenceSpacer = /\s*([?!])\s*|(?!\d*\.\d+)\s*([.])\s*/g;
 
-//Initialize the lexer
-const lex = new Lexer(nlp);
-export { lex as Lexer };
+// Matches the end of a sentence, optionally matching . or ! or ?
+const sentenceTerminal = /\s*[.?!]{0,1}$/;
 
-//Custom plugin that normalizes text
+// Custom plugin that normalizes text
 const toNormal = {
   Term: {
     toNormal: function() {
@@ -62,32 +65,22 @@ const toNormal = {
   }
 };
 
-//nlp.plugin(require('nlp-locale'))//Plugin that convert from British to USA
-nlp.plugin(toNormal);
+nlp_compromise.plugin(toNormal);
 
-//Matches whenever there are more than 1 space between words
-const wordSpacer = /\b\s\s+\b/g;
-
-//Matches sentence punctuation (use a negative look ahead to ignore doubles #.#
-const sentenceSpacer = /\s*([?!])\s*|(?!\d*\.\d+)\s*([.])\s*/g;
-
-//Matches the end of a sentence, optionally matching . or ! or ?
-const sentenceTerminal = /\s*[.?!]{0,1}$/;
-
-export function runNLP (message, logger) {
+function runNLP(message, logger, lex) {
   const cleaned = message.text.replace(wordSpacer, ' ').replace(sentenceSpacer, "$1$2  ").trim();
 
   let cleanSentences = null;
-  // if text contains IP address don't run through nlp_compromise
+  // If text contains IP address don't run through nlp_compromise
   if (/(?:[0-9]{1,3}\.){3}[0-9]{1,3}/.test(cleaned)) {
     cleanSentences = cleaned;
   } else {
-    let normalized = nlp.text(cleaned)/*.to_present().toAmerican()*/.toNormal();
+    let normalized = nlp_compromise.text(cleaned)/*.to_present().toAmerican()*/.toNormal();
     if (normalized.contractions && normalized.contractions.expand) {
       normalized = normalized.contractions.expand();
     }
-    //Ensure that all sentences end with '.' a note, this will replace ! and ? with .
-    cleanSentences = nlp.text(normalized.text()).sentences.map((s) => {
+    // Ensure that all sentences end with '.' a note, this will replace ! and ? with .
+    cleanSentences = nlp_compromise.text(normalized.text()).sentences.map((s) => {
       return s.str.trim().replace(sentenceTerminal, '.');
     }).join('  ');
   }
@@ -98,13 +91,15 @@ export function runNLP (message, logger) {
 
   message.original_text = message.text;
   message.text = resolved;
-  message.nlp = nlp.text(message.text);
-}
+  message.nlp = nlp_compromise.text(message.text);
+};
+module.exports.runNLP = runNLP; //export for testing
 
-export default (robot) => {
+const nlp = (robot) => {
+  const lex = new Lexer(nlp_compromise);
   robot.receiveMiddleware((context, next, done) => {
     const message = context.response.message.message || context.response.message;
-    runNLP(message, robot.logger);
+    runNLP(message, robot.logger, lex);
 
     if (!message.text.includes('@' + robot.name)) {
       context.response.message.done = true;
@@ -112,4 +107,6 @@ export default (robot) => {
 
     next();
   });
+  return lex;
 };
+module.exports.nlp = nlp;

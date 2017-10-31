@@ -19,12 +19,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-
-import Listener from './base-listener';
+const Listener = require('./base-listener');
 const Conversation = require("hubot-conversation");
 
-export default class AlertsListener extends Listener {
+class AlertsListener extends Listener {
   constructor(robot, client, transform) {
     super(robot, client, transform);
 
@@ -32,11 +30,11 @@ export default class AlertsListener extends Listener {
 
     this.title = "Alerts";
     this.capabilities = [];
-    this.respond(/(?:get|list|show) last (:<count>[0-9]*?) alerts\.$/i, ::this.ListNumberOfAlerts);
+    this.respond(/(?:get|list|show) last (:<count>[0-9]*?) alerts\.$/i, this.ListNumberOfAlerts.bind(this));
     this.capabilities.push(this.BULLET + "List last [insert #] alerts (e.g. list last 10 alerts)");
 
-    this.respond(/(?:get|list|show) all (:<state>active|locked|cleared){0,1}(?: ?)(:<status>critical|warning|ok|disabled){0,1}(?: ?)alerts(?: from ){0,1}(:<time>today|last 7 days|last 30 days){0,1}\.$/i, ::this.ListFilteredAlerts);
-    this.capabilities.push(this.BULLET + "List all active/locked/cleared critical/warning/ok/disabled alerts from today/last 7 days/last 30 days (e.g. list all (critical) (active) alerts (from today)) ")
+    this.respond(/(?:get|list|show) all (:<state>active|locked|cleared){0,1}(?: ?)(:<status>critical|warning|ok|disabled){0,1}(?: ?)alerts(?: from ){0,1}(:<time>today|last 7 days|last 30 days){0,1}\.$/i, this.ListFilteredAlerts.bind(this));
+    this.capabilities.push(this.BULLET + "List all active/locked/cleared critical/warning/ok/disabled alerts from today/last 7 days/last 30 days (e.g. list all (critical) (active) alerts (from today)) ");
   }
 
   ListNumberOfAlerts(msg) {
@@ -78,3 +76,5 @@ export default class AlertsListener extends Listener {
     });
   }
 }
+
+module.exports = AlertsListener;

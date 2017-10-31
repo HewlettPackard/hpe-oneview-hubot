@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 const uri = '/rest/logical-interconnects/';
 
-export default class LogicalInterconnects {
+class LogicalInterconnects {
   constructor (ov_client) {
     this.ov_client = ov_client;
     this.connections = ov_client.getConnections();
@@ -57,4 +57,6 @@ export default class LogicalInterconnects {
       return res.telemetryConfiguration;
     });
   }
-}
+};
+
+module.exports = LogicalInterconnects;

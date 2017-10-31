@@ -19,18 +19,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-import OVClient from '../oneview-sdk/ov-client';
-import ServerProfiles from '../oneview-sdk/server-profiles';
+const OVClient = require('../src/oneview-sdk/ov-client');
+const ServerProfiles = require('../src/oneview-sdk/server-profiles');
 
 let chai = require('chai');
 let sinon = require('sinon');
 let nock = require('nock');
 let Bluebird = require('bluebird');
 
+chai.should();
+
 describe('ServerProfiles', () => {
   let oVClient;
-  var serverProfiles;
+  let serverProfiles;
   beforeEach(() => {
     let oneviewConfig = {
       hosts: [{
@@ -51,7 +52,7 @@ describe('ServerProfiles', () => {
     serverProfiles = new ServerProfiles(oVClient);
   });
 
-  it('get critical profiles', sinon.test(function() {
+  it('get critical profiles', (done) => {
     let serverProfileResponse = {
       "type": "server-profile-list",
       "category": "server-profiles",
@@ -67,10 +68,10 @@ describe('ServerProfiles', () => {
 
     serverProfiles.getProfilesByStatus("Critical").then(function(data) {
       data.members[0].status.should.equal("Critical");
-    });
-  }));
+    }).then(() => done(), done);
+  });
 
-  it('get warning profiles', sinon.test(function() {
+  it('get warning profiles', (done) => {
     let serverProfileResponse = {
       "type": "server-profile-list",
       "category": "server-profiles",
@@ -86,10 +87,10 @@ describe('ServerProfiles', () => {
 
     serverProfiles.getProfilesByStatus("Warning").then(function(data) {
       data.members[0].status.should.equal("Warning");
-    });
-  }));
+    }).then(() => done(), done);
+  });
 
-  it('get OK profiles', sinon.test(function() {
+  it('get OK profiles', (done) => {
     let serverProfileResponse = {
       "type": "server-profile-list",
       "category": "server-profiles",
@@ -105,10 +106,10 @@ describe('ServerProfiles', () => {
 
     serverProfiles.getProfilesByStatus("OK").then(function(data) {
       data.members[0].status.should.equal("OK");
-    });
-  }));
+    }).then(() => done(), done);
+  });
 
-  it('get disabled profiles', sinon.test(function() {
+  it('get disabled profiles', (done) => {
     let serverProfileResponse = {
       "type": "server-profile-list",
       "category": "server-profiles",
@@ -124,7 +125,6 @@ describe('ServerProfiles', () => {
 
     serverProfiles.getProfilesByStatus("Disabled").then(function(data) {
       data.members[0].status.should.equal("Disabled");
-    });
-  }));
-
+    }).then(() => done(), done);
+  });
 });

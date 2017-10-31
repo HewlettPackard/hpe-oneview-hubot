@@ -19,13 +19,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const Resource = require('./resource');
+let ov_brain;
 
-import Resource from './resource';
-import { getDeviceNameAndHyperLink, getHardwareModel } from '../../../ov-brain';
+class ServerProfile extends Resource {
 
-export default class ServerProfile extends Resource {
-
-  constructor(oneViewResource) {
+  constructor(oneViewResource, brain) {
     if (oneViewResource) {
       super(oneViewResource);
       this.name = oneViewResource.name;
@@ -33,22 +32,23 @@ export default class ServerProfile extends Resource {
       this.serialNumber = oneViewResource.serialNumber;
       this.serverHardwareUri = oneViewResource.serverHardwareUri;
       this.serverHardwareHyperlink = oneViewResource.serverHardwareHyperlink;
+      ov_brain = brain;
     }
   }
 
   buildPlainTextOutput(host) {
     let output = '';
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
     }
     if (this.serverHardwareUri) {
-      output += '\t\u2022 Server Hardware: ' + getDeviceNameAndHyperLink(host + this.serverHardwareUri).deviceName + '\n';
-      output += '\t\u2022 Hardware Model: ' + getHardwareModel(host + this.serverHardwareUri) + '\n';
+      output += '\t\u2022 Server Hardware: ' + ov_brain.getDeviceNameAndHyperLink(host + this.serverHardwareUri).deviceName + '\n';
+      output += '\t\u2022 Hardware Model: ' + ov_brain.getHardwareModel(host + this.serverHardwareUri) + '\n';
     }
-    
+
     //Add status to output only for Flowdock and Hipchat
     output += '\t\u2022 Status: ' +  this.status + '\n';
     return output;
@@ -57,7 +57,7 @@ export default class ServerProfile extends Resource {
   buildSlackFields(host) {
     let fields = [];
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
 
@@ -71,20 +71,22 @@ export default class ServerProfile extends Resource {
       fields.push({
         title: 'Server Hardware',
         short: true,
-        value: '<' + this.serverHardwareHyperlink + '|' + getDeviceNameAndHyperLink(host + this.serverHardwareUri).deviceName + '>'
+        value: '<' + this.serverHardwareHyperlink + '|' + ov_brain.getDeviceNameAndHyperLink(host + this.serverHardwareUri).deviceName + '>'
       });
       fields.push({
         title: 'Hardware Model',
         short: true,
-        value: getHardwareModel(this.serverHardwareUri)
+        value: ov_brain.getHardwareModel(host + this.serverHardwareUri)
       });
     }
 
     return fields;
   }
-  
-  __isNonDisplayField__(field){
-    var nonDisplayFields = ['name', 'type', 'status', 'serverhardwareuri', 'serverhardwarehyperlink', 'hyperlink', 'state'];
-    return nonDisplayFields.includes(field.toLowerCase());
-  }
 }
+
+function   __isNonDisplayField__(field){
+  let nonDisplayFields = ['name', 'type', 'status', 'serverhardwareuri', 'serverhardwarehyperlink', 'hyperlink', 'state'];
+  return nonDisplayFields.includes(field.toLowerCase());
+}
+
+module.exports = ServerProfile;

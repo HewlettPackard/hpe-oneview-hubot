@@ -19,13 +19,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const Resource = require('./resource');
+let ov_brain;
 
-import Resource from './resource';
-import { getDeviceNameAndHyperLink } from '../../../ov-brain';
+class ServerHardware extends Resource {
 
-export default class ServerHardware extends Resource {
-
-  constructor(oneViewResource) {
+  constructor(oneViewResource, brain) {
     if (oneViewResource) {
       super(oneViewResource);
       this.name = oneViewResource.name;
@@ -33,6 +32,7 @@ export default class ServerHardware extends Resource {
       this.powerState = oneViewResource.powerState;
       this.serverProfileUri = oneViewResource.serverProfileUri;
       this.serverProfileHyperlink = oneViewResource.serverProfileHyperlink;
+      ov_brain = brain;
     }
   }
 
@@ -40,13 +40,13 @@ export default class ServerHardware extends Resource {
     let output = '';
     let hasProfile = false;
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
     }
     if (this.serverProfileUri) {
-      output += '\t\u2022 Profile: ' +  getDeviceNameAndHyperLink(host + this.serverProfileUri).deviceName + '\n';
+      output += '\t\u2022 Profile: ' +  ov_brain.getDeviceNameAndHyperLink(host + this.serverProfileUri).deviceName + '\n';
       hasProfile = true;
     }
     if (!hasProfile) {
@@ -62,7 +62,7 @@ export default class ServerHardware extends Resource {
     let fields = [];
     let hasProfile = false;
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
 
@@ -76,7 +76,7 @@ export default class ServerHardware extends Resource {
       fields.push({
         title: 'Profile',
         short: true,
-        value: '<' + this.serverProfileHyperlink + '|' + getDeviceNameAndHyperLink(host + this.serverProfileUri).deviceName + '>'
+        value: '<' + this.serverProfileHyperlink + '|' + ov_brain.getDeviceNameAndHyperLink(host + this.serverProfileUri).deviceName + '>'
       });
       hasProfile = true;
     }
@@ -89,9 +89,11 @@ export default class ServerHardware extends Resource {
     }
     return fields;
   }
-
-  __isNonDisplayField__(field){
-    var nonDisplayFields = ['name', 'type', 'status', 'serverprofileuri', 'serverprofilehyperlink', 'hyperlink'];
-    return nonDisplayFields.includes(field.toLowerCase());
-  }
 }
+
+function __isNonDisplayField__(field){
+  let nonDisplayFields = ['name', 'type', 'status', 'serverprofileuri', 'serverprofilehyperlink', 'hyperlink'];
+  return nonDisplayFields.includes(field.toLowerCase());
+}
+
+module.exports = ServerHardware;

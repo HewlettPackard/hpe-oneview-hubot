@@ -20,11 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import PromiseFeedback from './utils/emitter';
+const PromiseFeedback = require('./utils/emitter');
 
 const uri = '/rest/server-profile-templates/';
 
-export default class ServerProfileTemplates {
+class ServerProfileTemplates {
   constructor (ov_client) {
     this.ov_client = ov_client;
     this.connections = ov_client.getConnections();
@@ -105,4 +105,6 @@ export default class ServerProfileTemplates {
       return [];
     });
   }
-}
+};
+
+module.exports = ServerProfileTemplates;

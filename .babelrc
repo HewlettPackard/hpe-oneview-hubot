@@ -1,9 +1,0 @@
-{
-  "presets": [ "es2015" ],
-  "plugins": [ "transform-function-bind" ],
-  "env": {
-    "test": {
-      "plugins": [ "istanbul" ]
-    }
-  }
-}

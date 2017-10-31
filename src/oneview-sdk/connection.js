@@ -19,16 +19,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const request = require('request-promise');
+const https = require('https');
+const PromiseFeedback = require('./utils/emitter');
+const Enhance = require('./utils/enhance');
+const isTerminal = require('./tasks');
 
-import request from 'request-promise';
-import https from 'https';
-import PromiseFeedback from './utils/emitter';
-import Enhance from './utils/enhance';
-import { isTerminal } from './tasks';
+let useProxy = false;
 
-var useProxy = false;
-
-export default class Connection {
+class Connection {
   constructor(host, apiVersion, doProxy, proxyHost, proxyPort){
     this.host = host;
     this.apiVersion = apiVersion;
@@ -92,7 +91,7 @@ export default class Connection {
       agent: this.agent,
       rejectUnauthorized: false
     });
-    
+
   }
 
   put(path, body) {
@@ -153,7 +152,7 @@ export default class Connection {
     }
 
     if (options.uri.endsWith('/rest/login-sessions')) {
-      return request(options).then(::this.__handleResponse__);
+      return request(options).then(this.__handleResponse__.bind(this));
     }
 
     if (options.uri.endsWith('/rest/certificates/ca')) {
@@ -206,7 +205,7 @@ export default class Connection {
 
  __requestHandleTasks__(options, feedback) {
    return new Promise((resolve, reject) => {
-     request(options).then(::this.__handleResponse__).then((res) => {
+     request(options).then(this.__handleResponse__.bind(this)).then((res) => {
        try {
          if (!res.type || !res.type.startsWith("TaskResource") || options.uri.endsWith(res.uri)) {
            resolve(res);
@@ -264,4 +263,6 @@ export default class Connection {
      });
    }
  }
-}
+};
+
+module.exports = Connection;

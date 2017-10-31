@@ -19,12 +19,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const Listener = require('./base-listener');
+const buildDashboard = require('../charting/show-dashboard');
 
-import Listener from './base-listener';
-import { buildDashboard } from '../charting/show-dashboard';
-
-
-export default class DashboardListener extends Listener {
+class DashboardListener extends Listener {
   constructor(robot, client, transform) {
     super(robot, client, transform);
 
@@ -32,9 +30,8 @@ export default class DashboardListener extends Listener {
     this.capabilities = [];
     this.room = client.notificationsRoom;
 
-    this.respond(/show (?:oneview ){0,1}(?:dashboard|status).$/i, ::this.ShowOneViewDashboard);
+    this.respond(/show (?:oneview ){0,1}(?:dashboard|status).$/i, this.ShowOneViewDashboard.bind(this));
     this.capabilities.push(this.BULLET + "show (OneView) dashboard");
-
   }
 
   ShowOneViewDashboard(msg) {
@@ -56,3 +53,5 @@ export default class DashboardListener extends Listener {
 
   }
 }
+
+module.exports = DashboardListener;

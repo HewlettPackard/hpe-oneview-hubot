@@ -19,100 +19,55 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-import Listener from './base-listener';
-import { buildD3Chart } from '../charting/chart';
-import { getLogicalInterconnectsMap, getDeviceNameAndHyperLink } from '../ov-brain';
+const Listener = require('./base-listener');
+const buildD3Chart = require('../charting/chart');
 const Conversation = require('hubot-conversation');
 const rtrim = /\/statistics\/d\d*/i;
 
-export default class ServerHardwareListener extends Listener {
-  constructor(robot, client, transform) {
+class ServerHardwareListener extends Listener {
+  constructor(robot, client, transform, brain) {
     super(robot, client, transform);
 
     this.switchBoard = new Conversation(robot);
     this.room = client.notificationsRoom;
-
+    this.brain = brain;
     this.title = "Server hardware";
     this.capabilities = [];
-    this.respond(/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOn);
-    this.respond(/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOff);
+    this.respond(/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, this.PowerOn.bind(this));
+    this.respond(/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, this.PowerOff.bind(this));
     this.capabilities.push(this.BULLET + "Power on/off a specific (server) hardware (e.g. turn on Encl1, bay 1).");
 
-    this.respond(/(?:get|list|show) all (?:server ){0,1}hardware\.$/i, ::this.ListServerHardware);
+    this.respond(/(?:get|list|show) all (?:server ){0,1}hardware\.$/i, this.ListServerHardware.bind(this));
     this.capabilities.push(this.BULLET + "List all (server) hardware (e.g. list all hardware).");
 
-    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, ::this.ListServerHardwareUtilization);
+    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, this.ListServerHardwareUtilization.bind(this));
     this.capabilities.push(this.BULLET + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
-    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i, ::this.ListAllServerHardwareUtilization);
-    this.capabilities.push(this.BULLET + "List all server hardware utilization (e.g. list Encl1, bay 1 all utilization).");
+    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i, this.ListAllServerHardwareUtilization.bind(this));
+    this.capabilities.push(this.BULLET + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
-    this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerHardwareById);
+    this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, this.ListServerHardwareById.bind(this));
     this.capabilities.push(this.BULLET + "List server hardware by name (e.g. list Encl1, bay 1).");
 
-    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}hardware\.$/i, ::this.ListHardwareByStatus);
+    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}hardware\.$/i, this.ListHardwareByStatus.bind(this));
     this.capabilities.push(this.BULLET + "List all critical/warning/ok/disabled (server) hardware (e.g. list all critical hardware).");
 
-    this.respond(/(?:get|list|show) (?:all ){0,1}(:<powerState>powered on|powered off*?) (?:server ){0,1}hardware\.$/i, ::this.ListHardwareByPowerState);
+    this.respond(/(?:get|list|show) (?:all ){0,1}(:<powerState>powered on|powered off*?) (?:server ){0,1}hardware\.$/i, this.ListHardwareByPowerState.bind(this));
     this.capabilities.push(this.BULLET + "List all powered on/off (server) hardware.");
   }
 
-  PowerOnHardware(msg, suppress) {
+  PowerOnHardware(msg) {
     if(this.client.isReadOnly()) {
       return this.transform.text(msg, "Not so fast...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
     }
-    let startMessage = false;
+    let startMessage = true;
     return this.client.ServerHardware.setPowerState(msg.host, msg.serverId, "On").feedback((res) => {
-      if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
-        startMessage = true;
+      if (startMessage && res.associatedResource.resourceHyperlink) {
+        startMessage = false;
         this.transform.text(msg, "I am powering on " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + ", this may take some time.");
       }
     }).then((res) => {
-      if (!suppress) {
-        this.transform.send(msg, res, "Finished powering on " + res.name);
-      }
-    });
-  }
-
-  PowerOffHardware(msg, suppress) {
-    if(this.client.isReadOnly()) {
-      return this.transform.text(msg, "Not so fast...  You'll have to set readOnly mode to false in your config file first if you want to do that...");
-    }
-    let startMessage = false;
-
-    let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "How would you like to power off the blade?\n" + 
-    this.BULLET + "@" + this.robot.name + " Momentary Press\n" + this.BULLET + "@" + this.robot.name + " Press and Hold");
-
-    dialog.addChoice(/momentary press/i, () => {
-      return this.client.ServerHardware.setPowerState(msg.host, msg.serverId, "Off", "MomentaryPress").feedback((res, err) => {
-        if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
-          startMessage = true;
-          this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering off " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + " with a Momentary Press. This may take some time.");
-        }
-      }).then((res) => {
-        if (!suppress) {
-          this.transform.send(msg, res, "Finished powering off " + res.name);
-        }
-      }).catch((err) => {
-        this.transform.error(msg, err);
-      });
-    });
-
-    dialog.addChoice(/press and hold/i, () => {
-      return this.client.ServerHardware.setPowerState(msg.host, msg.serverId, "Off", "PressAndHold").feedback((res, err) => {
-        if (!suppress && !startMessage && res.associatedResource.resourceHyperlink) {
-          startMessage = true;
-          this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering off " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + " with Press and Hold. This may take some time.");
-        }
-      }).then((res) => {
-        if (!suppress) {
-          this.transform.send(msg, res, "Finished powering off " + res.name);
-        }
-      }).catch((err) => {
-        this.transform.error(msg, err);
-      });
+      this.transform.send(msg, res, "Finished powering on " + res.name);
     });
   }
 
@@ -123,13 +78,12 @@ export default class ServerHardwareListener extends Listener {
 
     let dialog = this.switchBoard.startDialog(msg);
 
-    let deviceAndHyperlink = getDeviceNameAndHyperLink(msg.host + "/rest/server-hardware/" + msg.serverId);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(deviceAndHyperlink.hyperlink, deviceAndHyperlink.deviceName) + 
+    let deviceAndHyperlink = this.brain.getDeviceNameAndHyperLink(msg.host + "/rest/server-hardware/" + msg.serverId);
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the blade " + this.transform.hyperlink(deviceAndHyperlink.hyperlink, deviceAndHyperlink.deviceName) +
     ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
-    
-    
+
     dialog.addChoice(/yes/i, () => {
-      this.PowerOnHardware(msg).catch((err) => {
+      this.PowerOnHardware(msg, false).catch((err) => {
         return this.transform.error(msg, err);
       });
     });
@@ -145,17 +99,35 @@ export default class ServerHardwareListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
+    this.transform.text(msg, "How would you like to power off the server?\n" +
+    this.BULLET + "@" + this.robot.name + " Momentary Press\n" + this.BULLET + "@" + this.robot.name + " Press and Hold");
 
-    let deviceAndHyperlink = getDeviceNameAndHyperLink(msg.host + "/rest/server-hardware/" + msg.serverId);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the blade " + this.transform.hyperlink(deviceAndHyperlink.hyperlink, deviceAndHyperlink.deviceName) + 
-    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
-
-    dialog.addChoice(/yes/i, () => {
-      this.PowerOffHardware(msg);
+    dialog.addChoice(/momentary press/i, () => {
+      let startMessage = true;
+      return this.client.ServerHardware.setPowerState(msg.host, msg.serverId, "Off", "MomentaryPress").feedback((res, err) => {
+        if (startMessage && res.associatedResource.resourceHyperlink) {
+          startMessage = false;
+          this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering off " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + " with a Momentary Press. This may take some time.");
+        }
+      }).then((res) => {
+        this.transform.send(msg, res, "Finished powering off " + res.name);
+      }).catch((err) => {
+        this.transform.error(msg, err);
+      });
     });
 
-    dialog.addChoice(/no/i, () => {
-      return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't do that.");
+    dialog.addChoice(/press and hold/i, () => {
+      let startMessage = true;
+      return this.client.ServerHardware.setPowerState(msg.host, msg.serverId, "Off", "PressAndHold").feedback((res, err) => {
+        if (startMessage && res.associatedResource.resourceHyperlink) {
+          startMessage = false;
+          this.transform.text(msg, "Hey " + msg.message.user.name + " I am powering off " + this.transform.hyperlink(res.associatedResource.resourceHyperlink, res.associatedResource.resourceName) + " with Press and Hold. This may take some time.");
+        }
+      }).then((res) => {
+        this.transform.send(msg, res, "Finished powering off " + res.name);
+      }).catch((err) => {
+        this.transform.error(msg, err);
+      });
     });
   }
 
@@ -212,7 +184,7 @@ export default class ServerHardwareListener extends Listener {
   ListServerHardwareUtilization(msg) {
     this.transform.send(msg, "Ok " + msg.message.user.name + " I'm going to create the CPU and network utilization charts. This can take quite some time.");
 
-    let icMap = getLogicalInterconnectsMap();
+    let icMap = this.brain.getLogicalInterconnectsMap();
 
     let p1 = this.client.ServerHardware.getServerUtilization(msg.host, msg.serverId, {fields: 'CpuUtilization,CpuAverageFreq'}).then((res) => {
       return buildD3Chart(this.robot, this.room, 'CPU', res.metricList);
@@ -252,7 +224,7 @@ export default class ServerHardwareListener extends Listener {
   ListAllServerHardwareUtilization(msg) {
     this.transform.send(msg, msg.message.user.name + " I'm going to create all of the server utilization charts including CPU, temp, power and network utilization. This can take quite some time.");
 
-    let icMap = getLogicalInterconnectsMap();
+    let icMap = this.brain.getLogicalInterconnectsMap();
 
     let p1 = this.client.ServerHardware.getServerUtilization(msg.host, msg.serverId, {fields: 'AveragePower,PeakPower,PowerCap'}).then((res) => {
       return Promise.all([res, buildD3Chart(this.robot, this.room, 'Power', res.metricList)]);
@@ -297,3 +269,5 @@ export default class ServerHardwareListener extends Listener {
     });
   }
 }
+
+module.exports = ServerHardwareListener;

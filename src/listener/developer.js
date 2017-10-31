@@ -19,17 +19,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const Listener = require('./base-listener');
 
-import Listener from './base-listener';
-
-export default class DeveloperListener extends Listener {
+class DeveloperListener extends Listener {
   constructor(robot, client, transform) {
     super(robot, client, transform);
     this.title = "Developer";
     this.capabilities = [];
-    this.respond(/(?:get|list|show) \/rest\/(:<category>[a-zA-Z0-9_-]*?)\/(:<id>[a-zA-Z0-9_-]*?) json\.$/i, ::this.ListRaw); //Developer end point (echoes raw JSON)
+    this.respond(/(?:get|list|show) \/rest\/(:<category>[a-zA-Z0-9_-]*?)\/(:<id>[a-zA-Z0-9_-]*?) json\.$/i, this.ListRaw.bind(this)); //Developer end point (echoes raw JSON)
     this.capabilities.push(this.BULLET + "List /rest/category/id as json (e.g. list /rest/enclosure/12325dd7).");
-    this.respond(/(?:get|list|show) \/rest\/(:<category>[a-zA-Z0-9_-]*?)\/(:<id>[a-zA-Z0-9_-]*?) clean\.$/i, ::this.ListClean); //Developer end point (echoes a clean resource)
+    this.respond(/(?:get|list|show) \/rest\/(:<category>[a-zA-Z0-9_-]*?)\/(:<id>[a-zA-Z0-9_-]*?) clean\.$/i, this.ListClean.bind(this)); //Developer end point (echoes a clean resource)
     this.capabilities.push(this.BULLET + "List /rest/category/id as clean resource (e.g. list rest/enclosure/12325dd7).");
   }
 
@@ -49,3 +48,5 @@ export default class DeveloperListener extends Listener {
     });
   }
 }
+
+module.exports = DeveloperListener;

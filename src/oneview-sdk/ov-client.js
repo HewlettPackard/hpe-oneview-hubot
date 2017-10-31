@@ -19,22 +19,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const connection = require('./connection');
+const serverhardware = require('./server-hardware');
+const serverprofiles = require('./server-profiles');
+const serverprofiletemplates = require('./server-profile-templates');
+const dashboard = require('./dashboard');
+const alerts = require('./alerts');
+const logicalinterconnects = require('./logical-interconnects');
+const notifications = require('./notifications');
 
-'use strict';
+let logger = {};
 
-import connection from './connection';
-import serverhardware from './server-hardware';
-import serverprofiles from './server-profiles';
-import serverprofiletemplates from './server-profile-templates';
-import dashboard from './dashboard';
-import alerts from './alerts';
-import logicalinterconnects from './logical-interconnects';
-import notifications from './notifications';
-
-export default class OVClient {
+class OVClient {
   constructor(oneviewConfig, robot) {
     this.connections = new Map();
-    this.robot = robot;
+    logger = robot.logger;
     this.hosts = oneviewConfig.hosts;
     for (let host of this.hosts) {
       this.connections.set(host.applianceIp, new connection(host.applianceIp, host.apiVersion, host.doProxy, host.proxyHost, host.proxyPort));
@@ -64,43 +63,11 @@ export default class OVClient {
 
   login(reconnect) {
     let promises = [];
+    const connections = this.getConnections();
     for (let host of this.hosts) {
-      promises.push(this.__performLogin__(reconnect, host));
+      promises.push(__performLogin__(reconnect, host, connections, this.notifications, this.pollingInterval));
     }
     return Promise.all(promises);
-  }
-
-  __performLogin__(reconnect, host) {
-    let body =  {
-      'authLoginDomain': undefined,
-      'password': host.password,
-      'userName': host.userName,
-      'loginMsgAck': 'true'
-    };
-
-    const connection = this.getConnections().get(host.applianceIp);
-
-    const auth = () => {
-      return connection.post('/rest/login-sessions', body).then((res) => {
-        return res.sessionID;
-      });
-    };
-
-    //TODO: This needs to be per user once we have a per user login-session
-    connection.__newSession__ = auth;
-
-    return auth().then((sessionToken) => {
-      connection.headers.auth = sessionToken;
-      connection.loggedIn = true;
-      return sessionToken;
-    }).then((sessionToken) => {
-      if (!reconnect) {
-        this.notifications.__connect__(host.applianceIp);
-      }
-      this.__pollAuthToken__(host);
-      this.robot.logger.info('Successfully logged into host', host.applianceIp);
-      return sessionToken;
-    });
   }
 
   getAuthToken(host) {
@@ -139,39 +106,74 @@ export default class OVClient {
   get Notifications() {
     return this.notifications;
   }
+};
 
-  __pollAuthToken__(host) {
-    this.__delay__(this.pollingInterval * 60000).then(() => {
-      this.__checkToken__(host).then(() => {
-        this.robot.logger.debug('Existing OV auth token is still valid for host', host.applianceIp);
-        this.__pollAuthToken__(host);
-      }).catch(() => {
-         this.robot.logger.info('Existing OV auth token appears to no longer be valid.  Creating new token now for host', host.applianceIp);
-         this.__performLogin__(host, true);
-         this.__pollAuthToken__(host);
-       });
-    }).catch((err) => {
-      this.robot.logger.error(err);
-    });
-  }
+function __performLogin__(reconnect, host, connections, notifications, pollingInterval) {
+  let body =  {
+    'authLoginDomain': undefined,
+    'password': host.password,
+    'userName': host.userName,
+    'loginMsgAck': 'true'
+  };
 
-  __delay__(ms) {
-    return new Promise ((resolve) => {
-      setTimeout(function(){
-          resolve();
-      }, ms);
-    });
-  }
+  const connection = connections.get(host.applianceIp);
 
-  __checkToken__(host) {
-    return new Promise ((resolve, reject) => {
-      const connection = this.getConnections().get(host.applianceIp);
-      connection.headers['session-id'] = connection.headers.auth;
-      connection.get('/rest/sessions').then((res) => {
-        resolve(res.sessionID);
-      }).catch((err) => {
-        reject(err);
-      });
+  const auth = () => {
+    return connection.post('/rest/login-sessions', body).then((res) => {
+      return res.sessionID;
     });
-  }
+  };
+
+  //TODO: This needs to be per user once we have a per user login-session
+  connection.__newSession__ = auth;
+
+  return auth().then((sessionToken) => {
+    connection.headers.auth = sessionToken;
+    connection.loggedIn = true;
+    return sessionToken;
+  }).then((sessionToken) => {
+    if (!reconnect) {
+      notifications.connect(host.applianceIp);
+    }
+    __pollAuthToken__(host, connections, pollingInterval);
+    logger.info('Successfully logged into host', host.applianceIp);
+    return sessionToken;
+  });
 }
+
+function __pollAuthToken__(host, connections, pollingInterval) {
+  __delay__(pollingInterval * 60000).then(() => {
+    __checkToken__(host, connections).then(() => {
+      logger.debug('Existing OV auth token is still valid for host', host.applianceIp);
+      __pollAuthToken__(host, connections, pollingInterval);
+    }).catch(() => {
+       logger.info('Existing OV auth token is no longer valid.  Creating new token now for host', host.applianceIp);
+       __performLogin__(true, host, connections, notifications, pollingInterval);
+       __pollAuthToken__(host, connections, pollingInterval);
+     });
+  }).catch((err) => {
+    logger.error(err);
+  });
+}
+
+function __delay__(ms) {
+  return new Promise ((resolve) => {
+    setTimeout(function(){
+        resolve();
+    }, ms);
+  });
+}
+
+function __checkToken__(host, connections) {
+  return new Promise ((resolve, reject) => {
+    const connection = connections.get(host.applianceIp);
+    connection.headers['session-id'] = connection.headers.auth;
+    connection.get('/rest/sessions').then((res) => {
+      resolve(res.sessionID);
+    }).catch((err) => {
+      reject(err);
+    });
+  });
+}
+
+module.exports = OVClient;

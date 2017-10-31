@@ -19,12 +19,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-import { Lexer } from '../middleware/nlp-middleware';
-import OVClient from '../oneview-sdk/ov-client';
-import ovBrain from '../ov-brain';
-import { getHardwareModel } from '../ov-brain';
-import { getDeviceNameAndHyperLink } from '../ov-brain';
-import { getLogicalInterconnectsMap } from '../ov-brain';
+const nlp = require('nlp_compromise');
+const Lexer = require('../src/middleware/utils/lexer');
+const OVClient = require('../src/oneview-sdk/ov-client');
+const OneViewBrain = require('../src/middleware/ov-brain');
+
+const lex = new Lexer(nlp);
 
 let chai = require('chai');
 let sinon = require('sinon');
@@ -115,48 +115,47 @@ describe('OV Brain', () => {
   sinon.stub(oVClient.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.resolve(serverProfileTemplateResponse));
   sinon.stub(oVClient.LogicalInterconnects, 'getAllLogicalInterconnects').returns(Bluebird.resolve(logicalInterconnectsResponse));
 
-  new ovBrain(oVClient, robot, Lexer);
+  const brain = new OneViewBrain(oVClient, robot, lex);
 
   it('getHardwareModel', () => {
-    const result = getHardwareModel('10.1.1.1/rest/server-hardware/eb13eab8-adsf');
+    const result = brain.getHardwareModel('10.1.1.1/rest/server-hardware/eb13eab8-adsf');
     result.should.equal('BL460c Gen8 1');
   });
 
   it('getHardwareModel empty', () => {
-    const result = getHardwareModel('10.1.1.1/rest/server-profiles/eb13eab7');
+    const result = brain.getHardwareModel('10.1.1.1/rest/server-profiles/eb13eab7');
     result.should.equal('');
   });
 
   it('getDeviceNameAndHyperLink SH', () => {
-    const result = getDeviceNameAndHyperLink('10.1.1.1/rest/server-hardware/eb13eab8-adsf');
+    const result = brain.getDeviceNameAndHyperLink('10.1.1.1/rest/server-hardware/eb13eab8-adsf');
     const expected = {deviceName: '0000A6610EE, bay 5', hyperlink: 'https://10.1.1.1/#/server-hardware/show/overview/r/rest/server-hardware/eb13eab8-adsf?s_sid=LTE'};
     chai.expect(result).to.deep.equal(expected);
   });
 
   it('getDeviceNameAndHyperLink SP', () => {
-    const result = getDeviceNameAndHyperLink('10.1.1.1/rest/server-profiles/cc7b3c49-ef11');
+    const result = brain.getDeviceNameAndHyperLink('10.1.1.1/rest/server-profiles/cc7b3c49-ef11');
     const expected = {deviceName: 'Profile101', hyperlink: 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/ea54r213eab8-adsf?s_sid=LTE'};
     chai.expect(result).to.deep.equal(expected);
   });
 
   it('getDeviceNameAndHyperLink SPT', () => {
-    const result = getDeviceNameAndHyperLink('10.1.1.1/rest/server-profile-templates/cc7b3c49-ef112');
+    const result = brain.getDeviceNameAndHyperLink('10.1.1.1/rest/server-profile-templates/cc7b3c49-ef112');
     const expected = {deviceName: 'ProfileTemplate101', hyperlink: 'https://10.1.1.1/#/profile-templates/show/overview/r/rest/server-profile-templates/cc7b3c49-ef112?s_sid=LTE'};
     chai.expect(result).to.deep.equal(expected);
   });
 
   it('getDeviceNameAndHyperLink undef', () => {
-    const result = getDeviceNameAndHyperLink('10.1.1.1/rest/server-profiles/eb13eab99');
+    const result = brain.getDeviceNameAndHyperLink('10.1.1.1/rest/server-profiles/eb13eab99');
     const expected = {deviceName: '', hyperlink: ''};
     chai.expect(result).to.deep.equal(expected);
   });
 
   it('getLogicalInterconnectsMap', () => {
-    const result = getLogicalInterconnectsMap();
+    const result = brain.getLogicalInterconnectsMap();
     const expected = new Map();
     expected.set('/rest/interconnects/e', '/rest/logical-interconnects/47a1');
     expected.set('/rest/interconnects/f', '/rest/logical-interconnects/47a1');
     chai.expect(result).to.deep.equal(expected);
   });
-
 });

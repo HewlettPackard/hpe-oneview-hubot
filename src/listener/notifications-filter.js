@@ -19,45 +19,53 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+let logger;
 
-'use strict';
-import configLoader from '../config-loader';
-
-export default class NotificationsFilter {
-
+class NotificationsFilter {
   constructor(robot) {
-    let oneview_config = configLoader(robot);
-    const filters = oneview_config.notificationsFilters;
+    let oneviewConfig;
+    try {
+      const configuration = require('../../oneview-configuration.json');
+      robot.logger.info('Applying configuration from json file.');
+      oneviewConfig = configuration;
+    } catch(err) {
+      robot.logger.error('Error reading OneView configuration file: ', err);
+      //throw new error
+      return;
+    }
+    const filters = oneviewConfig.notificationsFilters;
     this.filters = filters;
     this.robot = robot;
     this.robot.logger.info('Configured with notification filters', this.filters);
+    logger = robot.logger;
   }
 
   check(message) {
     if (message) {
-      return [message.resource].filter(::this.__filter__);
+      return [message.resource].filter(__filter__.bind(this));
     }
   }
-
-  __filter__(item) {
-    if (this.filters) {
-      for (var i=0; i < this.filters.length; i++) {
-        return this.__checkFilter__(this.filters[i], item);
-      }
-    }
-  }
-
-  __checkFilter__(filter, item) {
-    //TODO need to be case insensitive when matching the filter key to the message.resource.severity
-    for (let key in filter) {
-      if(item[key] === undefined || item[key] != filter[key]) {
-        this.robot.logger.info('Message does not pass against filter', filter);
-        return false;
-      } else {
-        this.robot.logger.info('Message passes against filter', filter);
-        return true;
-      }
-    }
-  }
-
 }
+
+function __filter__(item) {
+  if (this.filters) {
+    for (let i=0; i < this.filters.length; i++) {
+      return __checkFilter__(this.filters[i], item);
+    }
+  }
+}
+
+function __checkFilter__(filter, item) {
+  //TODO need to be case insensitive when matching the filter key to the message.resource.severity
+  for (let key in filter) {
+    if(item[key] === undefined || item[key] != filter[key]) {
+      logger.info('Message does not pass against filter', filter);
+      return false;
+    } else {
+      logger.info('Message passes against filter', filter);
+      return true;
+    }
+  }
+}
+
+module.exports = NotificationsFilter;

@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 const uri = '/rest/index/resources/aggregated?';
 
-export default class Dashboard {
+class Dashboard {
   constructor (ov_client) {
     this.ov_client = ov_client;
     this.connections = ov_client.getConnections();
@@ -99,4 +99,6 @@ export default class Dashboard {
       });
     });
   }
-}
+};
+
+module.exports = Dashboard;
