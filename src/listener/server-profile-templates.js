@@ -70,7 +70,7 @@ class ServerProfileTemplateListener extends Listener {
 
   GetAvailableTargets(msg) {
     let template = null;
-    __getAvailableTargets__(msg, (spt) => { template = spt; }).then((targets) => {
+    __getAvailableTargets__(msg, (spt) => { template = spt; }, this.client).then((targets) => {
       if (targets && targets.length > 0) {
         return this.transform.send(msg, targets, "I was able to dig up " + this.transform.makePlural(targets.length, 'server') + ' for ' + this.transform.hyperlink(template.hyperlink, template.name));
       } else {
@@ -102,7 +102,7 @@ class ServerProfileTemplateListener extends Listener {
 
     dialog.addChoice(/yes/i, () => {
       let template = null;
-      __getAvailableTargets__(msg, (spt) => { template = spt; }).then((targets) => {
+      __getAvailableTargets__(msg, (spt) => { template = spt; }, this.client).then((targets) => {
         let i = -1;
         return targets.filter((t) => {
           if (t.powerState === 'Off') {
@@ -254,11 +254,11 @@ class ServerProfileTemplateListener extends Listener {
   }
 }
 
-function __getAvailableTargets__(msg, target) {
+function __getAvailableTargets__(msg, target, client) {
   let host = msg.host;
-  return this.client.ServerProfileTemplates.getAvailableTargets(msg.host, msg.templateId, target).then((targets) => {
+  return client.ServerProfileTemplates.getAvailableTargets(msg.host, msg.templateId, target).then((targets) => {
     if (targets.length > 0) {
-      return Promise.allSettled(targets.map((t) => { return this.client.ServerHardware.getServerHardware(host, t.serverHardwareUri); }));
+      return Promise.allSettled(targets.map((t) => { return client.ServerHardware.getServerHardware(host, t.serverHardwareUri); }));
     } else {
       return [];
     }

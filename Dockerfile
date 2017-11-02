@@ -19,8 +19,7 @@ WORKDIR /home/docker/hpe-oneview-hubot
 
 RUN cp -rf /home/docker/hubot-core-org/node_modules/ /home/docker/hpe-oneview-hubot/
 
-COPY gulpfile.babel.js /home/docker/hpe-oneview-hubot/
+COPY gulpfile.js /home/docker/hpe-oneview-hubot/
 COPY src /home/docker/hpe-oneview-hubot/src/
-COPY .babelrc /home/docker/hpe-oneview-hubot/
 
 ENTRYPOINT ["sh", "/usr/local/bin/docker_entry.sh"]
