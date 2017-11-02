@@ -22,11 +22,13 @@ THE SOFTWARE.
 const transform = require('./resource-transformer');
 const url = require('url');
 let ov_brain;
+let adapter;
 
 // PlainTextTransform it's a common transformer to HipChat and Flowdock.
 class PlainTextTransform {
-  constructor(brain) {
+  constructor(brain, adapterName) {
     ov_brain = brain;
+    adapter = adapterName;
   }
 
   hyperlink(uri, name) {
@@ -88,7 +90,7 @@ class PlainTextTransform {
   }
 
   getProviderName() {
-    if (robot.adapterName === 'flowdock') {
+    if (adapter === 'flowdock') {
       return 'Flowdock';
     } else {
       return 'HipChat';

@@ -28,7 +28,7 @@ class ResourceTransforms {
     if (robot.adapterName === 'slack') {
       this.provider = new SlackTransform(brain);
     } else if (robot.adapterName === 'hipchat' || robot.adapterName === 'flowdock') {
-      this.provider = new PlainTextTransform(brain);
+      this.provider = new PlainTextTransform(brain, robot.adapterName);
     } else {
       this.provider = new ShellTransform();
     }
