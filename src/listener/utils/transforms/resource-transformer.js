@@ -19,26 +19,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const ServerProfile = require('./server-profile');
+const ServerProfileTemplate = require('./server-profile-template');
+const Alert = require('./alert');
+const ServerHardware = require('./server-hardware');
+const ServerProfileCompliancePreview = require('./server-profile-compliance-preview');
 
-import ServerProfile from './server-profile';
-import ServerProfileTemplate from './server-profile-template';
-import Alert from './alert';
-import ServerHardware from './server-hardware';
-import ServerProfileCompliancePreview from './server-profile-compliance-preview';
-
-export function transform(oneViewResource) {
+function transform(oneViewResource, brain) {
   let oneViewResourceType = oneViewResource.type.toLowerCase();
 
   switch(true) {
     case oneViewResourceType.startsWith('serverprofilecompliancepreview'):
       return new ServerProfileCompliancePreview(oneViewResource);
     case oneViewResourceType.startsWith('server-hardware'):
-      return new ServerHardware(oneViewResource);
+      return new ServerHardware(oneViewResource, brain);
     case oneViewResourceType.startsWith('serverprofiletemplate'):
       return new ServerProfileTemplate(oneViewResource);
     case oneViewResourceType.startsWith('alertresource'):
       return new Alert(oneViewResource);
     case oneViewResourceType.startsWith('serverprofile'):
-      return new ServerProfile(oneViewResource);
+      return new ServerProfile(oneViewResource, brain);
   }
 }
+
+module.exports = transform;

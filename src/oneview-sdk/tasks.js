@@ -19,8 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-export function isTerminal(task) {
+function isTerminal(task) {
   if (!task || !task.type || !task.type.startsWith("TaskResource")) {
     return true;
   }
@@ -36,4 +35,6 @@ export function isTerminal(task) {
   }
 
   return false;
-}
+};
+
+module.exports = isTerminal;

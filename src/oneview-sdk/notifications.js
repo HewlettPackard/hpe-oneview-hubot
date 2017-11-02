@@ -19,10 +19,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-'use strict';
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 
 const amqp = require('amqp');
 const alerts = 'scmb.alerts.Created.#';
@@ -52,6 +50,7 @@ class MessageEmitter {
     }
   }
 }
+module.exports = MessageEmitter;
 
 function exists(filepath) {
   return new Promise((resolve) => {
@@ -96,7 +95,7 @@ function write(filepath, string) {
   });
 }
 
-export default class Notifications {
+class Notifications {
   constructor (client, robot) {
     this.robot = robot;
     this.client = client;
@@ -105,7 +104,7 @@ export default class Notifications {
   //TODO: Bug #22 Not working.  Need to perform an aysnc shutdown from the SCMB
   disconnect () {
     this.robot.logger.info('Disonnecting from SCMB');
-    var exchange = this.connection.exchange('scmb', {type: 'topic'});
+    let exchange = this.connection.exchange('scmb', {type: 'topic'});
     this.queue.unbind(exchange, alerts);
     this.queue.unbind(exchange, sp);
     this.queue.unbind(exchange, spt);
@@ -115,7 +114,7 @@ export default class Notifications {
     this.robot.logger.info('Disconnected from SCMB');
   }
 
-  __connect__(host) {
+  connect(host) {
     this.robot.logger.info('Connecting to SCMB on host', host);
 
     const sslFolder = 'oneview-hubot/pem_files/' + host + '/';
@@ -160,7 +159,7 @@ export default class Notifications {
           queue.bind(exchange, sh);
 
           const emitter = new MessageEmitter(this.robot, queue, host);
-          queue.subscribe({ack: true}, ::emitter.onMessage);
+          queue.subscribe({ack: true}, emitter.onMessage.bind(emitter));
         });
       });
 
@@ -210,3 +209,4 @@ export default class Notifications {
     return true;
   }
 }
+module.exports = Notifications;

@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-export default class Resource {
+class Resource {
   constructor(oneViewResource) {
     this.type = oneViewResource.type;
     this.status = oneViewResource.status;
@@ -29,7 +29,7 @@ export default class Resource {
     this.hyperlink = oneViewResource.hyperlink;
   }
 
- camelCaseToTitleCase(camelCase){
+  camelCaseToTitleCase(camelCase){
     if (camelCase == null || camelCase === "" ) {
       return camelCase;
     }
@@ -46,3 +46,5 @@ export default class Resource {
     return newText;
   }
 }
+
+module.exports = Resource;

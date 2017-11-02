@@ -20,13 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-export default class ShellTransform {
+class ShellTransform {
   hyperlink(uri, name) {
     return name ? name : uri;
   }
 
   list(lines) {
-    for (var i = 0; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
       lines[i] = '  - ' + lines[i];
     }
     return lines;
@@ -76,3 +76,5 @@ export default class ShellTransform {
     return 'Shell';
   }
 }
+
+module.exports = ShellTransform;

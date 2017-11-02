@@ -19,46 +19,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const PlainTextTransform = require('./transforms/plain-text');
+const ShellTransform = require('./transforms/shell');
+const SlackTransform = require('./transforms/slack');
 
-import PlainTextTransform from './transforms/plain-text';
-import ShellTransform from './transforms/shell';
-import SlackTransform from './transforms/slack';
-
-//From: http://stackoverflow.com/questions/591857/how-can-i-get-a-javascript-stack-trace-when-i-throw-an-exception
-function st() {
-    var err = new Error();
-    return err.stack;
-}
-
-function stacktrace(error) {
-  if (error) {
-    let message = error.toString();
-    if (error.stack) {
-      message += error.stack;
-    }
-    return message;
-  } else {
-    return "Unknown error\n" + st();
-  }
-}
-
-function addPeriod(text) {
-  if (text && !text.endsWith('.')) {//TODO" Naieve assumption that the bot will never use ! or ?
-    return text + '.';
-  }
-  return text;
-}
-
-function isVowel(x) {
-  return /[aeiouAEIOU]/.test(x);
-}
-
-export default class ResourceTransforms {
-  constructor(robot) {
+class ResourceTransforms {
+  constructor(robot, brain) {
     if (robot.adapterName === 'slack') {
-      this.provider = new SlackTransform();
+      this.provider = new SlackTransform(brain);
     } else if (robot.adapterName === 'hipchat' || robot.adapterName === 'flowdock') {
-      this.provider = new PlainTextTransform();
+      this.provider = new PlainTextTransform(brain, robot.adapterName);
     } else {
       this.provider = new ShellTransform();
     }
@@ -70,9 +40,9 @@ export default class ResourceTransforms {
   }
 
   list(text) {
-    var lines = text.split('\n');
-    for (var i = 0; i < lines.length; i++) {
-      lines[i] = addPeriod(lines[i]);
+    let lines = text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      lines[i] = __addPeriod__(lines[i]);
     }
     return this.provider.list(lines).join('\n');
   }
@@ -84,7 +54,7 @@ export default class ResourceTransforms {
       try {
         let err = JSON.stringify(error, null, '  ');
         if (err === '{}') {
-          this.provider.text(msg, stacktrace(error));
+          this.provider.text(msg, ____stacktrace____(error));
         } else {
           this.provider.error(msg, error);
         }
@@ -97,7 +67,7 @@ export default class ResourceTransforms {
   text(msg, text) {
     return new Promise((resolve, reject) => {
       try {
-        resolve(this.provider.text(msg, addPeriod(text)));
+        resolve(this.provider.text(msg, __addPeriod__(text)));
       } catch (err) {
         this.robot.logger.error("Transform error in text handler", err);
         reject(err);
@@ -111,7 +81,7 @@ export default class ResourceTransforms {
         if (typeof resource === 'string') {
           this.text(msg, resource).then(resolve).catch(reject);
         } else {
-          resolve(this.provider.send(msg, resource, addPeriod(text)));
+          resolve(this.provider.send(msg, resource, __addPeriod__(text)));
         }
       } catch (err) {
         this.robot.logger.error("Transform error in send handler", err);
@@ -129,9 +99,9 @@ export default class ResourceTransforms {
         }
         this.robot.logger.debug('Selecting room ' + r + ' to send message to.');
         if (typeof resource === 'string') {
-          resolve(this.provider.messageRoom(this.robot, r, null, addPeriod(resource)));
+          resolve(this.provider.messageRoom(this.robot, r, null, __addPeriod__(resource)));
         } else {
-          resolve(this.provider.messageRoom(this.robot, r, resource, addPeriod(text)));
+          resolve(this.provider.messageRoom(this.robot, r, resource, __addPeriod__(text)));
         }
       } catch (err) {
         this.robot.logger.error("Transform error in messageRoom handler", err);
@@ -142,7 +112,7 @@ export default class ResourceTransforms {
 
   //http://www.really-learn-english.com/spelling-rules-add-s-verb.html
   makePlural(count, word) {
-    var out = word;
+    let out = word;
     if (count === 1) {
       return "1 " + word;
     }
@@ -155,11 +125,11 @@ export default class ResourceTransforms {
       word.endsWith("sh") ) {	// wash  --> washes
       out += "es";
     } else {
-      var before = 'a';
+      let before = 'a';
       if (word.length>=2) {
         before = word.charAt(word.length-2);			//2nd to last char
       }
-      if( word.endsWith("y") && !isVowel(before) ) {	// fly --> flies
+      if( word.endsWith("y") && !__isVowel__(before) ) {	// fly --> flies
         out = word.substring(0, word.length-1);
         out += "ies";
       } else {
@@ -180,3 +150,34 @@ export default class ResourceTransforms {
     return "are " + this.makePlural(count, word);
   }
 }
+
+//From: http://stackoverflow.com/questions/591857/how-can-i-get-a-javascript-stack-trace-when-i-throw-an-exception
+function __st__() {
+    let err = new Error();
+    return err.stack;
+}
+
+function __stacktrace__(error) {
+  if (error) {
+    let message = error.toString();
+    if (error.stack) {
+      message += error.stack;
+    }
+    return message;
+  } else {
+    return "Unknown error\n" + __st__();
+  }
+}
+
+function __addPeriod__(text) {
+  if (text && !text.endsWith('.')) {//TODO" Naieve assumption that the bot will never use ! or ?
+    return text + '.';
+  }
+  return text;
+}
+
+function __isVowel__(x) {
+  return /[aeiouAEIOU]/.test(x);
+}
+
+module.exports = ResourceTransforms;

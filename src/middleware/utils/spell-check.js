@@ -26,7 +26,7 @@ const spellingErrors = {
 };
 
 //SpellCheck function
-export default (term) => {
+const SpellCheck = (term) => {
   let rebuild = false;
   const fixed = term.text.split(" ").map((w) => {
     if (spellingErrors[w]) {
@@ -43,3 +43,5 @@ export default (term) => {
 
   return term;
 };
+
+module.exports = SpellCheck;

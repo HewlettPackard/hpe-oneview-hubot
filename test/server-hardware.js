@@ -19,10 +19,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-
-import OVClient from '../oneview-sdk/ov-client';
-import ServerHardware from '../oneview-sdk/server-hardware';
+const OVClient = require('../src/oneview-sdk/ov-client');
+const ServerHardware = require('../src/oneview-sdk/server-hardware');
 
 let chai = require('chai');
 let sinon = require('sinon');

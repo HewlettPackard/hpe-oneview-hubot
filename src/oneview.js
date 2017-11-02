@@ -20,34 +20,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import nlp, { Lexer } from './middleware/nlp-middleware';
-import ovListener from './listener/ov-listener';
-import ovClient from './oneview-sdk/ov-client';
-import ovBrain from './ov-brain';
-import configLoader from './config-loader';
+const nlp = require('./middleware/nlp-middleware').nlp;
+const ovListener = require('./listener/ov-listener');
+const ovClient = require('./oneview-sdk/ov-client');
+const ovBrain = require('./middleware/ov-brain');
 
 const BULLET = '\n\t\u2022 ';
 
 const main = (robot) => {
   // load OneView configuration data from external file
-  let oneviewConfig = configLoader(robot);
-  if (oneviewConfig === null) {
-    robot.logger.error(
-      'OneView config file not found!  Bot will not be started.');
+  let oneviewConfig;
+  try {
+    const configuration = require('../oneview-configuration.json');
+    robot.logger.info('Applying configuration from json file.');
+    oneviewConfig = configuration;
+  } catch(err) {
+    robot.logger.error('Error reading OneView configuration file: ', err);
+    //throw new error
     return;
   }
 
   robot.logger.info('Initializing NLP');
-  nlp(robot);
+  const lex = nlp(robot);
 
   robot.logger.info('Initializing OneView');
   const client = new ovClient(oneviewConfig, robot);
 
   client.login(false).then(() => {
     robot.logger.info('Logged into OneView.');
-    new ovBrain(client, robot, Lexer);
-    ovListener(robot, client);
+    const brain = new ovBrain(client, robot, lex);
+    ovListener(robot, client, brain);
     introBot();
+  }).catch((err) => {
+    robot.logger.error(err);
   });
 
   function introBot() {
@@ -85,5 +90,5 @@ const main = (robot) => {
   }));
 };
 
-export default main;
+exports.default = main;
 module.exports = main;

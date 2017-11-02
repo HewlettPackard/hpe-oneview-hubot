@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 const uri = '/rest/server-profiles/';
 
-export default class ServerProfiles {
+class ServerProfiles {
   constructor (ov_client) {
     this.ov_client = ov_client;
     this.connections = ov_client.getConnections();
@@ -95,4 +95,6 @@ export default class ServerProfiles {
     return connection.get(uri + 'available-targets?serverHardwareTypeUri=' + serverHardwareTypeUri + '&enclosureGroupUri=' + enclosureGroupUri);
   }
 
-}
+};
+
+module.exports = ServerProfiles;

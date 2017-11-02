@@ -19,72 +19,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-import { transform } from './resource-transformer';
+const transform = require('./resource-transformer');
 const url = require('url');
-
-function Title(resource) {
-  if (resource.type) {
-    if (resource.type.startsWith('AlertResource')) {
-      if (resource.alertTypeID && resource.alertTypeID.startsWith("Trap")) {
-        return "Trap: " + resource.description;
-      }
-      return resource.description + '\n';
-    }
-
-    if (resource.type.startsWith('server-hardware')) {
-      return 'Server Hardware: ' + resource.name + '\n';
-    }
-
-    if (resource.type.startsWith('ServerProfileTemplate')) {
-      return 'Profile Template: ' + resource.name + '\n';
-    }
-
-    if (resource.type.startsWith('ServerProfile') && !resource.type.startsWith('ServerProfileCompliancePreview')) {
-      return 'Profile: ' + resource.name + '\n';
-    }
-  }
-}
-
-function ToOutput(resource) {
-  const transformedRes = transform(resource);
-  let host;
-  if (resource.hyperlink) {
-    host = url.parse(resource.hyperlink).hostname;
-  }
-
-  const title = Title(transformedRes);
-
-  let output = '';
-  if (title) {
-    output = title;
-  }
-  if(transformedRes.pretext) {
-    output += transformedRes.pretext + '\n';
-  }
-  output += transformedRes.buildPlainTextOutput(host);
-  return output;
-}
-
-function output(resource) {
-  if (Array.isArray(resource)) {
-    return resource.map(ToOutput);
-  } else if (resource.members) {
-    return resource.members.map(ToOutput);
-  } else {
-    return [ToOutput(resource)];
-  }
-  return [];
-}
+let ov_brain;
+let adapter;
 
 // PlainTextTransform it's a common transformer to HipChat and Flowdock.
-export default class PlainTextTransform {
+class PlainTextTransform {
+  constructor(brain, adapterName) {
+    ov_brain = brain;
+    adapter = adapterName;
+  }
+
   hyperlink(uri, name) {
     return name ? name : uri;
   }
 
   list(lines) {
-    for (var i = 0; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
       lines[i] = '  - ' + lines[i];
     }
     return lines;
@@ -99,10 +51,10 @@ export default class PlainTextTransform {
       throw "Resource was null";
     }
 
-    const out = output(resource).join('\n');
+    const out = __output__(resource).join('\n');
     if (text) {
       msg.send(text);
-    } 
+    }
 
     msg.send(out);
   }
@@ -113,7 +65,7 @@ export default class PlainTextTransform {
     }
 
     if (resource) {
-      const out = output(resource).join('\n');
+      const out = __output__(resource).join('\n');
       robot.messageRoom(room, out);
     }
   }
@@ -138,10 +90,66 @@ export default class PlainTextTransform {
   }
 
   getProviderName() {
-    if (robot.adapterName === 'flowdock') {
+    if (adapter === 'flowdock') {
       return 'Flowdock';
     } else {
-      return 'HipChat';      
+      return 'HipChat';
     }
   }
 }
+
+function __title__(resource) {
+  if (resource.type) {
+    if (resource.type.startsWith('AlertResource')) {
+      if (resource.alertTypeID && resource.alertTypeID.startsWith("Trap")) {
+        return "Trap: " + resource.description;
+      }
+      return resource.description + '\n';
+    }
+
+    if (resource.type.startsWith('server-hardware')) {
+      return 'Server Hardware: ' + resource.name + '\n';
+    }
+
+    if (resource.type.startsWith('ServerProfileTemplate')) {
+      return 'Profile Template: ' + resource.name + '\n';
+    }
+
+    if (resource.type.startsWith('ServerProfile') && !resource.type.startsWith('ServerProfileCompliancePreview')) {
+      return 'Profile: ' + resource.name + '\n';
+    }
+  }
+}
+
+function __toOutput__(resource) {
+  const transformedRes = transform(resource, ov_brain);
+  let host;
+  if (resource.hyperlink) {
+    host = url.parse(resource.hyperlink).hostname;
+  }
+
+  const title = __title__(transformedRes);
+
+  let output = '';
+  if (title) {
+    output = title;
+  }
+  if(transformedRes.pretext) {
+    output += transformedRes.pretext + '\n';
+  }
+  output += transformedRes.buildPlainTextOutput(host);
+  return output;
+}
+
+function __output__(resource) {
+  if (Array.isArray(resource)) {
+    return resource.map(__toOutput__);
+  } else if (resource.members) {
+    return resource.members.map(__toOutput__);
+  } else {
+    return [__toOutput__(resource)];
+  }
+  return [];
+}
+
+module.exports = PlainTextTransform;

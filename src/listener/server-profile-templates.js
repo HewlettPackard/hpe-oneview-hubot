@@ -19,54 +19,41 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-import Listener from './base-listener';
-import UserException from '../oneview-sdk/user-exception';
-import { getDeviceNameAndHyperLink } from '../ov-brain';
+const Listener = require('./base-listener');
+const UserException = require('../oneview-sdk/user-exception');
 const Conversation = require('hubot-conversation');
 
-export default class ServerProfileTemplateListener extends Listener {
-  constructor(robot, client, transform, serverHardware, serverProfiles) {
+class ServerProfileTemplateListener extends Listener {
+  constructor(robot, client, transform, serverHardware, serverProfiles, brain) {
     super(robot, client, transform);
     this.serverHardware = serverHardware;
     this.serverProfiles = serverProfiles;
-
+    this.brain = brain;
     this.switchBoard = new Conversation(robot);
 
     this.title = "Server Profile Template";
     this.capabilities = [];
-    this.respond(/(?:get|list|show) all (?:server profile ){0,1}templates\.$/i, ::this.ListServerProfileTemplates);
+    this.respond(/(?:get|list|show) all (?:server profile ){0,1}templates\.$/i, this.ListServerProfileTemplates.bind(this));
     this.capabilities.push(this.BULLET + "Show all (server) profile templates (e.g. show all templates).");
 
-    this.respond(/(?:get|list|show) available (?:hardware|targets) for (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.GetAvailableTargets);
+    this.respond(/(?:get|list|show) available (?:hardware|targets) for (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, this.GetAvailableTargets.bind(this));
     this.capabilities.push(this.BULLET + "Show available targets for a server profile template (e.g. show available targets for docker swarm).");
 
-    this.respond(/(?:get|list|show) profile[s]{0,1} (?:using|deployed from|deployed by) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.GetDeployedProfiles);
+    this.respond(/(?:get|list|show) profile[s]{0,1} (?:using|deployed from|deployed by) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, this.GetDeployedProfiles.bind(this));
     this.capabilities.push(this.BULLET + "Show profile(s) using a server profile template (e.g. show profile using docker swarm).");
 
-    this.respond(/(?:deploy|create) (:<count>\d+) profile[s]{0,1} (?:from|for|using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.DeployProfiles);
+    this.respond(/(?:deploy|create) (:<count>\d+) profile[s]{0,1} (?:from|for|using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, this.DeployProfiles.bind(this));
     this.capabilities.push(this.BULLET + "Create profile(s) using a server profile template (e.g. create profile for docker swarm).");
 
-    this.respond(/(?:flex|grow)(?: the)? (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i, ::this.DeployProfiles);
+    this.respond(/(?:flex|grow)(?: the)? (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i, this.DeployProfiles.bind(this));
     this.capabilities.push(this.BULLET + "Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).");
 
-    this.respond(/(?:undeploy|remove) (:<count>\d+) profile[s]{0,1} (?:from|that were deployed from|that were using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.UnDeployProfiles);
-    this.respond(/(?:undeploy|remove) (:<count>\d+) server[s]{0,1} (?:from|that were deployed from|that were using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.UnDeployProfiles);
+    this.respond(/(?:undeploy|remove) (:<count>\d+) profile[s]{0,1} (?:from|that were deployed from|that were using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, this.UnDeployProfiles.bind(this));
+    this.respond(/(?:undeploy|remove) (:<count>\d+) server[s]{0,1} (?:from|that were deployed from|that were using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, this.UnDeployProfiles.bind(this));
     this.capabilities.push(this.BULLET + "Remove a number of profiles/servers from a profile template (e.g. remove 2 profiles from docker swarm).");
 
-    this.respond(/(?:fix)(?: all)? compliance(?: issues)? for (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, ::this.FixCompliance);
+    this.respond(/(?:fix)(?: all)? compliance(?: issues)? for (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i, this.FixCompliance.bind(this));
     this.capabilities.push(this.BULLET + "Fix compliance for a profile template (e.g. fix compliance for docker swarm).");
-  }
-
-  __getAvailableTargets__(msg, target) {
-    let host = msg.host;
-    return this.client.ServerProfileTemplates.getAvailableTargets(msg.host, msg.templateId, target).then((targets) => {
-      if (targets.length > 0) {
-        return Promise.allSettled(targets.map((t) => { return this.client.ServerHardware.getServerHardware(host, t.serverHardwareUri); }));
-      } else {
-        return [];
-      }
-    });
   }
 
   ListServerProfileTemplates(msg) {
@@ -83,7 +70,7 @@ export default class ServerProfileTemplateListener extends Listener {
 
   GetAvailableTargets(msg) {
     let template = null;
-    this.__getAvailableTargets__(msg, (spt) => { template = spt; }).then((targets) => {
+    __getAvailableTargets__(msg, (spt) => { template = spt; }, this.client).then((targets) => {
       if (targets && targets.length > 0) {
         return this.transform.send(msg, targets, "I was able to dig up " + this.transform.makePlural(targets.length, 'server') + ' for ' + this.transform.hyperlink(template.hyperlink, template.name));
       } else {
@@ -110,17 +97,17 @@ export default class ServerProfileTemplateListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy " + this.transform.makePlural(msg.count, 'profile') + 
-    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");    
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy " + this.transform.makePlural(msg.count, 'profile') +
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
 
     dialog.addChoice(/yes/i, () => {
-      var template = null;
-      this.__getAvailableTargets__(msg, (spt) => { template = spt; }).then((targets) => {
-        var i = -1;
+      let template = null;
+      __getAvailableTargets__(msg, (spt) => { template = spt; }, this.client).then((targets) => {
+        let i = -1;
         return targets.filter((t) => {
           if (t.powerState === 'Off') {
             i++;
-            return i < msg.count
+            return i < msg.count;
           }
         });
       }).then((targets) => {
@@ -162,13 +149,13 @@ export default class ServerProfileTemplateListener extends Listener {
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to un-deploy " + this.transform.makePlural(msg.count, 'profile') + 
-    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");    
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to un-deploy " + this.transform.makePlural(msg.count, 'profile') +
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
 
     dialog.addChoice(/yes/i, () => {
-      var template = null;
+      let template = null;
       this.client.ServerProfileTemplates.getProfilesUsingTemplate(msg.host, msg.templateId, (spt) => { template = spt; }).then((profiles) => {
-        var i = -1;
+        let i = -1;
         return profiles.filter(() => {
           i++;
           return i < msg.count;
@@ -181,7 +168,7 @@ export default class ServerProfileTemplateListener extends Listener {
                                         'I will notify you when I am finished.  Grab a snack.  This is going to take a bit.').then(() => {
           return Promise.allSettled(profiles.map((profile) => {
             if (profile.serverHardwareUri) {
-              return this.serverHardware.PowerOffHardware(host, profile.serverHardwareUri, msg, true).then(() => {
+              return this.PowerOffHardware(host, profile.serverHardwareUri, msg).then(() => {
                 return this.client.ServerProfiles.deleteServerProfile(host, profile.uri).feedback((res) => {
                   this.robot.logger.debug(res.taskState + ' ' + res.taskStatus);
                 });
@@ -225,15 +212,15 @@ export default class ServerProfileTemplateListener extends Listener {
 
     let dialog = this.switchBoard.startDialog(msg);
 
-    let nameAndHyperlink = getDeviceNameAndHyperLink(host + "/rest/server-profile-templates/" + msg.templateId);
-    this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template " + this.transform.hyperlink(nameAndHyperlink.hyperlink, nameAndHyperlink.deviceName) + 
-    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");    
+    let nameAndHyperlink = this.brain.getDeviceNameAndHyperLink(host + "/rest/server-profile-templates/" + msg.templateId);
+    this.transform.text(msg, msg.message.user.name + " I am going to fix the compliance issues for the profile template " + this.transform.hyperlink(nameAndHyperlink.hyperlink, nameAndHyperlink.deviceName) +
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
 
     dialog.addChoice(/yes/i, () => {
-      var template = null;
+      let template = null;
       this.client.ServerProfileTemplates.getNonCompliantProfiles(host, msg.templateId, (spt) => { template = spt; }).then((profiles) => {
         if (profiles.length == 0) {
-          msg.send({text:'There are no profiles using <' + template.hyperlink + '|' + template.name + '> that are out of compliance.'})
+          msg.send({text:'There are no profiles using <' + template.hyperlink + '|' + template.name + '> that are out of compliance.'});
         } else {
           return this.transform.send(msg, profiles, 'There ' + this.transform.isAre(profiles.length, 'profile') + ' that are out of compliance with ' + this.transform.hyperlink(template.hyperlink, template.name) + ' that I am going to automatically fix.\n' +
                                           'For each profile listed below, I will perform the following operations:\n' +
@@ -243,7 +230,7 @@ export default class ServerProfileTemplateListener extends Listener {
                                           'This may take a while but I will let you know when I finish.').then(() => {
             return Promise.allSettled(profiles.map((profile) => {
               //TODO bug here if the template is not assigned to a blade, need to null check profile.serverHardwareUri
-             return this.PowerOffHardware(host, profile.serverHardwareUri, msg).then((res) => {
+              return this.PowerOffHardware(host, profile.serverHardwareUri, msg).then((res) => {
                 return this.serverProfiles.MakeServerProfileCompliant(profile.uri, msg, true);
               }).then(() => {
                 msg.serverId = profile.serverHardwareUri;
@@ -266,3 +253,16 @@ export default class ServerProfileTemplateListener extends Listener {
     });
   }
 }
+
+function __getAvailableTargets__(msg, target, client) {
+  let host = msg.host;
+  return client.ServerProfileTemplates.getAvailableTargets(msg.host, msg.templateId, target).then((targets) => {
+    if (targets.length > 0) {
+      return Promise.allSettled(targets.map((t) => { return client.ServerHardware.getServerHardware(host, t.serverHardwareUri); }));
+    } else {
+      return [];
+    }
+  });
+}
+
+module.exports = ServerProfileTemplateListener;

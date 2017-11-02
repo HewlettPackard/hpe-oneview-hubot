@@ -19,37 +19,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-import Listener from "./base-listener";
-import { getDeviceNameAndHyperLink } from '../ov-brain';
+const Listener = require('./base-listener');
 const Conversation = require("hubot-conversation");
 
-export default class ServerProfilesListener extends Listener {
-  constructor(robot, client, transform, serverHardware) {
+class ServerProfilesListener extends Listener {
+  constructor(robot, client, transform, serverHardware, brain) {
     super(robot, client, transform);
     this.serverHardware = serverHardware;
-
+    this.brain = brain;
     this.switchBoard = new Conversation(robot);
 
     this.title = "Server Profile";
     this.capabilities = [];
-    this.respond(/(?:get|list|show) all (?:server ){0,1}profiles\.$/i, ::this.ListServerProfiles);
+    this.respond(/(?:get|list|show) all (?:server ){0,1}profiles\.$/i, this.ListServerProfiles.bind(this));
     this.capabilities.push(this.BULLET + "Show all (server) profiles (e.g. show all profiles).");
 
-    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.ListServerProfile);
+    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, this.ListServerProfile.bind(this));
     this.capabilities.push(this.BULLET + "Show a specific (server) profile (e.g. show hadoop cluster).");
 
-    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) compliance(?: preview){0,1}\.$/i, ::this.ListServerProfileCompliancePreview);
+    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) compliance(?: preview){0,1}\.$/i, this.ListServerProfileCompliancePreview.bind(this));
     this.capabilities.push(this.BULLET + "Show a specific (server) profile compliance (e.g. show hadoop cluster compliance).");
 
-    this.respond(/(?:update|make) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) (?:compliance|compliant)\.$/i, ::this.HandleServerCompliantMessage);
+    this.respond(/(?:update|make) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) (?:compliance|compliant)\.$/i, this.HandleServerCompliantMessage.bind(this));
     this.capabilities.push(this.BULLET + "Make/update a specific (server) profile compliance (e.g. make hadoop cluster compliant).");
 
-    this.respond(/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOnServerProfile);
-    this.respond(/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, ::this.PowerOffServerProfile);
+    this.respond(/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, this.PowerOnServerProfile.bind(this));
+    this.respond(/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, this.PowerOffServerProfile.bind(this));
     this.capabilities.push(this.BULLET + "Power on/off a specific (server) profile (e.g. turn on hadoop cluster).");
 
-    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}profiles\.$/i, ::this.ListProfilesByStatus);
+    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}profiles\.$/i, this.ListProfilesByStatus.bind(this));
     this.capabilities.push(this.BULLET + "List all critical/warning/ok/disabled (server) profiles (e.g. list all critical profiles).");
   }
 
@@ -122,11 +120,11 @@ export default class ServerProfilesListener extends Listener {
 
     let dialog = this.switchBoard.startDialog(msg);
 
-    let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
+    let deviceAndHyperlink = this.brain.getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
     let profileName = deviceAndHyperlink.deviceName;
     let profileHyperlink = deviceAndHyperlink.hyperlink;
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + 
-    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");    
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile " + this.transform.hyperlink(profileHyperlink, profileName) +
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
 
     dialog.addChoice(/yes/i, () => {
       this.client.ServerProfiles.getServerProfile(msg.host, msg.profileId).then((res) => {
@@ -155,11 +153,11 @@ export default class ServerProfilesListener extends Listener {
 
     let dialog = this.switchBoard.startDialog(msg);
 
-    let deviceAndHyperlink = getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
+    let deviceAndHyperlink = this.brain.getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
     let profileName = deviceAndHyperlink.deviceName;
     let profileHyperlink = deviceAndHyperlink.hyperlink;
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile " + this.transform.hyperlink(profileHyperlink, profileName) + 
-    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");    
+    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile " + this.transform.hyperlink(profileHyperlink, profileName) +
+    ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
 
     dialog.addChoice(/yes/i, () => {
       this.client.ServerProfiles.getServerProfile(msg.host, msg.profileId).then((res) => {
@@ -180,3 +178,5 @@ export default class ServerProfilesListener extends Listener {
     });
   }
 }
+
+module.exports = ServerProfilesListener;

@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import { isTerminal } from '../oneview-sdk/tasks';
+const isTerminal = require('../src/oneview-sdk/tasks');
 
 let chai = require('chai');
 

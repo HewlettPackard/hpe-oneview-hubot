@@ -19,9 +19,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 const normalizeGroups = /\(:<(\w+)>/g;
 const namedGroups = /\(:<(\w+)>|\((?!\?[:!]).*?\)/g;
+
 class NamedRegExp extends RegExp {
   constructor(rgx) {
     super(rgx.source.replace(normalizeGroups, '('), (rgx.global ? 'g' : '') + (rgx.ignoreCase ? 'i' : '') + (rgx.multiline  ? 'm' : ''));
@@ -36,10 +36,11 @@ class NamedRegExp extends RegExp {
       match = namedGroups.exec(rgx.source);
     }
   }
-}
+};
+module.exports = NamedRegExp;
 
 let registeredMiddleware = false;
-export default class Listener {
+class Listener {
   constructor(robot, client, transform) {
     this.robot = robot;
     this.client = client;
@@ -100,3 +101,4 @@ export default class Listener {
     };
   }
 }
+module.exports = Listener;

@@ -2,8 +2,8 @@ sudo: true
 dist: trusty
 language: node_js
 node_js:
-- '6'
 - '7'
+- '8'
 before_script:
 - npm install
 script:

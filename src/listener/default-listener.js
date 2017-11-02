@@ -19,13 +19,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const Listener = require('./base-listener');
 
-import Listener from "./base-listener";
-
-export default class DefaultListener extends Listener {
+class DefaultListener extends Listener {
   constructor(robot, transform) {
     super(robot, undefined, transform);
-    this.catchAll(::this.Fallback);
+    this.catchAll(this.Fallback.bind(this));
   }
 
   Fallback(msg) {
@@ -35,3 +34,5 @@ export default class DefaultListener extends Listener {
     }
   }
 }
+
+module.exports = DefaultListener;

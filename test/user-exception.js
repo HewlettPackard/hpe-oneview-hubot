@@ -20,13 +20,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-export default (robot) => {
-    try {
-      const configuration = require('../oneview-configuration.json');
-      robot.logger.info('Applying configuration from json file.');
-      return configuration;
-    } catch(err) {
-      robot.logger.error('Error reading OneView configuration file: ', err);
-      return;
-    }
-};
+const UserException = require('../src/oneview-sdk/user-exception');
+
+let chai = require('chai');
+
+chai.should();
+
+describe('UserException', () => {
+  let userException;
+
+  it('toMessage with message and resolution', () => {
+    userException = new UserException('This is the error.', 'This is the resolution.');
+    userException.toMessage().should.equal('This is the error.\nThis is the resolution.');
+  });
+
+  it('toMessage with message', () => {
+    userException = new UserException('This is the error.');
+    userException.toMessage().should.equal('This is the error.');
+  });
+});

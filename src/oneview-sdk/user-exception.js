@@ -19,8 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-export default class UserException {
+class UserException {
   constructor(message, resolution) {
     this.message = message;
     this.resolution = resolution;
@@ -34,4 +33,6 @@ export default class UserException {
       return this.message;
     }
   }
-}
+};
+
+module.exports = UserException;

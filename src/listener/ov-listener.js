@@ -19,28 +19,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-import Enhance from '../oneview-sdk/utils/enhance';
-import ResourceTransforms from './utils/resource-transforms';
-import DeveloperListener from './developer';
-import ServerHardwareListener from './server-hardware';
-import ServerProfilesListener from './server-profiles';
-import ServerProfileTemplateListener from './server-profile-templates';
-import DashboardListener from './dashboard-listener';
-import AlertsListener from './alerts-listener';
-import DefaultListener from './default-listener';
-import BotListener from './bot';
-import NotificationsFilter from './notifications-filter';
+const Enhance = require('../oneview-sdk/utils/enhance');
+const ResourceTransforms = require('./utils/resource-transforms');
+const DeveloperListener = require('./developer');
+const ServerHardwareListener = require('./server-hardware');
+const ServerProfilesListener = require('./server-profiles');
+const ServerProfileTemplateListener = require('./server-profile-templates');
+const DashboardListener = require('./dashboard-listener');
+const AlertsListener = require('./alerts-listener');
+const DefaultListener = require('./default-listener');
+const BotListener = require('./bot');
+const NotificationsFilter = require('./notifications-filter');
 const url = require('url');
 
-export default function(robot, client) {
-  const transform = new ResourceTransforms(robot);
+const listener = (robot, client, brain) => {
+  const transform = new ResourceTransforms(robot, brain);
   const filter = new NotificationsFilter(robot);
 
   const dev = new DeveloperListener(robot, client, transform);
-  const sh = new ServerHardwareListener(robot, client, transform);
-  const sp = new ServerProfilesListener(robot, client, transform, sh);
-  const spt = new ServerProfileTemplateListener(robot, client, transform, sh, sp);
+  const sh = new ServerHardwareListener(robot, client, transform, brain);
+  const sp = new ServerProfilesListener(robot, client, transform, sh, brain);
+  const spt = new ServerProfileTemplateListener(robot, client, transform, sh, sp, brain);
   const dash = new DashboardListener(robot, client, transform);
   const al = new AlertsListener(robot, client, transform);
   const deft = new DefaultListener(robot, transform);
@@ -58,8 +57,7 @@ export default function(robot, client) {
 
     //remove host before transform
     message.resourceUri = uri.path;
-    let resource = enhance.transformHyperlinks(auth, message);
-
+    let resource = enhance.transformHyperlinks(auth, message);    
     let checkedMessage = filter.check(resource);
     if (typeof checkedMessage !== 'undefined' && checkedMessage.length > 0) {
       let room = '#' + client.notificationsRoom;
@@ -67,8 +65,10 @@ export default function(robot, client) {
       if (robot.adapterName === 'flowdock') {
         room = client.notificationsRoom;
       }
-      
+
       transform.messageRoom(room, resource.resource);
     }
   });
-}
+};
+
+module.exports = listener;

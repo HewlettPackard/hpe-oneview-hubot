@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 function noop() {}
 
-export class Emitter {
+class Emitter {
   constructor() {
     this.next = noop;//Until a caller is registered, the next function is a noop
   }
@@ -39,18 +39,20 @@ export class Emitter {
     }
   }
 }
+module.exports = Emitter;
 
 function feedback(pipe, cb) {
   pipe.register(cb);
   return this;
 }
 
-export default function PromiseFeedback(exec) {
+function PromiseFeedback(exec) {
   const pipe = new Emitter();
-  const promise = exec(::pipe.feedback);
+  const promise = exec(pipe.feedback.bind(pipe));
   promise.feedback = feedback.bind(promise, pipe);
   return promise;
 }
+module.exports = PromiseFeedback;
 
 if (!Promise.allSettled) {
   Promise.allSettled = function(arr) {
@@ -71,7 +73,7 @@ if (!Promise.allSettled) {
           };
         };
 
-        for (var i = 0; i < arr.length; i++) {
+        for (let i = 0; i < arr.length; i++) {
           arr[i].then(exec(i)).catch(exec(i));
         }
       }

@@ -25,7 +25,6 @@ const jsdom = require('jsdom');
 const fs = require("fs");
 const svg2png = require("svg2png");
 
-
 function __uploadPNG__(robot, room, fileName) {
   return new Promise((resolve, reject) => {
     if (robot.adapterName === 'slack') {
@@ -71,7 +70,7 @@ function __transformProfileData__(aggregatedServerProfiles) {
     }
     profiles[e.value] += e.count;
     totalCount += e.count;
-  })
+  });
   let totalSplits = 0;
   for (let key in profiles) {
     dataset.push({ label: key, count: profiles[key], percent: profiles[key] / totalCount} );
@@ -99,7 +98,7 @@ function __transformHardwareData__(aggregatedServerHardware) {
     }
     hardware[e.value] += e.count;
     totalCount += e.count;
-  })
+  });
   let totalSplits = 0;
   for (let key in hardware) {
     if (key === "") {
@@ -131,7 +130,7 @@ function __transformAlertsData__(aggregatedAlerts) {
     }
     alerts[e.value] += e.count;
     totalCount += e.count;
-  })
+  });
   let totalSplits = 0;
   for (let key in alerts) {
     dataset.push({ label: key, count: alerts[key], percent: alerts[key] / totalCount} );
@@ -160,7 +159,7 @@ function __transformHardwareWithProfilesData__(aggregatedHardwareWithProfiles) {
     }
     hardwareWithProfiles[e.value] += e.count;
     totalCount += e.count;
-  })
+  });
   let totalSplits = 0;
   let temp = "";
   for (let key in hardwareWithProfiles) {
@@ -224,7 +223,7 @@ function __addHeadersAndLines__(svg) {
     .style("stroke", "rgb(189, 189, 189)");
 }
 
-export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerProfiles, aggregatedServerHardware, aggregatedHardwareWithProfiles) {
+function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerProfiles, aggregatedServerHardware, aggregatedHardwareWithProfiles) {
 
   return new Promise((resolve, reject) => {
 
@@ -281,7 +280,7 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
     //generate the svg on the document with the given dimensions
     let svg = document.d3.select("body").append("svg")
         .attr("width", width)
-        .attr("height", height)
+        .attr("height", height);
     //sets the background to white so the image shows up on mobile
     svg.append("rect")
     .attr("width", "100%")
@@ -363,7 +362,7 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
         .style("font-size", "4.0em")
         .style("font-family", "'MetricHPE Semibold'")
         .attr("dy", "-0.4em")
-        .text(totalCount1)
+        .text(totalCount1);
 
         g1.append("text")
         .attr("text-anchor", "middle")
@@ -421,7 +420,7 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
         .style("font-size", "4.0em")
         .style("font-family", "'MetricHPE Semibold'")
         .attr("dy", "-0.4em")
-        .text(totalCount2)
+        .text(totalCount2);
 
         g2.append("text")
         .attr("text-anchor", "middle")
@@ -478,7 +477,7 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
         .style("font-size", "4.0em")
         .style("font-family", "'MetricHPE Semibold'")
         .attr("dy", "-0.4em")
-        .text(totalCount3)
+        .text(totalCount3);
 
         g3.append("text")
         .attr("text-anchor", "middle")
@@ -536,7 +535,7 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
         .style("font-size", "4.0em")
         .style("font-family", "'MetricHPE Semibold'")
         .attr("dy", "-0.4em")
-        .text(totalCount4)
+        .text(totalCount4);
 
         g4.append("text")
         .attr("text-anchor", "middle")
@@ -562,4 +561,6 @@ export function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerPr
       return __uploadPNG__(robot, room, 'dashboard.png');
   });
 
-  }
+}
+
+module.exports = buildDashboard;

@@ -105,7 +105,7 @@ function __uploadPNG__(robot, room, fileName) {
   });
 }
 
-export function buildD3Chart(robot, room, metricName, metricList, sampleInterval) {
+function buildD3Chart(robot, room, metricName, metricList, sampleInterval) {
 
   return new Promise((resolve, reject) =>  {
 
@@ -214,3 +214,5 @@ export function buildD3Chart(robot, room, metricName, metricList, sampleInterval
     return __uploadPNG__(robot, room, metricName + "-chart.png");
   });
 }
+
+module.exports = buildD3Chart;

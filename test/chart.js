@@ -19,8 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
-import { buildD3Chart } from '../charting/chart';
+const buildD3Chart = require('../src/charting/chart');
 const svg2png = require("svg2png");
 const Bluebird = require('bluebird');
 const fs = require("fs");
@@ -36,21 +35,22 @@ function relative(relPath) {
     return path.resolve(__dirname, relPath);
 }
 
-describe('Chart', () => {
+describe('Chart', function() {
+  this.timeout(2500);
 
   let networkMetricList = [
     {metricName:'receiveKilobytesPerSec',metricSamples: [ '69', '69', '69']},
     {metricName:'transmitKilobytesPerSec',metricSamples: [ '71', '71', '71',]}
   ];
 
-  it('buildD3Chart', () => {
+  it('buildD3Chart', (done) => {
     let robot = {adapterName: 'shell', logger: {}};
     let svg = sinon.createStubInstance(svg2png);
     sinon.stub.returns(Bluebird.resolve());
 
-    return buildD3Chart(robot, 'room', 'result', networkMetricList, 300).then((result) => {
+    buildD3Chart(robot, 'room', 'result', networkMetricList, 300).then((result) => {
       result.should.equal('Adapter shell does not support web file upload.');
       expect(fs.existsSync(`result-chart.png`)).to.equal(true);
-    });
+    }).then(() => done());
   });
 });

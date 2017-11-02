@@ -19,10 +19,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const Resource = require('./resource');
 
-import Resource from './resource';
-
-export default class Alert extends Resource {
+class Alert extends Resource {
 
   constructor(oneViewResource) {
     if (oneViewResource) {
@@ -37,7 +36,7 @@ export default class Alert extends Resource {
   buildPlainTextOutput() {
     let output = '';
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       if (field === 'associatedResource') {
@@ -54,7 +53,7 @@ export default class Alert extends Resource {
   buildSlackFields() {
     let fields = [];
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
 
@@ -74,9 +73,11 @@ export default class Alert extends Resource {
     }
     return fields;
   }
-
-  __isNonDisplayField__(field){
-    var nonDisplayFields = ['type', 'status', 'severity', 'hyperlink'];
-    return nonDisplayFields.includes(field.toLowerCase());
-  }
 }
+
+function __isNonDisplayField__(field){
+  let nonDisplayFields = ['type', 'status', 'severity', 'hyperlink'];
+  return nonDisplayFields.includes(field.toLowerCase());
+}
+
+module.exports = Alert;

@@ -19,10 +19,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const Resource = require('./resource');
 
-import Resource from './resource';
-
-export default class ServerProfileTemplate extends Resource {
+class ServerProfileTemplate extends Resource {
 
   constructor(oneViewResource) {
     if (oneViewResource) {
@@ -35,7 +34,7 @@ export default class ServerProfileTemplate extends Resource {
   buildPlainTextOutput() {
     let output = '';
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
@@ -46,7 +45,7 @@ export default class ServerProfileTemplate extends Resource {
   buildSlackFields() {
     let fields = [];
     for (const field in this) {
-      if (this.__isNonDisplayField__(field) || !this[field]) {
+      if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
 
@@ -58,9 +57,11 @@ export default class ServerProfileTemplate extends Resource {
     }
     return fields;
   }
-
-  __isNonDisplayField__(field){
-    var nonDisplayFields = ['name', 'type', 'status', 'hyperlink'];
-    return nonDisplayFields.includes(field.toLowerCase());
-  }
 }
+
+function   __isNonDisplayField__(field){
+  let nonDisplayFields = ['name', 'type', 'status', 'hyperlink'];
+  return nonDisplayFields.includes(field.toLowerCase());
+}
+
+module.exports = ServerProfileTemplate;
