@@ -45,7 +45,7 @@
   "main": "dist/oneview.js",
   "scripts": {
     "prepublish": "gulp build",
-    "test": "nyc --all mocha test/*.js",
+    "test": "nyc --all mocha --recursive test",
     "coverage": "nyc report --reporter=text-lcov | coveralls && rm -rf ./coverage"
   }
 }

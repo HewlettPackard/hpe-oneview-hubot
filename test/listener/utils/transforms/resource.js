@@ -19,9 +19,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const Resource = require('../src/listener/utils/transforms/resource');
+const Resource = require('../../../../src/listener/utils/transforms/resource');
 
-let chai = require('chai');
+const chai = require('chai');
 chai.should();
 
 describe('Resource', () => {

@@ -19,12 +19,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const Connection = require('../src/oneview-sdk/connection');
+const Connection = require('../../src/oneview-sdk/connection');
 
-let sinon = require('sinon');
-let chai = require('chai');
-let Bluebird = require('bluebird');
-let nock = require('nock');
+const sinon = require('sinon');
+const chai = require('chai');
+const Bluebird = require('bluebird');
+const nock = require('nock');
 
 chai.should();
 

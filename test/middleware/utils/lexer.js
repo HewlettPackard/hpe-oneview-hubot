@@ -20,12 +20,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 const nlp = require('nlp_compromise');
-const Lexer = require('../src/middleware/utils/lexer');
+const Lexer = require('../../../src/middleware/utils/lexer');
 
 const lex = new Lexer(nlp);
-let chai = require('chai');
-let sinon = require('sinon');
-let assert = chai.assert;
+const chai = require('chai');
+const sinon = require('sinon');
+const assert = chai.assert;
 
 chai.should();
 

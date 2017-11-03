@@ -19,16 +19,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const OVClient = require('../src/oneview-sdk/ov-client');
-const ServerHardware = require('../src/oneview-sdk/server-hardware');
-const ServerProfiles = require('../src/oneview-sdk//server-profiles');
-const ServerProfileTemplates = require('../src/oneview-sdk/server-profile-templates');
-const Notifications = require('../src/oneview-sdk/notifications');
+const OVClient = require('../../src/oneview-sdk/ov-client');
+const ServerHardware = require('../../src/oneview-sdk/server-hardware');
+const ServerProfiles = require('../../src/oneview-sdk//server-profiles');
+const ServerProfileTemplates = require('../../src/oneview-sdk/server-profile-templates');
+const Notifications = require('../../src/oneview-sdk/notifications');
 
-let chai = require('chai');
-let sinon = require('sinon');
-let nock = require('nock');
-let assert = require('assert');
+const chai = require('chai');
+const sinon = require('sinon');
+const nock = require('nock');
+const assert = require('assert');
 
 chai.should();
 

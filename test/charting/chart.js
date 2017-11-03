@@ -19,15 +19,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const buildD3Chart = require('../src/charting/chart');
+const buildD3Chart = require('../../src/charting/chart');
 const svg2png = require("svg2png");
 const Bluebird = require('bluebird');
 const fs = require("fs");
 const path = require("path");
 const expect = require("chai").expect;
 
-let sinon = require('sinon');
-let chai = require('chai');
+const sinon = require('sinon');
+const chai = require('chai');
 
 chai.should();
 
