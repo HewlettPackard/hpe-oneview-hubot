@@ -20,13 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 const nlp_compromise = require('nlp_compromise');
-const Lexer = require('../src/middleware/utils/lexer');
-const runNLP = require('../src/middleware/nlp-middleware').runNLP;
+const Lexer = require('../../src/middleware/utils/lexer');
+const runNLP = require('../../src/middleware/nlp-middleware').runNLP;
 const lex = new Lexer(nlp_compromise);
 
-let chai = require('chai');
-let sinon = require('sinon');
-let Bluebird = require('bluebird');
+const chai = require('chai');
+const sinon = require('sinon');
+const Bluebird = require('bluebird');
 
 chai.should();
 

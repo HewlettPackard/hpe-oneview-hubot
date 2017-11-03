@@ -19,23 +19,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+const UserException = require('../../src/oneview-sdk/user-exception');
 
-const isTerminal = require('../src/oneview-sdk/tasks');
-
-let chai = require('chai');
+const chai = require('chai');
 
 chai.should();
 
-describe('Tasks', () => {
+describe('UserException', () => {
   let userException;
 
-  it('isTerminal terminal task', () => {
-    let task = {type: 'TaskResource', taskState: 'Completed'};
-    isTerminal(task).should.equal(true);
+  it('toMessage with message and resolution', () => {
+    userException = new UserException('This is the error.', 'This is the resolution.');
+    userException.toMessage().should.equal('This is the error.\nThis is the resolution.');
   });
 
-  it('isTerminal non-terminal task', () => {
-    let task = {type: 'TaskResource', taskState: 'Running'};
-    isTerminal(task).should.equal(false);
+  it('toMessage with message', () => {
+    userException = new UserException('This is the error.');
+    userException.toMessage().should.equal('This is the error.');
   });
 });

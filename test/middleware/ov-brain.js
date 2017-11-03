@@ -20,15 +20,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 const nlp = require('nlp_compromise');
-const Lexer = require('../src/middleware/utils/lexer');
-const OVClient = require('../src/oneview-sdk/ov-client');
-const OneViewBrain = require('../src/middleware/ov-brain');
+const Lexer = require('../../src/middleware/utils/lexer');
+const OVClient = require('../../src/oneview-sdk/ov-client');
+const OneViewBrain = require('../../src/middleware/ov-brain');
 
 const lex = new Lexer(nlp);
 
-let chai = require('chai');
-let sinon = require('sinon');
-let Bluebird = require('bluebird');
+const chai = require('chai');
+const sinon = require('sinon');
+const Bluebird = require('bluebird');
 
 chai.should();
 

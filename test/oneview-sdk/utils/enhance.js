@@ -20,10 +20,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const ResourceEnhancer = require('../src/oneview-sdk/utils/enhance');
+const ResourceEnhancer = require('../../../src/oneview-sdk/utils/enhance');
 
-let chai = require('chai');
-let sinon = require('sinon');
+const chai = require('chai');
+const sinon = require('sinon');
 
 describe('ResourceEnhancer', () => {
   let resourceEnhancer;
