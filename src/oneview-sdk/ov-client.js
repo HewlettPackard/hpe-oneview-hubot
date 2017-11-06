@@ -47,9 +47,9 @@ class OVClient {
     this.alerts = new alerts(this);
     this.logical_interconnects = new logicalinterconnects(this);
     this.notifications = new notifications(this, robot);
-    this.notificationsRoom = oneviewConfig.notificationsRoom;
-    if (this.notificationsRoom === undefined) {
-      this.notificationsRoom = 'clean-room';
+    this.chatRoom = oneviewConfig.chatRoom;
+    if (this.chatRoom === undefined) {
+      this.chatRoom = 'slack-channel';
     }
   }
 

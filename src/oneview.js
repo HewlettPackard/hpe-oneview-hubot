@@ -60,10 +60,10 @@ const main = (robot) => {
       client.ServerProfiles.getAllServerProfiles().then((sp) => {
         client.ServerProfileTemplates.getAllServerProfileTemplates()
           .then((spt) => {
-            let room = '#' + client.notificationsRoom;
+            let room = '#' + client.chatRoom;
 
             if (robot.adapterName === 'flowdock') {
-              room = client.notificationsRoom;
+              room = client.chatRoom;
             }
 
             robot.messageRoom(room,

@@ -30,7 +30,7 @@ class ServerHardwareListener extends Listener {
     super(robot, client, transform);
 
     this.switchBoard = new Conversation(robot);
-    this.room = client.notificationsRoom;
+    this.room = client.chatRoom;
     this.brain = brain;
     this.title = "Server hardware";
     this.capabilities = [];

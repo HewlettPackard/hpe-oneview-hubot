@@ -58,7 +58,7 @@ describe('OVClient', () => {
     notificationsFilters: [{"severity": "Critical"}],
     pollingInterval: 30,
     readOnly: true,
-    notificationsRoom: "room"
+    chatRoom: "room"
   };
 
   let oVClient = new OVClient(oneviewConfig, robot);

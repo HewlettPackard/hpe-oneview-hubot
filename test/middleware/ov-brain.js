@@ -107,7 +107,7 @@ describe('OV Brain', () => {
     notificationsFilters: [{"severity": "Critical"}],
     pollingInterval: 30,
     readOnly: true,
-    notificationsRoom: "room"
+    chatRoom: "room"
   };
   let oVClient = new OVClient(oneviewConfig, robot);
   sinon.stub(oVClient.ServerHardware, 'getAllServerHardware').returns(Bluebird.resolve(serverHardwareResponse));

@@ -22,5 +22,5 @@
   "notificationsFilters": [{"severity": "Critical"}],
   "pollingInterval": 30,
   "readOnly": true,
-  "notificationsRoom": "clean-room"
+  "chatRoom": "slack-channel"
 }

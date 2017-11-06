@@ -46,7 +46,7 @@ describe('ServerHardware', () => {
       notificationsFilters: [{"severity": "Critical"}],
       pollingInterval: 30,
       readOnly: true,
-      notificationsRoom: "room"
+      chatRoom: "room"
     };
     oVClient = new OVClient(oneviewConfig, {});
     serverHardware = new ServerHardware(oVClient);

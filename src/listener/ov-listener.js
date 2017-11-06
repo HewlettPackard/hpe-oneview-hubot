@@ -57,13 +57,13 @@ const listener = (robot, client, brain) => {
 
     //remove host before transform
     message.resourceUri = uri.path;
-    let resource = enhance.transformHyperlinks(auth, message);    
+    let resource = enhance.transformHyperlinks(auth, message);
     let checkedMessage = filter.check(resource);
     if (typeof checkedMessage !== 'undefined' && checkedMessage.length > 0) {
-      let room = '#' + client.notificationsRoom;
+      let room = '#' + client.chatRoom;
 
       if (robot.adapterName === 'flowdock') {
-        room = client.notificationsRoom;
+        room = client.chatRoom;
       }
 
       transform.messageRoom(room, resource.resource);
