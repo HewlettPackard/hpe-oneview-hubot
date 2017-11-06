@@ -22,6 +22,9 @@ THE SOFTWARE.
 const normalizeGroups = /\(:<(\w+)>/g;
 const namedGroups = /\(:<(\w+)>|\((?!\?[:!]).*?\)/g;
 
+// paginationJump controls the resources number displayed per message 
+const paginationJump = 10;
+
 class NamedRegExp extends RegExp {
   constructor(rgx) {
     super(rgx.source.replace(normalizeGroups, '('), (rgx.global ? 'g' : '') + (rgx.ignoreCase ? 'i' : '') + (rgx.multiline  ? 'm' : ''));
@@ -55,6 +58,22 @@ class Listener {
         }
         next();
       });
+    }
+  }
+
+  pagination(msg, response, text) {
+    if (text) {
+      this.transform.text(msg, text);
+    }
+
+    this.makePagination(paginationJump, response.members, msg, response);
+  }
+
+  makePagination(jump, members, msg, response) {
+    if (jump < members.length + paginationJump) {
+      response.members = members.slice(jump - paginationJump, jump);
+      this.transform.send(msg, response);
+      this.makePagination(jump + paginationJump, members, msg, response);
     }
   }
 

@@ -59,7 +59,7 @@ class ServerProfileTemplateListener extends Listener {
   ListServerProfileTemplates(msg) {
     this.client.ServerProfileTemplates.getAllServerProfileTemplates().then((res) => {
       if (res && res.members.length > 0) {
-        return this.transform.send(msg, res);
+        return this.pagination(msg, res);
       } else {
         return this.transform.text(msg, 'There are no server templates deployed');
       }

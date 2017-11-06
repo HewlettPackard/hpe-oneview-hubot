@@ -34,13 +34,13 @@ class AlertsListener extends Listener {
     this.capabilities.push(this.BULLET + "List last [insert #] alerts (e.g. list last 10 alerts)");
 
     this.respond(/(?:get|list|show) all (:<state>active|locked|cleared){0,1}(?: ?)(:<status>critical|warning|ok|disabled){0,1}(?: ?)alerts(?: from ){0,1}(:<time>today|last 7 days|last 30 days){0,1}\.$/i, this.ListFilteredAlerts.bind(this));
-    this.capabilities.push(this.BULLET + "List all active/locked/cleared critical/warning/ok/disabled alerts from today/last 7 days/last 30 days (e.g. list all (critical) (active) alerts (from today)) ");
+    this.capabilities.push(this.BULLET + "List all active/locked/cleared critical/warning/ok/disabled alerts from today/last 7 days/last 30 days (e.g. list all (active) (critical) alerts (from today)) ");
   }
 
   ListNumberOfAlerts(msg) {
     let count = msg.count;
     this.client.Alerts.getNumberOfAlerts(count).then((res) => {
-      return this.transform.send(msg, res, "Here are the last " + count + " alerts.");
+      return this.pagination(msg, res, "Here are the last " + count + " alerts.");
     }).catch((err) => {
       return this.transform.error(msg, err);
     });
@@ -70,7 +70,7 @@ class AlertsListener extends Listener {
         }
         return this.transform.text(msg, message);
       }
-      return this.transform.send(msg, res, "I found the following alerts.");
+      return this.pagination(msg, res, "I found the following alerts.");
     }).catch((err) => {
       return this.transform.error(msg, err);
     });

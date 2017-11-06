@@ -53,7 +53,7 @@ class ServerProfilesListener extends Listener {
 
   ListServerProfiles(msg) {
     this.client.ServerProfiles.getAllServerProfiles().then((res) => {
-      return this.transform.send(msg, res, (res.members && res.members.length === 0 ? 'There are no profiles.' : ''));
+      return this.pagination(msg, res, (res.members && res.members.length === 0 ? 'There are no profiles.' : ''));
     }).catch((err) => {
       return this.transform.error(msg, err);
     });
@@ -83,9 +83,9 @@ class ServerProfilesListener extends Listener {
         return this.transform.text(msg, msg.message.user.name + ", I didn't find any profiles with a " + msg.status.toLowerCase() + " status.");
       } else {
         if (msg.status.toLowerCase() === "ok") {
-          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following profiles have an " + msg.status.toUpperCase() + " status.");
+          return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following profiles have an " + msg.status.toUpperCase() + " status.");
         } else {
-          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following profiles have a " + msg.status.toLowerCase() + " status.");
+          return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following profiles have a " + msg.status.toLowerCase() + " status.");
         }
       }
     }).catch((err) => {

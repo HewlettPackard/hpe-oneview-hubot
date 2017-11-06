@@ -22,6 +22,7 @@ THE SOFTWARE.
 const Listener = require('./base-listener');
 const buildD3Chart = require('../charting/chart');
 const Conversation = require('hubot-conversation');
+
 const rtrim = /\/statistics\/d\d*/i;
 
 class ServerHardwareListener extends Listener {
@@ -133,7 +134,7 @@ class ServerHardwareListener extends Listener {
 
   ListServerHardware(msg) {
     this.client.ServerHardware.getAllServerHardware().then((res) => {
-      return this.transform.send(msg, res);
+      return this.pagination(msg, res);
     }).catch((err) => {
       return this.transform.error(msg, err);
     });
@@ -157,9 +158,10 @@ class ServerHardwareListener extends Listener {
       }
       else {
         if (status.toLowerCase() === "ok") {
-          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + status.toUpperCase() + " status.");
+          return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + status.toUpperCase() + " status.");
+          return;
         } else {
-          return this.transform.send(msg, res, "Okay " + msg.message.user.name + ", the following blades have a " + status.toUpperCase() + " status.");
+          return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + status.toUpperCase() + " status.");
         }
       }
     }).catch((err) => {
@@ -174,7 +176,7 @@ class ServerHardwareListener extends Listener {
       if (res.members.length === 0) {
         return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades that are powered " + status.toLowerCase() + ".");
       } else {
-        return this.transform.send(msg, res, "Okay, " + msg.message.user.name + ", the following blades are powered " + status.toLowerCase() + ".");
+        return this.pagination(msg, res, "Okay, " + msg.message.user.name + ", the following blades are powered " + status.toLowerCase() + ".");
       }
     }).catch((err) => {
       return this.transform.error(msg, err);
