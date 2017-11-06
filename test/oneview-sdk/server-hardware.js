@@ -72,6 +72,8 @@ describe('ServerHardware', () => {
       data.members.length.should.equal(1);
       data.members[0].powerState.should.equal("Off");
     });
+
+    sinon.restore();
   }));
 
   it('get "on" hardware', sinon.test(function() {
@@ -94,6 +96,8 @@ describe('ServerHardware', () => {
       data.members.length.should.equal(1);
       data.members[0].powerState.should.equal("On");
     });
+
+    sinon.restore();
   }));
 
   it('get critical hardware', sinon.test(function() {
@@ -115,6 +119,8 @@ describe('ServerHardware', () => {
       data.members.length.should.equal(1);
       data.members[0].status.should.equal("Critical");
     });
+
+    sinon.restore();
   }));
 
   it('get warning hardware', sinon.test(function() {
@@ -136,6 +142,8 @@ describe('ServerHardware', () => {
       data.members.length.should.equal(1);
       data.members[0].status.should.equal("Warning");
     });
+
+    sinon.restore();
   }));
 
   it('get disabled hardware', sinon.test(function() {
@@ -158,6 +166,8 @@ describe('ServerHardware', () => {
       data.members.length.should.equal(1);
       data.members[0].status.should.equal("Disabled");
     });
+
+    sinon.restore();
   }));
 
   it('get OK hardware', sinon.test(function() {
@@ -180,6 +190,8 @@ describe('ServerHardware', () => {
       data.members.length.should.equal(1);
       data.members[0].status.should.equal("OK");
     });
+
+    sinon.restore();
   }));
 
 });

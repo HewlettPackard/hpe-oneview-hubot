@@ -120,6 +120,8 @@ describe('Connection', () => {
       data.count.should.equal(1);
       data.members[0].name.should.equal('0000A6610EE, bay 5');
     });
+
+    sinon.restore();
   }));
 
   it('post', sinon.test(function() {
@@ -137,6 +139,8 @@ describe('Connection', () => {
       data.__task_output__.associatedResource.resourceUri.should.equal(data.uri);
       data.__task_state__.should.equal('Completed');
     });
+
+    sinon.restore();
   }));
 
   it('put', sinon.test(function() {
@@ -154,6 +158,9 @@ describe('Connection', () => {
       data.__task_output__.associatedResource.resourceUri.should.equal(data.uri);
       data.__task_state__.should.equal('Completed');
     });
+
+
+    sinon.restore();
   }));
 
   it('patch', sinon.test(function() {
@@ -167,6 +174,8 @@ describe('Connection', () => {
       data.__task_output__.associatedResource.resourceUri.should.equal(data.uri);
       data.__task_state__.should.equal('Completed');
     });
+
+    sinon.restore();
   }));
 
   it('delete', sinon.test(function() {
@@ -178,6 +187,8 @@ describe('Connection', () => {
       data.__task_output__.associatedResource.resourceUri.should.equal(data.uri);
       data.__task_state__.should.equal('Completed');
     });
+
+    sinon.restore();
   }));
 
   it('requestHandleTasks get', sinon.test(function(done) {

@@ -69,6 +69,8 @@ describe('ServerProfiles', () => {
     serverProfiles.getProfilesByStatus("Critical").then(function(data) {
       data.members[0].status.should.equal("Critical");
     }).then(() => done(), done);
+
+    sinon.restore();
   });
 
   it('get warning profiles', (done) => {
@@ -88,6 +90,8 @@ describe('ServerProfiles', () => {
     serverProfiles.getProfilesByStatus("Warning").then(function(data) {
       data.members[0].status.should.equal("Warning");
     }).then(() => done(), done);
+
+    sinon.restore();
   });
 
   it('get OK profiles', (done) => {
@@ -107,6 +111,8 @@ describe('ServerProfiles', () => {
     serverProfiles.getProfilesByStatus("OK").then(function(data) {
       data.members[0].status.should.equal("OK");
     }).then(() => done(), done);
+
+    sinon.restore();
   });
 
   it('get disabled profiles', (done) => {
@@ -126,5 +132,7 @@ describe('ServerProfiles', () => {
     serverProfiles.getProfilesByStatus("Disabled").then(function(data) {
       data.members[0].status.should.equal("Disabled");
     }).then(() => done(), done);
+
+    sinon.restore();
   });
 });

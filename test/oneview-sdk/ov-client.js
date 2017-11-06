@@ -60,8 +60,11 @@ describe('OVClient', () => {
     readOnly: true,
     chatRoom: "room"
   };
+  let oVClient;
 
-  let oVClient = new OVClient(oneviewConfig, robot);
+  beforeEach(() => {
+    oVClient = new OVClient(oneviewConfig, robot);
+  });
 
   it('login failure', () => {
     nock('https://localhost')

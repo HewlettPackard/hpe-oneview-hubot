@@ -48,5 +48,5 @@
     "test": "nyc --all mocha --recursive test",
     "coverage": "nyc report --reporter=text-lcov | coveralls && rm -rf ./coverage"
   },
-  "nyc": { "exclude": [ "dist", "gulpfile.js" ] }
+  "nyc": { "exclude": [ "dist", "gulpfile.js", "test" ] }
 }
