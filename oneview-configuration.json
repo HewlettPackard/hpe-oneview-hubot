@@ -17,7 +17,7 @@
       "doProxy": false,
       "proxyHost": "0.0.0.0",
       "proxyPort": 0
-    },
+    }
   ],
   "notificationsFilters": [{"severity": "Critical"}],
   "pollingInterval": 30,

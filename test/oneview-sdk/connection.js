@@ -113,7 +113,7 @@ describe('Connection', () => {
   });
 
   it('get', sinon.test(function() {
-    sinon.stub(connection, '__http__').returns(Bluebird.resolve(serverHardwareResponse));
+    let stub = sinon.stub(connection, '__http__').returns(Bluebird.resolve(serverHardwareResponse));
 
     connection.get('/rest/server-hardware', {}).then(function(data) {
       data.type.should.equal('server-hardware-list');
@@ -121,7 +121,7 @@ describe('Connection', () => {
       data.members[0].name.should.equal('0000A6610EE, bay 5');
     });
 
-    sinon.restore();
+    stub.restore();
   }));
 
   it('post', sinon.test(function() {
@@ -131,7 +131,7 @@ describe('Connection', () => {
       "serverHardwareUri":"/rest/server-hardware/uri"
     };
 
-    sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
+    let stub = sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
 
     return connection.post('/rest/server-profiles', data).then(function(data) {
       data.type.should.equal('ServerProfile');
@@ -140,7 +140,7 @@ describe('Connection', () => {
       data.__task_state__.should.equal('Completed');
     });
 
-    sinon.restore();
+    stub.restore();
   }));
 
   it('put', sinon.test(function() {
@@ -150,7 +150,7 @@ describe('Connection', () => {
       "serverHardwareUri":"/rest/server-hardware/uri"
     };
 
-    sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
+    let stub = sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
 
     return connection.put('/rest/server-profiles/cc7b3c49-ef11', data).then(function(data) {
       data.type.should.equal('ServerProfile');
@@ -159,14 +159,13 @@ describe('Connection', () => {
       data.__task_state__.should.equal('Completed');
     });
 
-
-    sinon.restore();
+    stub.restore();
   }));
 
   it('patch', sinon.test(function() {
     let data = [{'op':'replace','path':'/templateCompliance','value':'Compliant'}];
 
-    sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
+    let stub = sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
 
     return connection.patch('/rest/server-profiles/cc7b3c49-ef11', data).then(function(data) {
       data.type.should.equal('ServerProfile');
@@ -175,11 +174,11 @@ describe('Connection', () => {
       data.__task_state__.should.equal('Completed');
     });
 
-    sinon.restore();
+    stub.restore();
   }));
 
   it('delete', sinon.test(function() {
-    sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
+    let stub = sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
 
     return connection.delete('/rest/server-profiles/cc7b3c49-ef11').then(function(data) {
       data.type.should.equal('ServerProfile');
@@ -188,7 +187,7 @@ describe('Connection', () => {
       data.__task_state__.should.equal('Completed');
     });
 
-    sinon.restore();
+    stub.restore();
   }));
 
   it('requestHandleTasks get', sinon.test(function(done) {

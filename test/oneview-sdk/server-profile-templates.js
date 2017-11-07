@@ -98,7 +98,7 @@ describe('Server Profile Templates', () => {
   };
 
   it('get all templates', (done) => {
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileTemplatesResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileTemplatesResponse));
 
     templates.getAllServerProfileTemplates().then(function(data) {
       data.members[0].name.should.equal("spt");
@@ -106,11 +106,11 @@ describe('Server Profile Templates', () => {
       data.members[0].status.should.equal("OK");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 
   it('get template', (done) => {
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileTemplateResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileTemplateResponse));
 
     templates.getServerProfileTemplate('localhost', '650449e6').then(function(data) {
       data.name.should.equal("spt");
@@ -118,7 +118,7 @@ describe('Server Profile Templates', () => {
       data.status.should.equal("OK");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 
   it('get available targets', (done) => {
@@ -130,8 +130,6 @@ describe('Server Profile Templates', () => {
       data[0].enclosureName.should.equal('0000A');
       data[0].enclosureBay.should.equal(8)
     }).then(() => done(), done);
-
-    sinon.restore();
   });
 
 });

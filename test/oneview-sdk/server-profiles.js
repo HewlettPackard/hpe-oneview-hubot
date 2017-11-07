@@ -64,13 +64,13 @@ describe('ServerProfiles', () => {
             "status": "Critical",
           }]
     };
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
 
     serverProfiles.getProfilesByStatus("Critical").then(function(data) {
       data.members[0].status.should.equal("Critical");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 
   it('get warning profiles', (done) => {
@@ -85,13 +85,13 @@ describe('ServerProfiles', () => {
             "status": "Warning",
           }]
     };
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
 
     serverProfiles.getProfilesByStatus("Warning").then(function(data) {
       data.members[0].status.should.equal("Warning");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 
   it('get OK profiles', (done) => {
@@ -106,13 +106,13 @@ describe('ServerProfiles', () => {
             "status": "OK",
           }]
     };
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
 
     serverProfiles.getProfilesByStatus("OK").then(function(data) {
       data.members[0].status.should.equal("OK");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 
   it('get disabled profiles', (done) => {
@@ -127,12 +127,12 @@ describe('ServerProfiles', () => {
             "status": "Disabled",
           }]
     };
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
 
     serverProfiles.getProfilesByStatus("Disabled").then(function(data) {
       data.members[0].status.should.equal("Disabled");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 });

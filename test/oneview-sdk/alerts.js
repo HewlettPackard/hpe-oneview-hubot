@@ -87,47 +87,47 @@ describe('Alerts', () => {
   };
 
   it('get alerts by count', (done) => {
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(alertResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(alertResponse));
 
     alerts.getNumberOfAlerts(1).then(function(data) {
       data.members[0].category.should.equal("alerts");
       data.members[0].severity.should.equal("Warning");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 
   it('get alerts by state', (done) => {
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(alertResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(alertResponse));
 
     alerts.getFilteredAlerts("Locked").then(function(data) {
       data.members[0].category.should.equal("alerts");
       data.members[0].severity.should.equal("Warning");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 
   it('get alerts by status', (done) => {
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(alertResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(alertResponse));
 
     alerts.getFilteredAlerts("Warning").then(function(data) {
       data.members[0].category.should.equal("alerts");
       data.members[0].severity.should.equal("Warning");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 
   it('get alerts by status and time', (done) => {
-    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(alertResponse));
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(alertResponse));
 
     alerts.getFilteredAlerts("Warning", undefined, "last 7 days").then(function(data) {
       data.members[0].category.should.equal("alerts");
       data.members[0].severity.should.equal("Warning");
     }).then(() => done(), done);
 
-    sinon.restore();
+    stub.restore();
   });
 
 });
