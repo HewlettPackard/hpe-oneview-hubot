@@ -19,28 +19,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const normalizeGroups = /\(:<(\w+)>/g;
-const namedGroups = /\(:<(\w+)>|\((?!\?[:!]).*?\)/g;
+const NamedRegExp = require('./named-regexp');
 
-// paginationJump controls the resources number displayed per message 
+// paginationJump controls the resources number displayed per message
 const paginationJump = 10;
-
-class NamedRegExp extends RegExp {
-  constructor(rgx) {
-    super(rgx.source.replace(normalizeGroups, '('), (rgx.global ? 'g' : '') + (rgx.ignoreCase ? 'i' : '') + (rgx.multiline  ? 'm' : ''));
-
-    this.namedGroups = [''];
-    let match = namedGroups.exec(rgx.source);
-    while (match !== null) {
-      this.namedGroups.push(match[1] || '');
-      if (!match[1]) {
-        this.robot.logger.info('Regex without named groups', rgx.source, 'use ?: to prevent capture or name groups with :<name>');
-      }
-      match = namedGroups.exec(rgx.source);
-    }
-  }
-};
-module.exports = NamedRegExp;
 
 let registeredMiddleware = false;
 class Listener {

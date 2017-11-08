@@ -25,29 +25,39 @@ const Conversation = require("hubot-conversation");
 class ServerProfilesListener extends Listener {
   constructor(robot, client, transform, serverHardware, brain) {
     super(robot, client, transform);
+
     this.serverHardware = serverHardware;
     this.brain = brain;
-    this.switchBoard = new Conversation(robot);
-
     this.title = "Server Profile";
     this.capabilities = [];
-    this.respond(/(?:get|list|show) all (?:server ){0,1}profiles\.$/i, this.ListServerProfiles.bind(this));
+    
+    this.LIST_ALL = /(?:get|list|show) all (?:server ){0,1}profiles\.$/i;
+    this.LIST = /(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i;
+    this.LIST_COMPLIANCE = /(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) compliance(?: preview){0,1}\.$/i;
+    this.MAKE_COMPLIANT = /(?:update|make) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) (?:compliance|compliant)\.$/i;
+    this.POWER_ON = /(?:turn|power) on (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i;
+    this.POWER_OFF = /(?:turn|power) off (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i;
+    this.LIST_STATUS = /(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}profiles\.$/i;
+
+    this.switchBoard = new Conversation(robot);
+
+    this.respond(this.LIST_ALL, this.ListServerProfiles.bind(this));
     this.capabilities.push(this.BULLET + "Show all (server) profiles (e.g. show all profiles).");
 
-    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, this.ListServerProfile.bind(this));
+    this.respond(this.LIST, this.ListServerProfile.bind(this));
     this.capabilities.push(this.BULLET + "Show a specific (server) profile (e.g. show hadoop cluster).");
 
-    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) compliance(?: preview){0,1}\.$/i, this.ListServerProfileCompliancePreview.bind(this));
+    this.respond(this.LIST_COMPLIANCE, this.ListServerProfileCompliancePreview.bind(this));
     this.capabilities.push(this.BULLET + "Show a specific (server) profile compliance (e.g. show hadoop cluster compliance).");
 
-    this.respond(/(?:update|make) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) (?:compliance|compliant)\.$/i, this.HandleServerCompliantMessage.bind(this));
+    this.respond(this.MAKE_COMPLIANT, this.HandleServerCompliantMessage.bind(this));
     this.capabilities.push(this.BULLET + "Make/update a specific (server) profile compliance (e.g. make hadoop cluster compliant).");
 
-    this.respond(/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, this.PowerOnServerProfile.bind(this));
-    this.respond(/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i, this.PowerOffServerProfile.bind(this));
+    this.respond(this.POWER_ON, this.PowerOnServerProfile.bind(this));
+    this.respond(this.POWER_OFF, this.PowerOffServerProfile.bind(this));
     this.capabilities.push(this.BULLET + "Power on/off a specific (server) profile (e.g. turn on hadoop cluster).");
 
-    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}profiles\.$/i, this.ListProfilesByStatus.bind(this));
+    this.respond(this.LIST_STATUS, this.ListProfilesByStatus.bind(this));
     this.capabilities.push(this.BULLET + "List all critical/warning/ok/disabled (server) profiles (e.g. list all critical profiles).");
   }
 
@@ -120,7 +130,7 @@ class ServerProfilesListener extends Listener {
 
     let dialog = this.switchBoard.startDialog(msg);
 
-    let deviceAndHyperlink = this.brain.getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
+    let deviceAndHyperlink = this.brain.getDeviceNameAndHyperLink(msg.host + "/rest/server-profiles/" + msg.profileId);
     let profileName = deviceAndHyperlink.deviceName;
     let profileHyperlink = deviceAndHyperlink.hyperlink;
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power on the server profile " + this.transform.hyperlink(profileHyperlink, profileName) +
@@ -130,8 +140,7 @@ class ServerProfilesListener extends Listener {
       this.client.ServerProfiles.getServerProfile(msg.host, msg.profileId).then((res) => {
         if (res.serverHardwareUri === null) {
           return this.transform.text(msg, msg.message.user.name + ", " + this.transform.hyperlink(profileHyperlink, profileName) + " does not have any assigned server hardware to power on. Try assigning server hardware to the profile.");
-        }
-        else {
+        } else {
           msg.serverId = res.serverHardwareUri;
           return this.serverHardware.PowerOnHardware(msg, false);
         }
@@ -153,7 +162,7 @@ class ServerProfilesListener extends Listener {
 
     let dialog = this.switchBoard.startDialog(msg);
 
-    let deviceAndHyperlink = this.brain.getDeviceNameAndHyperLink("/rest/server-profiles/" + msg.profileId);
+    let deviceAndHyperlink = this.brain.getDeviceNameAndHyperLink(msg.host + "/rest/server-profiles/" + msg.profileId);
     let profileName = deviceAndHyperlink.deviceName;
     let profileHyperlink = deviceAndHyperlink.hyperlink;
     this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to power off the server profile " + this.transform.hyperlink(profileHyperlink, profileName) +
@@ -163,10 +172,9 @@ class ServerProfilesListener extends Listener {
       this.client.ServerProfiles.getServerProfile(msg.host, msg.profileId).then((res) => {
         if (res.serverHardwareUri === null) {
           return this.transform.text(msg, msg.message.user.name + ", " + this.transform.hyperlink(profileHyperlink, profileName) + " does not have any assigned server hardware to power off. Try assigning server hardware to the profile.");
-        }
-        else {
+        } else {
           msg.serverId = res.serverHardwareUri;
-          return this.serverHardware.PowerOffHardware(msg, false);
+          return this.serverHardware.PowerOff(msg, false);
         }
       }).catch((err) => {
         return this.transform.error(msg, err);

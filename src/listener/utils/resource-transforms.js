@@ -54,7 +54,7 @@ class ResourceTransforms {
       try {
         let err = JSON.stringify(error, null, '  ');
         if (err === '{}') {
-          this.provider.text(msg, ____stacktrace____(error));
+          this.provider.text(msg, __stacktrace__(error));
         } else {
           this.provider.error(msg, error);
         }
