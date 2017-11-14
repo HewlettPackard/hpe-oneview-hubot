@@ -52,7 +52,7 @@ describe('ServerHardware', () => {
     serverHardware = new ServerHardware(oVClient);
   });
 
-  it('get "off" hardware', sinon.test(function() {
+  it('get "off" hardware', () => {
 
     let serverHardwareResponse = {
       "type": "server-hardware-list",
@@ -74,9 +74,9 @@ describe('ServerHardware', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('get "on" hardware', sinon.test(function() {
+  it('get "on" hardware', () => {
 
     let serverHardwareResponse = {
       "type": "server-hardware-list",
@@ -98,9 +98,9 @@ describe('ServerHardware', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('get critical hardware', sinon.test(function() {
+  it('get critical hardware', () => {
     let serverHardwareResponse = {
       "type": "server-hardware-list",
       "category": "server-hardware",
@@ -121,9 +121,9 @@ describe('ServerHardware', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('get warning hardware', sinon.test(function() {
+  it('get warning hardware', () => {
     let serverHardwareResponse = {
       "type": "server-hardware-list",
       "category": "server-hardware",
@@ -144,9 +144,9 @@ describe('ServerHardware', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('get disabled hardware', sinon.test(function() {
+  it('get disabled hardware', () => {
     let serverHardwareResponse = {
       "type": "server-hardware-list",
       "category": "server-hardware",
@@ -168,9 +168,9 @@ describe('ServerHardware', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('get OK hardware', sinon.test(function() {
+  it('get OK hardware', () => {
     let serverHardwareResponse = {
       "type": "server-hardware-list",
       "category": "server-hardware",
@@ -192,6 +192,6 @@ describe('ServerHardware', () => {
     });
 
     stub.restore();
-  }));
+  });
 
 });

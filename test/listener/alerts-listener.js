@@ -23,6 +23,7 @@ const AlertsListener = require('../../src/listener/alerts-listener');
 const OneViewBrain = require('../../src/middleware/ov-brain');
 const OVClient = require('../../src/oneview-sdk/ov-client');
 const ResourceTransforms = require('../../src/listener/utils/resource-transforms');
+const NamedRegExp = require('../../src/listener/named-regexp');
 
 const chai = require('chai');
 const sinon = require('sinon');
@@ -33,18 +34,24 @@ const assert = chai.assert;
 
 describe('AlertsListener', () => {
 
-  const robot = {adapterName: 'shell', on: function () { }, listen: function () {}, respond: function () {}, listenerMiddleware: function() {}, logger: {debug: function () {}, error: function () {}, info: function () {}}};
+  const robot = {
+    name: 'bot',
+    adapterName: 'shell',
+    receive: function () {},
+    on: function () { },
+    listen: function (matcher, options) {listeners.push(matcher, options)},
+    respond: function () {},
+    listenerMiddleware: function() {},
+    logger: {debug: function () {}, error: function () {}, info: function () {}}
+  };
+
+  // capture dialog liseners
+  let listeners = [];
 
   const oneviewConfig = {
     hosts: []
   };
   const oVClient = new OVClient(oneviewConfig, robot);
-
-  sinon.stub(oVClient.ServerHardware, 'getAllServerHardware').returns(Bluebird.resolve([]));
-  sinon.stub(oVClient.ServerProfiles, 'getAllServerProfiles').returns(Bluebird.resolve([]));
-  sinon.stub(oVClient.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.resolve([]));
-  sinon.stub(oVClient.LogicalInterconnects, 'getAllLogicalInterconnects').returns(Bluebird.resolve([]));
-
   const brain = new OneViewBrain(oVClient, robot, {});
   const transform = new ResourceTransforms(robot, brain);
 
@@ -82,10 +89,48 @@ describe('AlertsListener', () => {
   };
 
   const err = {
-    error: {
-      errorCode: 'OOPS'
-    }
+    error: {errorCode: 'OOPS'}
   };
+
+  it('constructor', (done) => {
+    let spy = sinon.spy(robot, "respond");
+    const alertsListener = new AlertsListener(robot, oVClient, transform);
+
+    let rgx0 = new NamedRegExp(alertsListener.LIST_COUNT);
+    let rgx1 = new NamedRegExp(alertsListener.LIST_STATUS);
+
+    let constructorArgs = robot.respond.getCalls();
+
+    rgx0.should.deep.equal(constructorArgs[0].args[0]);
+    assert(typeof constructorArgs[0].args[2] === 'function');
+    'bound ListNumberOfAlerts'.should.equal(constructorArgs[0].args[2].name);
+    assert.isFalse(constructorArgs[0].args[2].hasOwnProperty('prototype'));
+
+    rgx1.should.deep.equal(constructorArgs[1].args[0]);
+    assert(typeof constructorArgs[1].args[2] === 'function');
+    'bound ListFilteredAlerts'.should.equal(constructorArgs[1].args[2].name);
+    assert.isFalse(constructorArgs[1].args[2].hasOwnProperty('prototype'));
+
+    assert(constructorArgs.length === 2);
+
+    spy.restore();
+    done();
+  });
+
+  it('test regexps', (done) => {
+    const alertsListener = new AlertsListener(robot, oVClient, transform);
+
+    let rgx0 = new NamedRegExp(alertsListener.LIST_COUNT);
+    let rgx1 = new NamedRegExp(alertsListener.LIST_STATUS);
+
+    assert.isTrue(rgx0.test('@bot show last 7 alerts.'));
+    assert.isTrue(rgx1.test('@bot show all active alerts from today.'));
+    assert.isTrue(rgx1.test('@bot show all critical alerts from last 7 days.'));
+    assert.isTrue(rgx1.test('@bot show all disabled alerts from last 30 days.'));
+    assert.isTrue(rgx1.test('@bot show all locked ok alerts from last 30 days.'));
+
+    done();
+  });
 
   it('list alerts by number', (done) => {
     let stub = sinon.stub(oVClient.Alerts, 'getNumberOfAlerts').returns(Bluebird.resolve(alertResponse));
@@ -140,6 +185,84 @@ describe('AlertsListener', () => {
     }, 100);
   });
 
+  it('list alerts by filter, no match today', (done) => {
+    let stub = sinon.stub(oVClient.Alerts, 'getFilteredAlerts').returns(Bluebird.resolve({members: []}));
+    const alertsListener = new AlertsListener(robot, oVClient, transform);
+
+    let msg = {
+      robot: {},
+      message: {TextMessage: {user: '', text: '@bot show all active critical alerts from today.'}},
+      count: 1,
+      status: 'warning',
+      state: 'active',
+      time: 'today',
+      send: function () {}
+    };
+    sinon.spy(msg, "send");
+
+    alertsListener.ListFilteredAlerts(msg);
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      "I didn't find any warning active alerts from today.".should.equal(msg.send.args[0][0]);
+      stub.restore();
+      done();
+    }, 100);
+  });
+
+  it('list alerts by filter, no match', (done) => {
+    let stub = sinon.stub(oVClient.Alerts, 'getFilteredAlerts').returns(Bluebird.resolve({members: []}));
+    const alertsListener = new AlertsListener(robot, oVClient, transform);
+
+    let msg = {
+      robot: {},
+      message: {TextMessage: {user: '', text: '@bot show all active critical alerts from last 7 days.'}},
+      count: 1,
+      status: 'critical',
+      state: 'active',
+      time: '7 days',
+      send: function () {}
+    };
+    sinon.spy(msg, "send");
+
+    alertsListener.ListFilteredAlerts(msg);
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      "I didn't find any critical active alerts from the 7 days.".should.equal(msg.send.args[0][0]);
+      stub.restore();
+      done();
+    }, 100);
+  });
+
+  it('list alerts by filter, no match undef', (done) => {
+    let stub = sinon.stub(oVClient.Alerts, 'getFilteredAlerts').returns(Bluebird.resolve({members: []}));
+    const alertsListener = new AlertsListener(robot, oVClient, transform);
+
+    let msg = {
+      robot: {},
+      message: {TextMessage: {user: '', text: '@bot show all   alerts from .'}},
+      count: 1,
+      status: undefined,
+      state: undefined,
+      time: undefined,
+      send: function () {}
+    };
+    sinon.spy(msg, "send");
+
+    alertsListener.ListFilteredAlerts(msg);
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      "I didn't find any alerts.".should.equal(msg.send.args[0][0]);
+      stub.restore();
+      done();
+    }, 100);
+  });
+
   it('list alerts by number error', (done) => {
     let stub = sinon.stub(oVClient.Alerts, 'getNumberOfAlerts').returns(Bluebird.reject(err));
     const alertsListener = new AlertsListener(robot, oVClient, transform);
@@ -157,7 +280,7 @@ describe('AlertsListener', () => {
     //sleep a momemt to wait for results
     setTimeout(() => {
       assert(msg.send.callCount === 1);
-      'Oops there was a problem.\n\nOneView error code: OOPS\n'.should.equal(msg.send.args[0][0]);
+      "Oops there was a problem.\n\nOneView error code: OOPS\n".should.equal(msg.send.args[0][0]);
       stub.restore();
       done();
     }, 100);
@@ -183,7 +306,7 @@ describe('AlertsListener', () => {
     //sleep a momemt to wait for results
     setTimeout(() => {
       assert(msg.send.callCount === 1);
-      'Oops there was a problem.\n\nOneView error code: OOPS\n'.should.equal(msg.send.args[0][0]);
+      "Oops there was a problem.\n\nOneView error code: OOPS\n".should.equal(msg.send.args[0][0]);
       stub.restore();
       done();
     }, 100);

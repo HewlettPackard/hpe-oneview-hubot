@@ -44,11 +44,11 @@ class ServerProfileTemplateListener extends Listener {
 
     this.LIST_DEPLOYED_PROFILES = /(?:get|list|show) profile[s]{0,1} (?:using|deployed from|deployed by) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i;
     this.respond(this.LIST_DEPLOYED_PROFILES, this.GetDeployedProfiles.bind(this));
-    this.capabilities.push(this.BULLET + "Show profile(s) using a server profile template (e.g. show profile using docker swarm).");
+    this.capabilities.push(this.BULLET + "Show profile(s) using a server profile template (e.g. show profiles using docker swarm).");
 
     this.CREATE_PROFILES_FROM_TEMPATE = /(?:deploy|create) (:<count>\d+) profile[s]{0,1} (?:from|for|using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i;
     this.respond(this.CREATE_PROFILES_FROM_TEMPATE, this.DeployProfiles.bind(this));
-    this.capabilities.push(this.BULLET + "Create profile(s) using a server profile template (e.g. create profile for docker swarm).");
+    this.capabilities.push(this.BULLET + "Create profile(s) using a server profile template (e.g. create 1 profile from docker swarm).");
 
     this.GROW_TEMPLATE = /(?:flex|grow)(?: the)? (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i;
     this.respond(this.GROW_TEMPLATE, this.DeployProfiles.bind(this));

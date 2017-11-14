@@ -41,12 +41,6 @@ describe('DefaultListener', () => {
     hosts: []
   };
   const oVClient = new OVClient(oneviewConfig, robot);
-
-  sinon.stub(oVClient.ServerHardware, 'getAllServerHardware').returns(Bluebird.resolve([]));
-  sinon.stub(oVClient.ServerProfiles, 'getAllServerProfiles').returns(Bluebird.resolve([]));
-  sinon.stub(oVClient.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.resolve([]));
-  sinon.stub(oVClient.LogicalInterconnects, 'getAllLogicalInterconnects').returns(Bluebird.resolve([]));
-
   const brain = new OneViewBrain(oVClient, robot, {});
   const transform = new ResourceTransforms(robot, brain);
 

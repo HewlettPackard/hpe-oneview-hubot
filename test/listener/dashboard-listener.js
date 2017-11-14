@@ -23,6 +23,7 @@ const DashboardListener = require('../../src/listener/dashboard-listener');
 const OneViewBrain = require('../../src/middleware/ov-brain');
 const OVClient = require('../../src/oneview-sdk/ov-client');
 const ResourceTransforms = require('../../src/listener/utils/resource-transforms');
+const NamedRegExp = require('../../src/listener/named-regexp');
 
 const chai = require('chai');
 const sinon = require('sinon');
@@ -39,12 +40,6 @@ describe('DashboardListener', () => {
     hosts: []
   };
   const oVClient = new OVClient(oneviewConfig, robot);
-
-  sinon.stub(oVClient.ServerHardware, 'getAllServerHardware').returns(Bluebird.resolve([]));
-  sinon.stub(oVClient.ServerProfiles, 'getAllServerProfiles').returns(Bluebird.resolve([]));
-  sinon.stub(oVClient.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.resolve([]));
-  sinon.stub(oVClient.LogicalInterconnects, 'getAllLogicalInterconnects').returns(Bluebird.resolve([]));
-
   const brain = new OneViewBrain(oVClient, robot, {});
   const transform = new ResourceTransforms(robot, brain);
 
@@ -77,6 +72,37 @@ describe('DashboardListener', () => {
       errorCode: 'OOPS'
     }
   };
+
+  it('constructor', (done) => {
+    let spy = sinon.spy(robot, "respond");
+    const dashboardListener = new DashboardListener(robot, oVClient, transform);
+
+    let rgx0 = new NamedRegExp(dashboardListener.SHOW);
+
+    let constructorArgs = robot.respond.getCalls();
+
+    rgx0.should.deep.equal(constructorArgs[0].args[0]);
+    assert(typeof constructorArgs[0].args[2] === 'function');
+    'bound ShowOneViewDashboard'.should.equal(constructorArgs[0].args[2].name);
+    assert.isFalse(constructorArgs[0].args[2].hasOwnProperty('prototype'));
+
+    assert(constructorArgs.length === 1);
+
+    spy.restore();
+    done();
+  });
+
+  it('test regexps', (done) => {
+    const dashboardListener = new DashboardListener(robot, oVClient, transform);
+
+    let rgx0 = new NamedRegExp(dashboardListener.SHOW);
+
+    assert.isTrue(rgx0.test('@bot show dashboard.'));
+    assert.isTrue(rgx0.test('@bot show oneview dashboard.'));
+    assert.isTrue(rgx0.test('@bot show oneview status.'));
+
+    done();
+  });
 
   it('show', (done) => {
     let stub1 = sinon.stub(oVClient.Dashboard, 'getAggregatedAlerts').returns(Bluebird.resolve(alertsResponse));

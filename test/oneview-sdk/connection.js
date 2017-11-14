@@ -112,7 +112,7 @@ describe('Connection', () => {
     connection.proxyPort.should.equal(8080);
   });
 
-  it('get', sinon.test(function() {
+  it('get', () => {
     let stub = sinon.stub(connection, '__http__').returns(Bluebird.resolve(serverHardwareResponse));
 
     connection.get('/rest/server-hardware', {}).then(function(data) {
@@ -122,9 +122,9 @@ describe('Connection', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('post', sinon.test(function() {
+  it('post', () => {
     let data = {
       "type":"ServerProfile",
       "name":"Profile101",
@@ -141,9 +141,9 @@ describe('Connection', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('put', sinon.test(function() {
+  it('put', () => {
     let data = {
       "type":"ServerProfile",
       "name":"Profile102",
@@ -160,9 +160,9 @@ describe('Connection', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('patch', sinon.test(function() {
+  it('patch', () => {
     let data = [{'op':'replace','path':'/templateCompliance','value':'Compliant'}];
 
     let stub = sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
@@ -175,9 +175,9 @@ describe('Connection', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('delete', sinon.test(function() {
+  it('delete', () => {
     let stub = sinon.stub(connection, '__http__').returns(Bluebird.resolve(profileResponse));
 
     return connection.delete('/rest/server-profiles/cc7b3c49-ef11').then(function(data) {
@@ -188,9 +188,9 @@ describe('Connection', () => {
     });
 
     stub.restore();
-  }));
+  });
 
-  it('requestHandleTasks get', sinon.test(function(done) {
+  it('requestHandleTasks get', (done) => {
     let mockResponse = {
       body: serverHardwareResponse
     };
@@ -217,9 +217,9 @@ describe('Connection', () => {
         done(err);
       }
     });
-  }));
+  });
 
-  it('checkTask delete', sinon.test(function(done) {
+  it('checkTask delete', (done) => {
 
     taskResponse.taskState = 'Completed';
 
@@ -239,9 +239,9 @@ describe('Connection', () => {
         done(err);
       }
     });
-  }));
+  });
 
-  it('checkTask post/put terminal', sinon.test(function(done) {
+  it('checkTask post/put terminal', (done) => {
 
     updatedTaskResponse.taskState = 'Completed';
 
@@ -267,7 +267,7 @@ describe('Connection', () => {
         done(err);
       }
     });
-  }));
+  });
 
   //TODO fix this test
   // it('checkTask post/put polling', sinon.test(function(done) {

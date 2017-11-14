@@ -33,11 +33,15 @@ class BotListener extends Listener {
     this.title = "bot";
     this.capabilities = [];
 
-    this.respond(/help\.$/i, this.ListActions.bind(this));
-    this.respond(/What can you do(?: for me){0,1}\.$/i, this.ListActions.bind(this));
+    this.LIST_HELP = /help\.$/i;
+    this.LIST_ACTIONS = /What can you do(?: for me){0,1}\.$/i
+    this.LIST_ACTION = /(:<text>[a-zA-Z][a-z A-Z]*?) help\.$/i
+
+    this.respond(this.LIST_HELP, this.ListActions.bind(this));
+    this.respond(this.LIST_ACTIONS, this.ListActions.bind(this));
     this.capabilities.push(this.BULLET + "Help (Show list of areas of help).");
 
-    this.respond(/(:<text>[a-zA-Z][a-z A-Z]*?) help\.$/i, this.ListActionsFor.bind(this));
+    this.respond(this.LIST_ACTION, this.ListActionsFor.bind(this));
     this.capabilities.push(this.BULLET + "<text> Help (Show help in a specific area).");
   }
 

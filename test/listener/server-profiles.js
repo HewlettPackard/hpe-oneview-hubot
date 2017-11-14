@@ -72,56 +72,31 @@ describe('ServerProfilesListener', () => {
     adapterName: 'shell',
     receive: function () {},
     on: function () { },
-    listeners: [],
     listen: function (matcher, options) {listeners.push(matcher, options)},
     respond: function () {},
     listenerMiddleware: function() {},
-    logger: {debug: function () {}, error: function () {}, info: function () {}}};
+    logger: {debug: function () {}, error: function () {}, info: function () {}}
+  };
 
   // capture dialog liseners
-  let listeners = []; //empty after test power on runs
+  let listeners = [];
 
   const oneviewConfig = {
     hosts: []
   };
   const client = new OVClient(oneviewConfig, robot);
-
-  sinon.stub(client.ServerHardware, 'getAllServerHardware').returns(Bluebird.resolve([]));
-  sinon.stub(client.ServerProfiles, 'getAllServerProfiles').returns(Bluebird.resolve(profilesResponse));
-  sinon.stub(client.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.resolve([]));
-  sinon.stub(client.LogicalInterconnects, 'getAllLogicalInterconnects').returns(Bluebird.resolve([]));
-
   const brain = new OneViewBrain(client, robot, {});
   const transform = new ResourceTransforms(robot, brain);
-
   const sh = new ServerHardwareListener(robot, client, transform, brain);
 
-  it('power on profile', (done) => {
-    let stub1 = sinon.stub(client.ServerProfiles, 'getServerProfile').returns(Bluebird.resolve(profileResponse));
-    let stub2 = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+  sinon.stub(client.ServerProfiles, 'getAllServerProfiles').returns(Bluebird.resolve(profilesResponse));
 
-    let msg = {
-      robot: robot,
-      message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},
-      send: function () {}
-    };
-    sinon.spy(msg, 'send');
+  const err = {
+    error: {errorCode: 'OOPS'}
+  };
 
-    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
-
-    serverProfilesListener.PowerOnServerProfile(msg);
-
-    listeners[3](msg); //call the dialog listener with the msg
-
-    //sleep a momemt to wait for results
-    setTimeout(() => {
-      assert(msg.send.callCount === 2);
-      "Ok name I am going to power on the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
-      'name, myprofile does not have any assigned server hardware to power on. Try assigning server hardware to the profile.'.should.equal(msg.send.args[1][0]);
-      stub1.restore();
-      stub2.restore();
-      done();
-    }, 10);
+  afterEach(function () {
+    listeners = [];
   });
 
   it('constructor', (done) => {
@@ -213,7 +188,7 @@ describe('ServerProfilesListener', () => {
       count: 1,
       send: function () {}
     };
-    sinon.spy(msg, "send");
+    let spy = sinon.spy(msg, "send");
 
     serverProfilesListener.ListServerProfiles(msg);
 
@@ -223,6 +198,7 @@ describe('ServerProfilesListener', () => {
     setTimeout(() => {
       assert(msg.send.callCount === 1);
       expectedJsonResults.should.equal(msg.send.args[0][0]);
+      spy.restore();
       done();
     }, 10);
   });
@@ -238,7 +214,7 @@ describe('ServerProfilesListener', () => {
       count: 1,
       send: function () {}
     };
-    sinon.spy(msg, "send");
+    let spy = sinon.spy(msg, "send");
 
     serverProfilesListener.ListServerProfile(msg);
 
@@ -248,6 +224,7 @@ describe('ServerProfilesListener', () => {
     setTimeout(() => {
       assert(msg.send.callCount === 1);
       expectedJsonResults.should.equal(msg.send.args[0][0]);
+      spy.restore();
       stub.restore();
       done();
     }, 10);
@@ -264,7 +241,7 @@ describe('ServerProfilesListener', () => {
       count: 1,
       send: function () {}
     };
-    sinon.spy(msg, "send");
+    let spy = sinon.spy(msg, "send");
 
     serverProfilesListener.ListServerProfileCompliancePreview(msg);
 
@@ -274,6 +251,7 @@ describe('ServerProfilesListener', () => {
     setTimeout(() => {
       assert(msg.send.callCount === 1);
       expectedJsonResults.should.equal(msg.send.args[0][0]);
+      spy.restore();
       done();
     }, 10);
   });
@@ -290,7 +268,7 @@ describe('ServerProfilesListener', () => {
       send: function () {},
       status: "OK"
     };
-    sinon.spy(msg, "send");
+    let spy = sinon.spy(msg, "send");
 
     serverProfilesListener.ListProfilesByStatus(msg);
 
@@ -301,6 +279,7 @@ describe('ServerProfilesListener', () => {
       assert(msg.send.callCount === 2);
       'Okay name, the following profiles have an OK status.'.should.equal(msg.send.args[0][0]);
       expectedJsonResults.should.equal(msg.send.args[1][0]);
+      spy.restore();
       stub.restore();
       done();
     }, 10);
@@ -318,7 +297,7 @@ describe('ServerProfilesListener', () => {
       send: function () {},
       status: "Critical"
     };
-    sinon.spy(msg, "send");
+    let spy = sinon.spy(msg, "send");
 
     serverProfilesListener.ListProfilesByStatus(msg);
 
@@ -329,6 +308,7 @@ describe('ServerProfilesListener', () => {
       assert(msg.send.callCount === 1);
       "name, I didn't find any profiles with a critical status.".should.equal(msg.send.args[0][0]);
       stub.restore();
+      spy.restore();
       done();
     }, 10);
   });
@@ -348,7 +328,7 @@ describe('ServerProfilesListener', () => {
       count: 1,
       send: function () {}
     };
-    sinon.spy(msg, "send");
+    let spy = sinon.spy(msg, "send");
 
     serverProfilesListener.MakeServerProfileCompliant('123123', msg, false);
 
@@ -359,8 +339,297 @@ describe('ServerProfilesListener', () => {
       assert(msg.send.callCount === 2);
       "Finished making myprofile compliant.".should.equal(msg.send.args[0][0]);
       expectedJsonResults.should.equal(msg.send.args[1][0]);
+      spy.restore();
       stub.restore();
       done();
     }, 10);
   });
+
+  it('power on profile, yes', (done) => {
+    let stub1 = sinon.stub(client.ServerProfiles, 'getServerProfile').returns(Bluebird.resolve(profileResponse));
+    let stub2 = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOnServerProfile(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Ok name I am going to power on the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
+      'name, myprofile does not have any assigned server hardware to power on. Try assigning server hardware to the profile.'.should.equal(msg.send.args[1][0]);
+      stub1.restore();
+      stub2.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('power on profile with hardware, yes', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-hardware/AS1231";
+
+    let stub1 = sinon.stub(client.ServerProfiles, 'getServerProfile').returns(Bluebird.resolve(profileResponse));
+    let stub2 = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+    let stub3 = sinon.stub(client.ServerHardware, 'setPowerState').returns(
+      new PromiseFeedback((feedback) => {
+        return Bluebird.resolve({name: 'Encl1, bay 4'});
+      })
+    );
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},
+      host: 'localhost',
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOnServerProfile(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 3);
+      "Ok name I am going to power on the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
+      'Finished powering on Encl1, bay 4.'.should.equal(msg.send.args[1][0]);
+      stub1.restore();
+      stub2.restore();
+      stub3.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('power on profile, error', (done) => {
+    let stub1 = sinon.stub(client.ServerProfiles, 'getServerProfile').returns(Bluebird.reject(err));
+    let stub2 = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOnServerProfile(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Ok name I am going to power on the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
+      'Oops there was a problem.\n\nOneView error code: OOPS\n'.should.equal(msg.send.args[1][0]);
+      stub1.restore();
+      stub2.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('power on profile, no', (done) => {
+    let stub = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot no.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOnServerProfile(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Ok name I am going to power on the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
+      "Ok name I won't do that.".should.equal(msg.send.args[1][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('power off profile, yes', (done) => {
+    profileResponse.serverHardwareUri = null;
+
+    let stub1 = sinon.stub(client.ServerProfiles, 'getServerProfile').returns(Bluebird.resolve(profileResponse));
+    let stub2 = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOffServerProfile(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Ok name I am going to power off the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
+      'name, myprofile does not have any assigned server hardware to power off. Try assigning server hardware to the profile.'.should.equal(msg.send.args[1][0]);
+      stub1.restore();
+      stub2.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('power off profile with hardware, yes', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-hardware/AS1231";
+
+    let stub1 = sinon.stub(client.ServerProfiles, 'getServerProfile').returns(Bluebird.resolve(profileResponse));
+    let stub2 = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOffServerProfile(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Ok name I am going to power off the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
+      'How would you like to power off the server?\n\t\u2022 @bot Momentary Press\n\t\u2022 @bot Press and Hold.'.should.equal(msg.send.args[1][0]);
+      stub1.restore();
+      stub2.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('power off profile, no', (done) => {
+    let stub = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot no.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOffServerProfile(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Ok name I am going to power off the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
+      "Ok name I won't do that.".should.equal(msg.send.args[1][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('power off profile, error', (done) => {
+    let stub1 = sinon.stub(client.ServerProfiles, 'getServerProfile').returns(Bluebird.reject(err));
+    let stub2 = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOffServerProfile(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Ok name I am going to power off the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
+      'Oops there was a problem.\n\nOneView error code: OOPS\n'.should.equal(msg.send.args[1][0]);
+      stub1.restore();
+      stub2.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('power off profile, read only', (done) => {
+    let msg = {
+      robot: robot,
+      message: {text: '@bot', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    client.readOnly = true;
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOffServerProfile(msg);
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      "Hold on a sec...  You\'ll have to set readOnly mode to false in your config file first if you want to do that...   .".should.equal(msg.send.args[0][0]);
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('power on profile, read only', (done) => {
+    let msg = {
+      robot: robot,
+      message: {text: '@bot', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, 'send');
+
+    client.readOnly = true;
+
+    const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+    serverProfilesListener.PowerOnServerProfile(msg);
+
+    //sleep a momemt to wait for results
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      "Hold on a sec...  You\'ll have to set readOnly mode to false in your config file first if you want to do that...   .".should.equal(msg.send.args[0][0]);
+      spy.restore();
+      done();
+    }, 10);
+  });
+
 });

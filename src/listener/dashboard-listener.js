@@ -30,7 +30,9 @@ class DashboardListener extends Listener {
     this.capabilities = [];
     this.room = client.chatRoom;
 
-    this.respond(/show (?:oneview ){0,1}(?:dashboard|status).$/i, this.ShowOneViewDashboard.bind(this));
+    this.SHOW = /show (?:oneview ){0,1}(?:dashboard|status).$/i;
+
+    this.respond(this.SHOW, this.ShowOneViewDashboard.bind(this));
     this.capabilities.push(this.BULLET + "show (OneView) dashboard");
   }
 
