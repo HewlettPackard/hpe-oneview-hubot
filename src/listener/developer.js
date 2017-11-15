@@ -26,14 +26,21 @@ class DeveloperListener extends Listener {
     super(robot, client, transform);
     this.title = "Developer";
     this.capabilities = [];
-    this.respond(/(?:get|list|show) \/rest\/(:<category>[a-zA-Z0-9_-]*?)\/(:<id>[a-zA-Z0-9_-]*?) json\.$/i, this.ListRaw.bind(this)); //Developer end point (echoes raw JSON)
-    this.capabilities.push(this.BULLET + "List /rest/category/id as json (e.g. list /rest/enclosure/12325dd7).");
-    this.respond(/(?:get|list|show) \/rest\/(:<category>[a-zA-Z0-9_-]*?)\/(:<id>[a-zA-Z0-9_-]*?) clean\.$/i, this.ListClean.bind(this)); //Developer end point (echoes a clean resource)
-    this.capabilities.push(this.BULLET + "List /rest/category/id as clean resource (e.g. list rest/enclosure/12325dd7).");
+
+    this.LIST_RAW = /(?:get|list|show) (:<host>.*?)\/rest\/(:<category>[a-zA-Z0-9_-]*?)\/(:<id>[a-zA-Z0-9_-]*?) json\.$/i;
+    this.LIST_CLEAN = /(?:get|list|show) (:<host>.*?)\/rest\/(:<category>[a-zA-Z0-9_-]*?)\/(:<id>[a-zA-Z0-9_-]*?) clean\.$/i;
+
+    this.respond(this.LIST_RAW, this.ListRaw.bind(this)); //Developer end point (echoes raw JSON)
+    this.capabilities.push(this.BULLET + "List resource as json (e.g. list Encl1, bay 16 json).");
+    this.respond(this.LIST_CLEAN, this.ListClean.bind(this)); //Developer end point (echoes a clean resource)
+    this.capabilities.push(this.BULLET + "List clean resource (e.g. list Encl1, bay 16 clean).");
+
+    this.connections = client.getConnections();
   }
 
   ListRaw(msg) {
-    this.client.ClientConnection.get('/rest/' + msg.category + '/' + msg.id).then((res) => {
+    const connection = this.connections.get(msg.host);
+    connection.get('/rest/' + msg.category + '/' + msg.id).then((res) => {
       return this.transform.text(msg, JSON.stringify(res, null, '  '));
     }).catch((err) => {
       return this.transform.error(msg, err);
@@ -41,7 +48,8 @@ class DeveloperListener extends Listener {
   }
 
   ListClean(msg) {
-    this.client.ClientConnection.get('/rest/' +  msg.category + '/' + msg.id).then((res) => {
+    const connection = this.connections.get(msg.host);
+    connection.get('/rest/' +  msg.category + '/' + msg.id).then((res) => {
       return this.transform.send(msg, res.members || res);
     }).catch((err) => {
       return this.transform.error(msg, err);
