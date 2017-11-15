@@ -37,4 +37,8 @@ describe('Tasks', () => {
     let task = {type: 'TaskResource', taskState: 'Running'};
     isTerminal(task).should.equal(false);
   });
+
+  it('no task', () => {    
+    isTerminal().should.equal(true);
+  });
 });

@@ -52,6 +52,45 @@ describe('ServerProfiles', () => {
     serverProfiles = new ServerProfiles(oVClient);
   });
 
+  let serverProfileResponse = {
+    type: "ServerProfileV6",
+    uri: "/rest/server-profiles/1a94be5c",
+    name: "myprofile",
+    description: "",
+    serialNumber: "VCGLPVN007",
+    uuid: "1a94be5c",
+    serverHardwareUri: null,
+    hyperlink: "https://0.0.0.0/#/profiles/show/overview/r/rest/server-profiles/1a94be5c?s_sid=LTIyNDcK",
+    serverProfileTemplateHyperlink: "https://0.0.0.0/#/profile-templates/show/overview/r/rest/server-profile-templates/650449e6?s_sid=LTIyNDcK",
+    serverHardwareHyperlink: "https://0.0.0.0/#/server-hardware/show/overview/r/rest/server-hardware/37333036?s_sid=LTIyNDcK",
+    serverHardwareTypeHyperlink: "https://0.0.0.0/#/server-hardware-types/show/general/r/rest/server-hardware-types/30D74951?s_sid=LTIyNDcK",
+    enclosureGroupHyperlink: "https://0.0.0.0/#/enclosuregroups/show/interconectbayconfiguration/r/rest/enclosure-groups/dfebe3a3?s_sid=LTIyNDcK",
+    enclosureHyperlink: "https://0.0.0.0/#/enclosure/show/overview/r/rest/enclosures/09SGHX6J1?s_sid=LTIyNDcK",
+    taskHyperlink: "https://0.0.0.0/#/activity/r/rest/tasks/85EDF0DA?s_sid=LTIyNDcK",
+    status: "OK"
+  };
+
+  it('get all profiles', (done) => {
+    let serverProfileResponse = {
+      "type": "server-profile-list",
+      "category": "server-profiles",
+      "count": 1,
+      "members": [
+          {
+            "type": "server-profiles",
+            "name": "SP1",
+            "status": "Critical",
+          }]
+    };
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
+
+    serverProfiles.getAllServerProfiles().then(function(data) {
+      data.members[0].status.should.equal("Critical");
+    }).then(() => done(), done);
+
+    stub.restore();
+  });
+
   it('get critical profiles', (done) => {
     let serverProfileResponse = {
       "type": "server-profile-list",
@@ -135,4 +174,89 @@ describe('ServerProfiles', () => {
 
     stub.restore();
   });
+
+  it('update server profile compliance', (done) => {
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
+
+    serverProfiles.updateServerProfileCompliance('localhost', '/rest/server-profiles/123as41').then((data) => {
+      'ServerProfileV6'.should.equal(data.type);
+    }).then(() => done(), done);
+
+    stub.restore();
+  });
+
+  it('get server profile compliance preview', (done) => {
+    let profileCompliance = {
+      type: "ServerProfileCompliancePreviewV1",
+      isOnlineUpdate: false,
+      automaticUpdates: [
+          "Create a connection to network {\"name\":\"eth1\", \"uri\":\"/rest/ethernet-networks/95717f69\"} with id 2 on Mezzanine (Mezz) 3:2-a."
+      ],
+      manualUpdates: []
+    };
+
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(profileCompliance));
+
+    serverProfiles.getServerProfileCompliancePreview('localhost', '/rest/server-profiles/123as41').then((data) => {
+      'ServerProfileCompliancePreviewV1'.should.equal(data.type);
+      data.manualUpdates.length.should.equal(0);
+    }).then(() => done(), done);
+
+    stub.restore();
+  });
+
+  it('delete server profile', (done) => {
+    let task = {state: "Complete"};
+
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(task));
+
+    serverProfiles.deleteServerProfile('localhost', '/rest/server-profiles/123as41').then((data) => {
+      'Complete'.should.equal(data.state);
+    }).then(() => done(), done);
+
+    stub.restore();
+  });
+
+  it('create server profile', (done) => {
+    let task = {state: "Complete"};
+
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(task));
+
+    serverProfiles.createServerProfile('localhost', {}).then((data) => {
+      'Complete'.should.equal(data.state);
+    }).then(() => done(), done);
+
+    stub.restore();
+  });
+
+  it('get server profile', (done) => {
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileResponse));
+
+    serverProfiles.getServerProfile('localhost', '/rest/server-profiles/123as41').then((data) => {
+      'ServerProfileV6'.should.equal(data.type);
+    }).then(() => done(), done);
+
+    stub.restore();
+  });
+
+  it('get available targets', (done) => {
+    let targets = {
+      type: 'AvailableTargetsV2',
+      targets: [ { enclosureGroupName: 'dcs',
+           enclosureName: '0000A',
+           enclosureUri: '/rest/enclosures/0A66101',
+           enclosureBay: 8,
+           serverHardwareName: '0000A66101, bay 8'}]
+    };
+
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(targets));
+
+    serverProfiles.getAvailableTargets('localhost', '/rest/server-hardware/123as41', '/rest/enclosure-groups/asdfb').then((data) => {
+      'AvailableTargetsV2'.should.equal(data.type);
+      data.targets.length.should.equal(1);
+    }).then(() => done(), done);
+
+    stub.restore();
+  });
+
 });

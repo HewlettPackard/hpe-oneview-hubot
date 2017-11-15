@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 const Listener = require('./base-listener');
-const buildDashboard = require('../charting/show-dashboard');
+const buildDashboard = require('../charting/dashboard');
 
 class DashboardListener extends Listener {
   constructor(robot, client, transform) {

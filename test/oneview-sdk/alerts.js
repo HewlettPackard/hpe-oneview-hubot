@@ -24,7 +24,6 @@ const Alerts = require('../../src/oneview-sdk/alerts');
 
 const chai = require('chai');
 const sinon = require('sinon');
-const nock = require('nock');
 const Bluebird = require('bluebird');
 
 chai.should();

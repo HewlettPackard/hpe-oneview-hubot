@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 const OVClient = require('../../src/oneview-sdk/ov-client');
 const ServerProfileTemplates = require('../../src/oneview-sdk/server-profile-templates');
+const PromiseFeedback = require('../../src/oneview-sdk/utils/emitter');
 
 const chai = require('chai');
 const sinon = require('sinon');
@@ -129,6 +130,35 @@ describe('Server Profile Templates', () => {
       data.length.should.equal(1);
       data[0].enclosureName.should.equal('0000A');
       data[0].enclosureBay.should.equal(8)
+    }).then(() => done(), done);
+  });
+
+  it('deploy profile', (done) => {
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverProfileTemplateResponse));
+    sinon.stub(oVClient.ServerProfiles, 'createServerProfile').returns(
+      new PromiseFeedback((feedback) => {
+          return Bluebird.resolve({type: 'ServerProfileV5'});
+      })
+    );
+
+    templates.deployProfile('localhost', 'templateUri', 'serverHardwareUri', 'name').then(function(data) {
+      data.type.should.equal('ServerProfileV5')
+    }).then(() => done(), done);
+  });
+
+  it('get profiles using template', (done) => {
+    sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(
+      Bluebird.resolve(
+        {
+          resource: serverProfileTemplateResponse,
+          children: {server_profile_template_to_server_profiles: [{resource: {type: 'ServerProfileV5', uri: '/rest/server-profiles/asdf123aA'}}]}
+        }
+      )
+    );
+    sinon.stub(oVClient.ServerProfiles, 'getServerProfile').returns({type: 'ServerProfileV5', uri: '/rest/server-profiles/asdf123aA'});
+
+    templates.getProfilesUsingTemplate('localhost', 'templateUri', (target) => { resource = target; }).then(function(data) {
+      data[0].type.should.equal('ServerProfileV5');    
     }).then(() => done(), done);
   });
 
