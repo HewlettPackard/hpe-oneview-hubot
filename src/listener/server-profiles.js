@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const Listener = require('./base-listener');
+const Listener = require('./base');
 const Conversation = require("hubot-conversation");
 
 class ServerProfilesListener extends Listener {
@@ -30,7 +30,7 @@ class ServerProfilesListener extends Listener {
     this.brain = brain;
     this.title = "Server Profile";
     this.capabilities = [];
-    
+
     this.LIST_ALL = /(?:get|list|show) all (?:server ){0,1}profiles\.$/i;
     this.LIST = /(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?)\.$/i;
     this.LIST_COMPLIANCE = /(?:get|list|show) (:<host>.*?)(?:\/rest\/server-profiles\/)(:<profileId>[a-zA-Z0-9_-]*?) compliance(?: preview){0,1}\.$/i;

@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 
 const nlp = require('./middleware/nlp-middleware').nlp;
-const ovListener = require('./listener/ov-listener');
+const ovListener = require('./listener/oneview');
 const ovClient = require('./oneview-sdk/ov-client');
 const ovBrain = require('./middleware/ov-brain');
 

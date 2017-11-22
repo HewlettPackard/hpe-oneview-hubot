@@ -19,8 +19,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 const uri = '/rest/server-hardware/';
+const url = require('url');
 
 class ServerHardware {
   constructor (ov_client) {
@@ -107,9 +107,11 @@ class ServerHardware {
   @param server hardware interconnect port statistics uri
   @param server hardware logical interconnect uri
   */
-  getServerNetworkUtilization(shInterconnectPortStatisticsUri, shLogicalInterconnectUri) {    
-    return this.ov_client.connection.get(shInterconnectPortStatisticsUri).then((res) => {
-      return Promise.all([res, this.ov_client.LogicalInterconnects.getLogicalInterconnectTelemetryConfiguration(shLogicalInterconnectUri)]);
+  getServerNetworkUtilization(host, shInterconnectPortStatisticsUri, shLogicalInterconnectUri) {
+    const connection = this.connections.get(host);
+    return connection.get(shInterconnectPortStatisticsUri).then((res) => {
+      let uri = url.parse('https://' + shLogicalInterconnectUri);
+      return Promise.all([res, this.ov_client.LogicalInterconnects.getLogicalInterconnectTelemetryConfiguration(host, uri.pathname)]);
     });
   }
 };
