@@ -105,7 +105,6 @@ describe('SlackTransform', () => {
       slackTransform.send(msg, ServerProfileTemplateResource, "Hello I'm bot");
       assert(msg.send.callCount === 1);
     } catch (e) {
-      console.log(e);
       sinon.assert.fail('Should not have thrown e!');
     }
   });

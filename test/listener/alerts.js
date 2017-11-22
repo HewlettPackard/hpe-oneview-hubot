@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const AlertsListener = require('../../src/listener/alerts-listener');
+const AlertsListener = require('../../src/listener/alerts');
 const OneViewBrain = require('../../src/middleware/ov-brain');
 const OVClient = require('../../src/oneview-sdk/ov-client');
 const ResourceTransforms = require('../../src/listener/utils/resource-transforms');

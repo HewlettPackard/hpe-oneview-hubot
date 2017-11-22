@@ -529,7 +529,6 @@ function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerProfiles,
           });
     }
 
-
     let middle4 = g4.append("text")
         .attr("text-anchor", "middle")
         .style("font-size", "4.0em")
@@ -544,19 +543,17 @@ function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerProfiles,
         .attr("dy", "1em")
         .text("Total");
 
+      // convert the final svg to png
+      let buf = Buffer.from(document.d3.select("body").html());
+      const outputBuffer = svg2png.sync(buf, {});
+      try {
+        fs.writeFileSync('dashboard.png', outputBuffer);
+        resolve();
+      } catch (err) {
+        robot.logger.error('Error creating dashboard on the filesytem', err);
+        reject(err);
+      }
 
-    //convert the final svg to png
-    let buf = Buffer.from(document.d3.select("body").html());
-
-      return svg2png(buf).then((buffer) => {
-        try {
-          fs.writeFileSync('dashboard.png', buffer);
-          resolve();
-        } catch (err) {
-          robot.logger.error('Error creating Dashboard on the filesytem', err);
-          reject(err);
-        }
-      });
     }).then((res) => {
       return __uploadPNG__(robot, room, 'dashboard.png');
   });

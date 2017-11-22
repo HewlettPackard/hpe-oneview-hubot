@@ -199,16 +199,14 @@ function buildD3Chart(robot, room, metricName, metricList, sampleInterval) {
     svg.append("g").call(d3.axisLeft(y).ticks(4, "s"));
 
     let buf = Buffer.from(document.d3.select("body").html());
-
-    return svg2png(buf).then((buffer) => {
-      try {
-        fs.writeFileSync(metricName + "-chart.png", buffer);
-        resolve();
-      } catch (err) {
-        robot.logger.error('Error creating chart on the filesytem', err);
-        reject(err);
-      }
-    });
+    const outputBuffer = svg2png.sync(buf, {});
+    try {
+      fs.writeFileSync(metricName + "-chart.png", outputBuffer);
+      resolve();
+    } catch (err) {
+      robot.logger.error('Error creating chart on the filesytem', err);
+      reject(err);
+    }
 
   }).then((res) => {
     return __uploadPNG__(robot, room, metricName + "-chart.png");

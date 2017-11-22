@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const Listener = require('./base-listener');
+const Listener = require('./base');
 const buildD3Chart = require('../charting/chart');
 const Conversation = require('hubot-conversation');
 
@@ -29,31 +29,42 @@ class ServerHardwareListener extends Listener {
   constructor(robot, client, transform, brain) {
     super(robot, client, transform);
 
-    this.switchBoard = new Conversation(robot);
     this.room = client.chatRoom;
     this.brain = brain;
     this.title = "Server hardware";
     this.capabilities = [];
-    this.respond(/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, this.PowerOn.bind(this));
-    this.respond(/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, this.PowerOff.bind(this));
+
+    this.POWER_ON=/(?:turn|power) on (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i;
+    this.POWER_OFF=/(?:turn|power) off (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i;
+    this.LIST_ALL=/(?:get|list|show) all (?:server ){0,1}hardware\.$/i;
+    this.LIST_UTILIZATION=/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i;
+    this.LIST_ALL_UTILIZATION=/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i;
+    this.LIST=/(?:get|list|show) (?!\/rest\/server-profiles\/)(:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i;
+    this.LIST_STATUS=/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}hardware\.$/i;
+    this.LIST_POWER=/(?:get|list|show) (?:all ){0,1}(:<powerState>powered on|powered off*?) (?:server ){0,1}hardware\.$/i;
+
+    this.switchBoard = new Conversation(robot);
+
+    this.respond(this.POWER_ON, this.PowerOn.bind(this));
+    this.respond(this.POWER_OFF, this.PowerOff.bind(this));
     this.capabilities.push(this.BULLET + "Power on/off a specific (server) hardware (e.g. turn on Encl1, bay 1).");
 
-    this.respond(/(?:get|list|show) all (?:server ){0,1}hardware\.$/i, this.ListServerHardware.bind(this));
+    this.respond(this.LIST_ALL, this.ListServerHardware.bind(this));
     this.capabilities.push(this.BULLET + "List all (server) hardware (e.g. list all hardware).");
 
-    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) utilization\.$/i, this.ListServerHardwareUtilization.bind(this));
+    this.respond(this.LIST_UTILIZATION, this.ListServerHardwareUtilization.bind(this));
     this.capabilities.push(this.BULLET + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
-    this.respond(/(?:get|list|show) (:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?) all utilization\.$/i, this.ListAllServerHardwareUtilization.bind(this));
+    this.respond(this.LIST_ALL_UTILIZATION, this.ListAllServerHardwareUtilization.bind(this));
     this.capabilities.push(this.BULLET + "List server hardware utilization (e.g. list Encl1, bay 1 utilization).");
 
-    this.respond(/(?:get|list|show) (?!\/rest\/server-profiles\/)(:<host>.*?)(?:\/rest\/server-hardware\/)(:<serverId>[a-zA-Z0-9_-]*?)\.$/i, this.ListServerHardwareById.bind(this));
+    this.respond(this.LIST, this.ListServerHardwareById.bind(this));
     this.capabilities.push(this.BULLET + "List server hardware by name (e.g. list Encl1, bay 1).");
 
-    this.respond(/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}hardware\.$/i, this.ListHardwareByStatus.bind(this));
+    this.respond(this.LIST_STATUS, this.ListHardwareByStatus.bind(this));
     this.capabilities.push(this.BULLET + "List all critical/warning/ok/disabled (server) hardware (e.g. list all critical hardware).");
 
-    this.respond(/(?:get|list|show) (?:all ){0,1}(:<powerState>powered on|powered off*?) (?:server ){0,1}hardware\.$/i, this.ListHardwareByPowerState.bind(this));
+    this.respond(this.LIST_POWER, this.ListHardwareByPowerState.bind(this));
     this.capabilities.push(this.BULLET + "List all powered on/off (server) hardware.");
   }
 
@@ -159,7 +170,6 @@ class ServerHardwareListener extends Listener {
       else {
         if (status.toLowerCase() === "ok") {
           return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + status.toUpperCase() + " status.");
-          return;
         } else {
           return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following blades have an " + status.toUpperCase() + " status.");
         }
@@ -170,13 +180,13 @@ class ServerHardwareListener extends Listener {
   }
 
   ListHardwareByPowerState(msg) {
-    let status = msg.powerState.substring(8, msg.powerState.length);
-    status = status.charAt(0).toUpperCase() + status.slice(1);
-    this.client.ServerHardware.getHardwareByPowerState(status).then((res) => {
+    let state = msg.powerState.substring(8, msg.powerState.length);
+    state = state.charAt(0).toUpperCase() + state.slice(1);
+    this.client.ServerHardware.getHardwareByPowerState(state).then((res) => {
       if (res.members.length === 0) {
-        return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades that are powered " + status.toLowerCase() + ".");
+        return this.transform.text(msg, msg.message.user.name + ", I didn't find any blades that are powered " + state.toLowerCase() + ".");
       } else {
-        return this.pagination(msg, res, "Okay, " + msg.message.user.name + ", the following blades are powered " + status.toLowerCase() + ".");
+        return this.pagination(msg, res, "Okay, " + msg.message.user.name + ", the following blades are powered " + state.toLowerCase() + ".");
       }
     }).catch((err) => {
       return this.transform.error(msg, err);
@@ -196,9 +206,9 @@ class ServerHardwareListener extends Listener {
       let promises = [];
       for (let serverInterconnectPortLink of res.serverInterconnectPortLinks) {
         let shInterconnectUri = serverInterconnectPortLink.replace(rtrim, ''); //remove statistics port to make lookup key
-        let shLogicalInterconnectUri = icMap.get(shInterconnectUri);
+        let shLogicalInterconnectUri = icMap.get(msg.host + '' + shInterconnectUri);
         if(shLogicalInterconnectUri) { //don't query if the interconnect is not part of a logical interconnect
-          promises.push(this.client.ServerHardware.getServerNetworkUtilization(serverInterconnectPortLink, shLogicalInterconnectUri));
+          promises.push(this.client.ServerHardware.getServerNetworkUtilization(msg.host, serverInterconnectPortLink, shLogicalInterconnectUri));
         }
       }
       return Promise.all(promises);
@@ -244,9 +254,9 @@ class ServerHardwareListener extends Listener {
       let promises = [];
       for (let serverInterconnectPortLink of res.serverInterconnectPortLinks) {
         let shInterconnectUri = serverInterconnectPortLink.replace(rtrim, ''); //remove statistics port to make lookup key
-        let shLogicalInterconnectUri = icMap.get(shInterconnectUri);
+        let shLogicalInterconnectUri = icMap.get(msg.host + '' + shInterconnectUri);
         if(shLogicalInterconnectUri) { //don't query if the interconnect is not part of a logical interconnect
-          promises.push(this.client.ServerHardware.getServerNetworkUtilization(serverInterconnectPortLink, shLogicalInterconnectUri));
+          promises.push(this.client.ServerHardware.getServerNetworkUtilization(msg.host, serverInterconnectPortLink, shLogicalInterconnectUri));
         }
       }
       return Promise.all(promises);

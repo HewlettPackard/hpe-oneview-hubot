@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const Listener = require('./base-listener');
+const Listener = require('./base');
 const buildDashboard = require('../charting/dashboard');
 
 class DashboardListener extends Listener {
