@@ -19,7 +19,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 const nlp = require('./middleware/nlp-middleware').nlp;
 const ovListener = require('./listener/oneview');
 const ovClient = require('./oneview-sdk/ov-client');
@@ -27,29 +26,28 @@ const ovBrain = require('./middleware/ov-brain');
 
 const BULLET = '\n\t\u2022 ';
 
-const main = (robot) => {
+const main = (robot, oneViewClient, lexer, oneViewListener) => {
   // load OneView configuration data from external file
   let oneviewConfig;
   try {
     const configuration = require('../oneview-configuration.json');
-    robot.logger.info('Applying configuration from json file.');
+    robot.logger.info('Applying configuration from oneview-configuration.json file.');
     oneviewConfig = configuration;
   } catch(err) {
-    robot.logger.error('Error reading OneView configuration file: ', err);
-    //throw new error
-    return;
+    robot.logger.error('Cannot read oneview-configuration.json configuration file: ', err);
+    throw new Error('Cannot read oneview-configuration.json file!');
   }
 
   robot.logger.info('Initializing NLP');
-  const lex = nlp(robot);
+  const lex = lexer || nlp(robot);
 
-  robot.logger.info('Initializing OneView');
-  const client = new ovClient(oneviewConfig, robot);
+  robot.logger.info('Initializing OneView client');
+  const client = oneViewClient || new ovClient(oneviewConfig, robot);
 
   client.login(false).then(() => {
     robot.logger.info('Logged into OneView.');
     const brain = new ovBrain(client, robot, lex);
-    ovListener(robot, client, brain);
+    oneViewListener || ovListener(robot, client, brain);
     introBot();
   }).catch((err) => {
     robot.logger.error(err);
@@ -58,31 +56,30 @@ const main = (robot) => {
   function introBot() {
     client.ServerHardware.getAllServerHardware().then((sh) => {
       client.ServerProfiles.getAllServerProfiles().then((sp) => {
-        client.ServerProfileTemplates.getAllServerProfileTemplates()
-          .then((spt) => {
-            let room = '#' + client.chatRoom;
+        client.ServerProfileTemplates.getAllServerProfileTemplates().then((spt) => {
 
-            if (robot.adapterName === 'flowdock') {
-              room = client.chatRoom;
-            }
+          let room = '#' + client.chatRoom;
+          if (robot.adapterName === 'flowdock') {
+            room = client.chatRoom;
+          }
 
-            robot.messageRoom(room,
-              "Hello, I'm " + robot.name + "! "
-              +"Your OneView instance is currently showing:"
-              + BULLET + sh.members.length + " server(s)."
-              + BULLET + sp.members.length + " server profile(s)."
-              + BULLET + spt.members.length +" server profile template(s)."
-              + "\nHow can I assist you? Type '@" + robot.name
-              + " help' to learn what I can do.");
+          robot.messageRoom(room,
+            "Hello, I'm " + robot.name + "! "
+            +"Your OneView instance is currently showing:"
+            + BULLET + sh.members.length + " server(s)."
+            + BULLET + sp.members.length + " server profile(s)."
+            + BULLET + spt.members.length +" server profile template(s)."
+            + "\nHow can I assist you? Type '@" + robot.name
+            + " help' to learn what I can do.");
           });
       });
     });
   }
 
-  //TODO: Bug #22 Not working.  Need to perform an aysnc shutdown from the SCMB
+  // TODO: Bug #22 Not working.  Need to perform an aysnc shutdown from the SCMB
   function exitHandler() {
     robot.logger.debug('in exitHandler, calling disconnect');
-    client.Notifications.disconnect();
+    // client.Notifications.disconnect();
   }
 
   process.on('exit', exitHandler.bind(null, {
