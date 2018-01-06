@@ -55,7 +55,7 @@ class ServerProfileCompliancePreview extends Resource {
   }
 
   buildPlainTextFlowdockOutput() {
-    let output = '>';
+    let output = '';
     for (const field in this) {
       if (__isNonDisplayField__(field) || !this[field]) {
         continue;

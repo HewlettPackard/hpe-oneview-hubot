@@ -79,15 +79,6 @@ describe('ServerHardware', () => {
   const brain = new OneViewBrain(oVClient, robot, {});
   sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({deviceName: '0000A66103_b11 profile'});
 
-  it('buildPlainTextOutput with profile', () => {
-    let expected = "\t\u2022 State: ProfileApplied\n\t\u2022 Model: Synergy 480 Gen10\n\t\u2022 Power State: On\n\t\u2022 Profile: 0000A66103_b11 profile\n\t\u2022 Status: OK\n";
-    const sh = new ServerHardware(ServerHardwareResourceProfile, brain);
-
-    let result = sh.buildPlainTextOutput();
-
-    expected.should.eql(result);
-  });
-
   it('buildPlainTextHipchatOutput without profile', () => {
     let expected = "\t\u2022 State: NoProfileApplied\n\t\u2022 Model: Synergy 480 Gen10\n\t\u2022 Power State: On\n\t\u2022 Profile: Available for deployment\n\t\u2022 Status: OK\n";
     const sh = new ServerHardware(ServerHardwareResource, brain);
@@ -98,7 +89,7 @@ describe('ServerHardware', () => {
   });
 
   it('buildPlainTextFlowdockOutput without profile', () => {
-    let expected = "\t\u2022 **State**: NoProfileApplied\n\t\u2022 **Model**: Synergy 480 Gen10\n\t\u2022 **Power State**: On\n\t\u2022 **Profile**: Available for deployment\n\t\u2022 **Status**: OK\n";
+    let expected = ">\t\u2022 **State**: NoProfileApplied\n\t\u2022 **Model**: Synergy 480 Gen10\n\t\u2022 **Power State**: On\n\t\u2022 **Profile**: Available for deployment\n\t\u2022 **Status**: OK\n";
     const sh = new ServerHardware(ServerHardwareResource, brain);
 
     let result = sh.buildPlainTextFlowdockOutput();

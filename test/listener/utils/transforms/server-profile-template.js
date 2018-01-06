@@ -53,7 +53,7 @@ describe('ServerProfileTemplate', () => {
   });
 
   it('buildPlainTextFlowdockOutput', () => {
-    let expected = '\t\u2022 **Description**: A server profile template\n';
+    let expected = '>\t\u2022 **Description**: A server profile template\n';
     const template = new ServerProfileTemplate(ServerProfileTemplateResource);
 
     let result = template.buildPlainTextFlowdockOutput();

@@ -106,7 +106,7 @@ describe('ServerProfile', () => {
   });
 
   it('buildPlainTextFlowdockOutput with hardware', () => {
-    let expected = "\t\u2022 **Affinity**: Bay\n\t\u2022 **Serial Number**: BCGLPVN00\n\t\u2022 **Server Hardware**: 0000A66101, bay 8\n\t\u2022 **Hardware Model**: HPE Synergy 480 Gen9 Compute Module\n\t\u2022 **Status**: OK\n";
+    let expected = ">\t\u2022 **Affinity**: Bay\n\t\u2022 **Serial Number**: BCGLPVN00\n\t\u2022 **Server Hardware**: 0000A66101, bay 8\n\t\u2022 **Hardware Model**: HPE Synergy 480 Gen9 Compute Module\n\t\u2022 **Status**: OK\n";
     const profile = new ServerProfile(ServerProfileResourceHardware, brain);
 
     let result = profile.buildPlainTextFlowdockOutput();
@@ -114,7 +114,7 @@ describe('ServerProfile', () => {
   });
 
   it('buildPlainTextFlowdockOutput without hardware', () => {
-    let expected = "\t\u2022 **Affinity**: Bay\n\t\u2022 **Serial Number**: BCGLPVN00\n\t\u2022 **Status**: OK\n";
+    let expected = ">\t\u2022 **Affinity**: Bay\n\t\u2022 **Serial Number**: BCGLPVN00\n\t\u2022 **Status**: OK\n";
     const profile = new ServerProfile(ServerProfileResource, brain);
 
     let result = profile.buildPlainTextFlowdockOutput();

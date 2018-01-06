@@ -53,7 +53,7 @@ describe('Alert', () => {
   });
 
   it('buildPlainTextFlowdockOutput', () => {
-    let expected = "\t\u2022 **Description**: The server has been powered off.\n\t\u2022 **Resource**: 0000A66101, bay 3\n\t\u2022 **Alert State**: OK\n\t\u2022 **Severity**: OK\n"
+    let expected = ">\t\u2022 **Description**: The server has been powered off.\n\t\u2022 **Resource**: 0000A66101, bay 3\n\t\u2022 **Alert State**: OK\n\t\u2022 **Severity**: OK\n"
     const alert = new Alert(AlertResource);
 
     let result = alert.buildPlainTextFlowdockOutput();
