@@ -31,13 +31,24 @@ class ServerProfileTemplate extends Resource {
     }
   }
 
-  buildPlainTextOutput() {
+  buildPlainTextHipchatOutput() {
     let output = '';
     for (const field in this) {
       if (__isNonDisplayField__(field) || !this[field]) {
         continue;
       }
       output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
+    }
+    return output;
+  }
+
+  buildPlainTextFlowdockOutput() {
+    let output = '>';
+    for (const field in this) {
+      if (__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      output += '\t\u2022 **' + this.camelCaseToTitleCase(field) + '**: ' + this[field] + '\n';
     }
     return output;
   }

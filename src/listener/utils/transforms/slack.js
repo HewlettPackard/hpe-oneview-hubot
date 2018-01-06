@@ -20,8 +20,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 const transform = require('./resource-transformer');
+const { RtmClient, CLIENT_EVENTS } = require('@slack/client');
 const url = require('url');
 let ov_brain;
+
+const token = process.env.SLACK_TOKEN;
+
+const rtm = new RtmClient(token, {
+  dataStore: false,
+  useRtmConnect: true,
+});
 
 class SlackTransform {
   constructor(brain) {
@@ -68,7 +76,9 @@ class SlackTransform {
       message.text = text;
     }
 
-    robot.messageRoom(room, message);
+    rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPEN, () => {
+    	rtm.sendMessage(message, room);
+	});
   }
 
   error(msg, err) {

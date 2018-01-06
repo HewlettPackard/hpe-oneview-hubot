@@ -36,7 +36,7 @@ class ServerProfile extends Resource {
     }
   }
 
-  buildPlainTextOutput(host) {
+  buildPlainTextHipchatOutput(host) {
     let output = '';
     for (const field in this) {
       if (__isNonDisplayField__(field) || !this[field]) {
@@ -49,8 +49,24 @@ class ServerProfile extends Resource {
       output += '\t\u2022 Hardware Model: ' + ov_brain.getHardwareModel(host + this.serverHardwareUri) + '\n';
     }
 
-    //Add status to output only for Flowdock and Hipchat
     output += '\t\u2022 Status: ' +  this.status + '\n';
+    return output;
+  }
+
+  buildPlainTextFlowdockOutput(host) {
+    let output = '>';
+    for (const field in this) {
+      if (__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      output += '\t\u2022 **' + this.camelCaseToTitleCase(field) + '**: ' + this[field] + '\n';
+    }
+    if (this.serverHardwareUri) {
+      output += '\t\u2022 **Server Hardware**: ' + ov_brain.getDeviceNameAndHyperLink(host + this.serverHardwareUri).deviceName + '\n';
+      output += '\t\u2022 **Hardware Model**: ' + ov_brain.getHardwareModel(host + this.serverHardwareUri) + '\n';
+    }
+
+    output += '\t\u2022 **Status**: ' +  this.status + '\n';
     return output;
   }
 

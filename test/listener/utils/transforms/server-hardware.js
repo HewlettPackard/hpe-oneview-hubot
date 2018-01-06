@@ -88,11 +88,20 @@ describe('ServerHardware', () => {
     expected.should.eql(result);
   });
 
-  it('buildPlainTextOutput without profile', () => {
+  it('buildPlainTextHipchatOutput without profile', () => {
     let expected = "\t\u2022 State: NoProfileApplied\n\t\u2022 Model: Synergy 480 Gen10\n\t\u2022 Power State: On\n\t\u2022 Profile: Available for deployment\n\t\u2022 Status: OK\n";
     const sh = new ServerHardware(ServerHardwareResource, brain);
 
-    let result = sh.buildPlainTextOutput();
+    let result = sh.buildPlainTextHipchatOutput();
+
+    expected.should.eql(result);
+  });
+
+  it('buildPlainTextFlowdockOutput without profile', () => {
+    let expected = "\t\u2022 **State**: NoProfileApplied\n\t\u2022 **Model**: Synergy 480 Gen10\n\t\u2022 **Power State**: On\n\t\u2022 **Profile**: Available for deployment\n\t\u2022 **Status**: OK\n";
+    const sh = new ServerHardware(ServerHardwareResource, brain);
+
+    let result = sh.buildPlainTextFlowdockOutput();
 
     expected.should.eql(result);
   });
