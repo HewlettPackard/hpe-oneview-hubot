@@ -43,11 +43,20 @@ describe('Alert', () => {
     hyperlink: "https://0.0.0.0/#/activity/r/rest/alerts/5483?s_sid=LTQ2OT",
   };
 
-  it('buildPlainTextOutput', () => {
+  it('buildPlainTextHipchatOutput', () => {
     let expected = "\t\u2022 Description: The server has been powered off.\n\t\u2022 Resource: 0000A66101, bay 3\n\t\u2022 Alert State: OK\n\t\u2022 Severity: OK\n"
     const alert = new Alert(AlertResource);
 
-    let result = alert.buildPlainTextOutput();
+    let result = alert.buildPlainTextHipchatOutput();
+
+    expected.should.eql(result);
+  });
+
+  it('buildPlainTextFlowdockOutput', () => {
+    let expected = ">\t\u2022 **Description**: The server has been powered off.\n\t\u2022 **Resource**: 0000A66101, bay 3\n\t\u2022 **Alert State**: OK\n\t\u2022 **Severity**: OK\n"
+    const alert = new Alert(AlertResource);
+
+    let result = alert.buildPlainTextFlowdockOutput();
 
     expected.should.eql(result);
   });

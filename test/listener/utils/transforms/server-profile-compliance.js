@@ -36,11 +36,19 @@ describe('ServerProfileCompliancePreview', () => {
     manualUpdates: []
   };
 
-  it('buildPlainTextOutput', () => {
+  it('buildPlainTextHipchatOutput', () => {
     let expected = "Automatic Updates:\nCreate a connection to network {\"name\":\"eth\", \"uri\":\"/rest/ethernet-networks/95717f69\"} with id 2 on Mezzanine (Mezz) 3:2.\n";
     const compliance = new ServerProfileCompliancePreview(ServerProfileCompliancePreviewResource);
 
-    let result = compliance.buildPlainTextOutput();
+    let result = compliance.buildPlainTextHipchatOutput();
+    expected.should.eql(result);
+  });
+
+  it('buildPlainTextFlowdockOutput', () => {
+    let expected = "**Automatic Updates**:\nCreate a connection to network {\"name\":\"eth\", \"uri\":\"/rest/ethernet-networks/95717f69\"} with id 2 on Mezzanine (Mezz) 3:2.\n";
+    const compliance = new ServerProfileCompliancePreview(ServerProfileCompliancePreviewResource);
+
+    let result = compliance.buildPlainTextFlowdockOutput();
     expected.should.eql(result);
   });
 

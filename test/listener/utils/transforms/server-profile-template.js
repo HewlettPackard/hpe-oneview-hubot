@@ -44,11 +44,19 @@ describe('ServerProfileTemplate', () => {
     enclosureGroupHyperlink: "https://0.0.0.0/#/enclosuregroups/show/interconectbayconfiguration/r/rest/enclosure-groups/84da6697?s_sid=LTc2"
   };
 
-  it('buildPlainTextOutput', () => {
+  it('buildPlainTextHipchatOutput', () => {
     let expected = '\t\u2022 Description: A server profile template\n';
     const template = new ServerProfileTemplate(ServerProfileTemplateResource);
 
-    let result = template.buildPlainTextOutput();
+    let result = template.buildPlainTextHipchatOutput();
+    expected.should.eql(result);
+  });
+
+  it('buildPlainTextFlowdockOutput', () => {
+    let expected = '>\t\u2022 **Description**: A server profile template\n';
+    const template = new ServerProfileTemplate(ServerProfileTemplateResource);
+
+    let result = template.buildPlainTextFlowdockOutput();
     expected.should.eql(result);
   });
 

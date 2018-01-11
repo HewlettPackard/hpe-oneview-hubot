@@ -133,11 +133,22 @@ function __toOutput__(resource) {
   let output = '';
   if (title) {
     output = title;
+
+    if (adapter === 'flowdock') {
+      output =  '**[' + title + ']' + '(' + transformedRes.hyperlink + ')**\n';      
+    }
   }
+
   if(transformedRes.pretext) {
     output += transformedRes.pretext + '\n';
   }
-  output += transformedRes.buildPlainTextOutput(host);
+
+  if (adapter === 'flowdock') {
+    output += transformedRes.buildPlainTextFlowdockOutput(host);
+  } else {
+    output += transformedRes.buildPlainTextHipchatOutput(host);
+  }
+      
   return output;
 }
 

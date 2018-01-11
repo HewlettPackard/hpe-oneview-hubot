@@ -35,7 +35,7 @@ class ServerProfileCompliancePreview extends Resource {
     }
   }
 
-  buildPlainTextOutput() {
+  buildPlainTextHipchatOutput() {
     let output = '';
     for (const field in this) {
       if (__isNonDisplayField__(field) || !this[field]) {
@@ -49,6 +49,25 @@ class ServerProfileCompliancePreview extends Resource {
       }
       if (value) {
         output += this.camelCaseToTitleCase(field) + ':\n' + value + '\n';
+      }
+    }
+    return output;
+  }
+
+  buildPlainTextFlowdockOutput() {
+    let output = '';
+    for (const field in this) {
+      if (__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      let value = '';
+      if (Array.isArray(this[field])) {
+        value = this[field].join("\n");
+      } else {
+        value = this[field];
+      }
+      if (value) {
+        output += '**' + this.camelCaseToTitleCase(field) + '**:\n' + value + '\n';
       }
     }
     return output;

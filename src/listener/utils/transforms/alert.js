@@ -33,7 +33,7 @@ class Alert extends Resource {
     }
   }
 
-  buildPlainTextOutput() {
+  buildPlainTextHipchatOutput() {
     let output = '';
     for (const field in this) {
       if (__isNonDisplayField__(field) || !this[field]) {
@@ -45,11 +45,28 @@ class Alert extends Resource {
         output += '\t\u2022 ' + this.camelCaseToTitleCase(field) + ': ' + this[field] + '\n';
       }
     }
-    //Add status to output only for Flowdock and Hipchat
+
     output += '\t\u2022 Severity: ' +  this.severity + '\n';
     return output;
   }
 
+  buildPlainTextFlowdockOutput() {
+    let output = '>';
+    for (const field in this) {
+      if (__isNonDisplayField__(field) || !this[field]) {
+        continue;
+      }
+      if (field === 'associatedResource') {
+        output += '\t\u2022 **Resource**: ' + this[field].resourceName + '\n';
+      } else {
+        output += '\t\u2022 **' + this.camelCaseToTitleCase(field) + '**: ' + this[field] + '\n';
+      }
+    }
+
+    output += '\t\u2022 **Severity**: ' +  this.severity + '\n';
+    return output;
+  }
+  
   buildSlackFields() {
     let fields = [];
     for (const field in this) {
