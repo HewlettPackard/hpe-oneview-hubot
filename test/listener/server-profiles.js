@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -504,6 +504,11 @@ describe('ServerProfilesListener', () => {
 
     let stub1 = sinon.stub(client.ServerProfiles, 'getServerProfile').returns(Bluebird.resolve(profileResponse));
     let stub2 = sinon.stub(brain, 'getDeviceNameAndHyperLink').returns({ deviceName: 'myprofile', hyperlink: '' });
+    let stub3 = sinon.stub(sh, 'PowerOff').returns(
+      new PromiseFeedback((feedback) => {
+        return Bluebird.resolve({name: 'Encl1, bay 4'});
+      })
+    );
 
     let msg = {
       robot: robot,
@@ -520,11 +525,11 @@ describe('ServerProfilesListener', () => {
 
     //sleep a momemt to wait for results
     setTimeout(() => {
-      assert(msg.send.callCount === 2);
+      assert(msg.send.callCount === 1);
       "Ok name I am going to power off the server profile myprofile.  Are you sure you want to do this?\n\t\u2022 @bot yes\n\t\u2022 @bot no.".should.equal(msg.send.args[0][0]);
-      'How would you like to power off the server?\n\t\u2022 @bot Momentary Press\n\t\u2022 @bot Press and Hold.'.should.equal(msg.send.args[1][0]);
       stub1.restore();
       stub2.restore();
+      stub3.restore();
       spy.restore();
       done();
     }, 10);

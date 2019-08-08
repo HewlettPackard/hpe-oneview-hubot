@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const nlp = require('nlp_compromise');
+const nlp = require('compromise');
 const Lexer = require('../../../src/middleware/utils/lexer');
 
 const lex = new Lexer(nlp);
@@ -84,7 +84,7 @@ describe('Lexer', () => {
     result.should.equal('@hubot show profile22.');
   });
 
-  //TODO make this pass (need to escape special characters in resource names)
+  // TODO make this pass (need to escape special characters in resource names)
   // it('resolveDevices complex name 4', () => {
   //   const result = lex.resolveDevices('@hubot show *Profile3hadoop??');
   //   result.should.equal('@hubot show /rest/server-profiles/eb13eab8.');

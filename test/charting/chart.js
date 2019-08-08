@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 const buildD3Chart = require('../../src/charting/chart');
-const svg2png = require("svg2png");
-const Bluebird = require('bluebird');
 const fs = require("fs");
 const path = require("path");
 const expect = require("chai").expect;
 
-const sinon = require('sinon');
 const chai = require('chai');
 
 chai.should();
@@ -45,8 +42,6 @@ describe('Chart', function() {
 
   it('buildD3Chart', (done) => {
     let robot = {adapterName: 'shell', logger: {}};
-    let svg = sinon.createStubInstance(svg2png);
-    sinon.stub.returns(Bluebird.resolve());
 
     buildD3Chart(robot, 'room', 'result', networkMetricList, 300).then((result) => {
       result.should.equal('Adapter shell does not support web file upload.');

@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -267,7 +267,7 @@ class ServerHardwareListener extends Listener {
         if (response[0].advancedStatistics) {
           let receiveKilobytesPerSec = {metricName: 'receiveKilobytesPerSec', metricSamples: response[0].advancedStatistics.receiveKilobytesPerSec.split(':')};
           let transmitKilobytesPerSec = {metricName: 'transmitKilobytesPerSec', metricSamples: response[0].advancedStatistics.transmitKilobytesPerSec.split(':')};
-          promises.push(buildD3Chart(this.robot, this.room, 'Network Utilization Port ' + response[0].portNumber, [receiveKilobytesPerSec, transmitKilobytesPerSec], response[1].sampleInterval));
+          promises.push(buildD3Chart(this.robot, this.room, 'Network Utilization Port ' + response[0].advancedStatistics.portNumber, [receiveKilobytesPerSec, transmitKilobytesPerSec], response[1].sampleInterval));
         }
       }
       return Promise.all(promises);

@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,9 +19,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 const d3 = require('d3');
 const jsdom = require('jsdom');
+const { JSDOM } = jsdom;
 const fs = require("fs");
 const svg2png = require("svg2png");
 
@@ -249,8 +249,8 @@ function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerProfiles,
     let dataset4 = hardwareWithProfiles.dataset;
 
     //generate the document to write the svg
-    const document = jsdom.jsdom("<html><body></body></html>");
-    document.d3 = d3.select(document);
+    const doc = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+    let body = d3.select(doc.window.document).select('body');
 
     //set the radius of the donut (the center part)
     let radius = 200;
@@ -278,7 +278,8 @@ function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerProfiles,
     let height = radius * 6;
 
     //generate the svg on the document with the given dimensions
-    let svg = document.d3.select("body").append("svg")
+    let svg = body.append('div').attr('class', 'container')
+      .append("svg")
         .attr("width", width)
         .attr("height", height);
     //sets the background to white so the image shows up on mobile
@@ -414,7 +415,6 @@ function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerProfiles,
           });
     }
 
-
     let middle2 = g2.append("text")
         .attr("text-anchor", "middle")
         .style("font-size", "4.0em")
@@ -544,7 +544,7 @@ function buildDashboard(robot, room, aggregatedAlerts, aggregatedServerProfiles,
         .text("Total");
 
       // convert the final svg to png
-      let buf = Buffer.from(document.d3.select("body").html());
+      let buf = Buffer.from(body.select('.container').html());
       const outputBuffer = svg2png.sync(buf, {});
       try {
         fs.writeFileSync('dashboard.png', outputBuffer);

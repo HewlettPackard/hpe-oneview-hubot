@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const nlp_compromise = require('nlp_compromise');
+const nlp_compromise = require('compromise');
 const Lexer = require('../../src/middleware/utils/lexer');
 const runNLP = require('../../src/middleware/nlp-middleware').runNLP;
 const lex = new Lexer(nlp_compromise);
@@ -59,7 +59,7 @@ describe('NLP Middleware', () => {
     runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-profile-templates/ad51166f.');
     Message.original_text.should.equal('@hubot show template1');
-    Message.nlp.raw_text.should.equal('@hubot show /rest/server-profile-templates/ad51166f.');
+    Message.nlp.out('text').should.equal('@hubot show /rest/server-profile-templates/ad51166f.');
   });
 
   it('runNLP simple profile', () => {
@@ -74,7 +74,7 @@ describe('NLP Middleware', () => {
     runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab1.');
     Message.original_text.should.equal('@hubot show profile1');
-    Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab1.');
+    Message.nlp.out('text').should.equal('@hubot show /rest/server-profiles/eb13eab1.');
   });
 
   it('runNLP simple hardware', () => {
@@ -89,7 +89,7 @@ describe('NLP Middleware', () => {
     runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-hardware/30303437.');
     Message.original_text.should.equal('@hubot show 0000A661, bay 2');
-    Message.nlp.raw_text.should.equal('@hubot show /rest/server-hardware/30303437.');
+    Message.nlp.out('text').should.equal('@hubot show /rest/server-hardware/30303437.');
   });
 
   it('runNLP complex profile', () => {
@@ -104,7 +104,7 @@ describe('NLP Middleware', () => {
     runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab3.');
     Message.original_text.should.equal('@hubot show profile1 - docker');
-    Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab3.');
+    Message.nlp.out('text').should.equal('@hubot show /rest/server-profiles/eb13eab3.');
   });
 
   it('runNLP complex profile', () => {
@@ -119,6 +119,6 @@ describe('NLP Middleware', () => {
     runNLP(Message, logger, lex);
     Message.text.should.equal('@hubot show /rest/server-profiles/eb13eab2.');
     Message.original_text.should.equal('@hubot show profile1 - 0000A661, bay 2');
-    Message.nlp.raw_text.should.equal('@hubot show /rest/server-profiles/eb13eab2.');
+    Message.nlp.out('text').should.equal('@hubot show /rest/server-profiles/eb13eab2.');
   });
 });

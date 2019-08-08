@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ let lookupset = {};
 class Lexer {
   constructor(nlp) {
     this.nlp = nlp;
-    this.lex = nlp.lexicon();
+    // this.lex = nlp.lexicon();
     this.largestDevice = 1;
 
     //TODO: BUG - This should really be part of a spelling error correction task, we should use an independent fuzzy set that operates on individual words.
@@ -45,8 +45,7 @@ class Lexer {
   }
 
   addNamedDevice(search, replacement) {
-    const tSearch = search.trim();
-
+    const tSearch = this.nlp(search.trim()).normalize().out();
     __addNamedDevice__(tSearch, replacement);
 
     if (bladeName.test(tSearch)) {//We know blades conform to a specific naming pattern so we can get really accurate fuzzy search results by mapping some explicit typographic errors to the correct value
@@ -69,18 +68,18 @@ class Lexer {
   }
 
   updateNamedDevice(robot, search, replacement) {
-    const tSearch = search.trim();
+    const tSearch = this.nlp(search.trim()).normalize().out();
     namedDevices.forEach((namedDevice) => {
       if (namedDevice.replacement === replacement) {
-        robot.logger.debug('Updating named device: ' + namedDevice.search + ' from: ' + namedDevice.search + ' to: ' + search + ' with uri: ' + namedDevice.replacement);
-        namedDevice.search = new RegExp('\\b' + search + '\\b', 'ig');
+        robot.logger.debug('Updating named device: ' + namedDevice.search + ' from: ' + namedDevice.search + ' to: ' + tSearch + ' with uri: ' + namedDevice.replacement);
+        namedDevice.search = new RegExp('\\b' + tSearch + '\\b', 'ig');
       }
     });
   }
 
   resolveDevices(text) {
-    text = this.nlp.text(text).sentences.map((sentence) => { //Split the message into sentences so our window is applied on each sentence.
-      let text = sentence.str.trim();
+    text = this.nlp(text).sentences().data().map((sentence) => { //Split the message into sentences so our window is applied on each sentence.
+      let text = this.nlp(sentence.text.trim()).normalize().out();
       if (text.endsWith('.')) {
         text = text.slice(0, -1);
       }

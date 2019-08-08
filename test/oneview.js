@@ -25,7 +25,7 @@ const Lexer = require('../src/middleware/utils/lexer');
 const ovListener = require('../src/listener/oneview');
 const ovBrain = require('../src/middleware/ov-brain');
 
-const nlp = require('nlp_compromise');
+const nlp = require('compromise');
 const chai = require('chai');
 const sinon = require('sinon');
 const Bluebird = require('bluebird');

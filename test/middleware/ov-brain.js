@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const nlp = require('nlp_compromise');
+const nlp = require('compromise');
 const Lexer = require('../../src/middleware/utils/lexer');
 const OVClient = require('../../src/oneview-sdk/ov-client');
 const OneViewBrain = require('../../src/middleware/ov-brain');
@@ -154,8 +154,8 @@ describe('OV Brain', () => {
   it('getLogicalInterconnectsMap', () => {
     const result = brain.getLogicalInterconnectsMap();
     const expected = new Map();
-    expected.set('/rest/interconnects/e', '/rest/logical-interconnects/47a1');
-    expected.set('/rest/interconnects/f', '/rest/logical-interconnects/47a1');
+    expected.set('10.1.1.1/rest/interconnects/e', '10.1.1.1/rest/logical-interconnects/47a1');
+    expected.set('10.1.1.1/rest/interconnects/f', '10.1.1.1/rest/logical-interconnects/47a1');
     chai.expect(result).to.deep.equal(expected);
   });
 });

@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,9 +19,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 const d3 = require('d3');
 const jsdom = require('jsdom');
+const { JSDOM } = jsdom;
 const fs = require("fs");
 const svg2png = require("svg2png");
 
@@ -109,13 +109,15 @@ function buildD3Chart(robot, room, metricName, metricList, sampleInterval) {
 
   return new Promise((resolve, reject) =>  {
 
-    const document = jsdom.jsdom("<html><body></body></html>");
-    document.d3 = d3.select(document);
-    let svg = document.d3.select("body").append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    const doc = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+    let body = d3.select(doc.window.document).select('body');
+
+    let svg = body.append('div').attr('class', 'container')
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     let data = [];
     if (sampleInterval) {
@@ -164,10 +166,10 @@ function buildD3Chart(robot, room, metricName, metricList, sampleInterval) {
 
       // Add the Legend
       svg.append("text")
-        .attr("x", (legendSpace/2)+i*legendSpace)
+        .attr("x", (legendSpace/3)+i*legendSpace)
         .attr("y", height + (margin.bottom/2)+ 5)
-        .style("font-family", "sans-serif")
-        .style("font-size", "12px")
+        .style("font-family", "'Arial'")
+        .style("font-size", ".8em")
         .style("fill", function() {return d.color = color(i); })
         .text(d.key);
     });
@@ -182,8 +184,8 @@ function buildD3Chart(robot, room, metricName, metricList, sampleInterval) {
       .attr("x", (width / 2))
       .attr("y", 0 - (margin.top / 2))
       .attr("text-anchor", "middle")
-      .style("font-family", "sans-serif")
-      .style("font-size", "14px")
+      .style("font-family", "'Arial'")
+      .style("font-size", "1.0em")
       .text(metricName);
 
     // Add axis label
@@ -191,14 +193,14 @@ function buildD3Chart(robot, room, metricName, metricList, sampleInterval) {
       .attr("x",  0 - 35)
       .attr("y", (height / 2))
       .attr("text-anchor", "middle")
-      .style("font-family", "sans-serif")
-      .style("font-size", "10px")
+      .style("font-family", "'Arial'")
+      .style("font-size", ".8em")
       .text(__chooseLabel__(metricName));
 
     // Add the Y Axis
     svg.append("g").call(d3.axisLeft(y).ticks(4, "s"));
 
-    let buf = Buffer.from(document.d3.select("body").html());
+    let buf = Buffer.from(body.select('.container').html());
     const outputBuffer = svg2png.sync(buf, {});
     try {
       fs.writeFileSync(metricName + "-chart.png", outputBuffer);

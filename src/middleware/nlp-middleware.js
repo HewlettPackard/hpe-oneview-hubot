@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-const nlp_compromise = require('nlp_compromise');
+const nlp_compromise = require('compromise');
 const SpellCheck = require('./utils/spell-check');
 const Lexer = require('./utils/lexer');
 
@@ -68,6 +68,9 @@ const toNormal = {
 nlp_compromise.plugin(toNormal);
 
 function runNLP(message, logger, lex) {
+  if (typeof message.text === 'undefined') {
+    return;
+  }
   const cleaned = message.text.replace(wordSpacer, ' ').replace(sentenceSpacer, "$1$2  ").trim();
 
   let cleanSentences = null;
@@ -75,13 +78,14 @@ function runNLP(message, logger, lex) {
   if (/(?:[0-9]{1,3}\.){3}[0-9]{1,3}/.test(cleaned)) {
     cleanSentences = cleaned;
   } else {
-    let normalized = nlp_compromise.text(cleaned)/*.to_present().toAmerican()*/.toNormal();
+    let normalized = nlp_compromise(cleaned).normalize().out();
+
     if (normalized.contractions && normalized.contractions.expand) {
       normalized = normalized.contractions.expand();
     }
     // Ensure that all sentences end with '.' a note, this will replace ! and ? with .
-    cleanSentences = nlp_compromise.text(normalized.text()).sentences.map((s) => {
-      return s.str.trim().replace(sentenceTerminal, '.');
+    cleanSentences = nlp_compromise(normalized).sentences().data().map((s) => {
+      return s.text.trim().replace(sentenceTerminal, '.');
     }).join('  ');
   }
 
@@ -91,7 +95,7 @@ function runNLP(message, logger, lex) {
 
   message.original_text = message.text;
   message.text = resolved;
-  message.nlp = nlp_compromise.text(message.text);
+  message.nlp = nlp_compromise(message.text);
 };
 module.exports.runNLP = runNLP; //export for testing
 
@@ -101,7 +105,7 @@ const nlp = (robot) => {
     const message = context.response.message.message || context.response.message;
     runNLP(message, robot.logger, lex);
 
-    if (!message.text.includes('@' + robot.name)) {
+    if (typeof message.text === 'undefined' || !message.text.includes('@' + robot.name)) {
       context.response.message.done = true;
     }
 
