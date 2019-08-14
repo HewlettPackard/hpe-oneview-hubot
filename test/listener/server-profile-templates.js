@@ -101,7 +101,7 @@ describe('ServerProfileTemplateListener', () => {
     let rgx0 = new NamedRegExp(serverProfileTemplateListener.LIST_ALL);
     let rgx1 = new NamedRegExp(serverProfileTemplateListener.LIST_AVAILABLE_TARGETS);
     let rgx2 = new NamedRegExp(serverProfileTemplateListener.LIST_DEPLOYED_PROFILES);
-    let rgx3 = new NamedRegExp(serverProfileTemplateListener.CREATE_PROFILES_FROM_TEMPATE);
+    let rgx3 = new NamedRegExp(serverProfileTemplateListener.CREATE_PROFILE_FROM_TEMPATE);
     let rgx4 = new NamedRegExp(serverProfileTemplateListener.GROW_TEMPLATE);
     let rgx5 = new NamedRegExp(serverProfileTemplateListener.UNDEPLOY_PROFILES_USING_TEMPLATE);
     let rgx6 = new NamedRegExp(serverProfileTemplateListener.UNDEPLOY_PROFILES_USING_SERVERS_IN_TEMPLATE);
@@ -126,12 +126,12 @@ describe('ServerProfileTemplateListener', () => {
 
     rgx3.should.deep.equal(constructorArgs[3].args[0]);
     assert(typeof constructorArgs[3].args[2] === 'function');
-    'bound DeployProfiles'.should.equal(constructorArgs[3].args[2].name);
+    'bound DeployProfile'.should.equal(constructorArgs[3].args[2].name);
     assert.isFalse(constructorArgs[3].args[2].hasOwnProperty('prototype'));
 
     rgx4.should.deep.equal(constructorArgs[4].args[0]);
     assert(typeof constructorArgs[4].args[2] === 'function');
-    'bound DeployProfiles'.should.equal(constructorArgs[4].args[2].name);
+    'bound DeployProfile'.should.equal(constructorArgs[4].args[2].name);
     assert.isFalse(constructorArgs[4].args[2].hasOwnProperty('prototype'));
 
     rgx5.should.deep.equal(constructorArgs[5].args[0]);
@@ -160,7 +160,7 @@ describe('ServerProfileTemplateListener', () => {
     let rgx0 = new NamedRegExp(serverProfileTemplateListener.LIST_ALL);
     let rgx1 = new NamedRegExp(serverProfileTemplateListener.LIST_AVAILABLE_TARGETS);
     let rgx2 = new NamedRegExp(serverProfileTemplateListener.LIST_DEPLOYED_PROFILES);
-    let rgx3 = new NamedRegExp(serverProfileTemplateListener.CREATE_PROFILES_FROM_TEMPATE);
+    let rgx3 = new NamedRegExp(serverProfileTemplateListener.CREATE_PROFILE_FROM_TEMPATE);
     let rgx4 = new NamedRegExp(serverProfileTemplateListener.GROW_TEMPLATE);
     let rgx5 = new NamedRegExp(serverProfileTemplateListener.UNDEPLOY_PROFILES_USING_TEMPLATE);
     let rgx6 = new NamedRegExp(serverProfileTemplateListener.UNDEPLOY_PROFILES_USING_SERVERS_IN_TEMPLATE);
@@ -169,7 +169,7 @@ describe('ServerProfileTemplateListener', () => {
     assert.isTrue(rgx0.test('@bot list all templates.'));
     assert.isTrue(rgx1.test('@bot show available targets for localhost/rest/server-profile-templates/1243.'));
     assert.isTrue(rgx2.test('@bot show profiles using localhost/rest/server-profile-templates/1243.'));
-    assert.isTrue(rgx3.test('@bot create 1 profile from localhost/rest/server-profile-templates/1243.'));
+    assert.isTrue(rgx3.test('@bot create a profile from localhost/rest/server-profile-templates/1243.'));
     assert.isTrue(rgx4.test('@bot grow localhost/rest/server-profile-templates/1243 by 4 profiles.'));
     assert.isTrue(rgx5.test('@bot remove 1 profile from localhost/rest/server-profile-templates/1243.'));
     assert.isTrue(rgx6.test('@bot remove 1 server from localhost/rest/server-profile-templates/1243.'));

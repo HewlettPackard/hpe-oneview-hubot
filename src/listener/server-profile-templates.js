@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -46,12 +46,12 @@ class ServerProfileTemplateListener extends Listener {
     this.respond(this.LIST_DEPLOYED_PROFILES, this.GetDeployedProfiles.bind(this));
     this.capabilities.push(this.BULLET + "Show profile(s) using a server profile template (e.g. show profiles using docker swarm).");
 
-    this.CREATE_PROFILES_FROM_TEMPATE = /(?:deploy|create) (:<count>\d+) profile[s]{0,1} (?:from|for|using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i;
-    this.respond(this.CREATE_PROFILES_FROM_TEMPATE, this.DeployProfiles.bind(this));
-    this.capabilities.push(this.BULLET + "Create profile(s) using a server profile template (e.g. create 1 profile from docker swarm).");
+    this.CREATE_PROFILE_FROM_TEMPATE = /(?:deploy|create) a profile (?:from|for|using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i;
+    this.respond(this.CREATE_PROFILE_FROM_TEMPATE, this.DeployProfile.bind(this));
+    this.capabilities.push(this.BULLET + "Create a profile using a server profile template (e.g. create a profile from docker swarm).");
 
     this.GROW_TEMPLATE = /(?:flex|grow)(?: the)? (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?) by (:<count>\d+)(?: profile| profiles| hardware| servers)?\.$/i;
-    this.respond(this.GROW_TEMPLATE, this.DeployProfiles.bind(this));
+    this.respond(this.GROW_TEMPLATE, this.DeployProfile.bind(this));
     this.capabilities.push(this.BULLET + "Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).");
 
     this.UNDEPLOY_PROFILES_USING_TEMPLATE = /(?:undeploy|remove) (:<count>\d+) profile[s]{0,1} (?:from|that were deployed from|that were using) (:<host>.*?)(?:\/rest\/server-profile-templates\/)(:<templateId>[a-zA-Z0-9_-]*?)\.$/i;
@@ -103,57 +103,73 @@ class ServerProfileTemplateListener extends Listener {
     });
   }
 
-  DeployProfiles(msg) {
+  DeployProfile(msg) {
     let host = msg.host;
     if (this.client.isReadOnly()) {
       return this.transform.text(msg, "Hold on a sec...  You'll have to set readOnly mode to false in your config file first if you want to do that...   ");
     }
 
     let dialog = this.switchBoard.startDialog(msg);
-    this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy " + this.transform.makePlural(msg.count, 'profile') +
-      ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
 
-    dialog.addChoice(/yes/i, () => {
-      let template = null;
-      __getAvailableTargets__(msg, (spt) => {
-        template = spt;
-      }, this.client).then((targets) => {
-        let i = -1;
-        return targets.filter((t) => {
-          if (t.powerState === 'Off') {
-            i++;
-            return i < msg.count;
-          }
-        });
-      }).then((targets) => {
-        if (targets && targets.length > 0) {
-          return this.transform.send(msg, targets, 'Alright, I am going to increase the capacity of ' + this.transform.hyperlink(template.hyperlink, template.name) + ' by ' + this.transform.makePlural(targets.length, 'profile') + '.\n' +
-            'For each server listed below, I will perform the following operations:\n' +
-            this.transform.list('Create a profile using this template\n' +
-              'Power on the profile') + "\n" +
-            "These operations will take a long time.  Grab a coffee.  I will let you know when I'm finished.").then(() => {
-            return Promise.allSettled(targets.map((target) => {
-              return this.client.ServerProfileTemplates.deployProfile(host, template.uri, target.uri, template.name + ' - ' + target.name).feedback((res) => {
-                this.robot.logger.debug(res);
-              }).then((profile) => {
-                return this.serverHardware.PowerOnHardware(host, profile.serverHardwareUri, msg, true);
-              });
-            }));
-          });
-        } else {
-          throw new UserException('Oops there are no servers available for ' + template.name + '. It appears there are no matching servers that are not powered off or do not already have profiles.', 'Try checking the power state of the matching servers.');
+    let template = null;
+    let targetNames = [];
+    __getAvailableTargets__(msg, (spt) => {
+      template = spt;
+    }, this.client).then((targets) => {
+      return targets.filter((t) => {
+        if (t.powerState === 'Off') {
+          targetNames.push(t.name);
+          return true;
         }
-      }).then(() => {
-        return this.client.ServerProfileTemplates.getProfilesUsingTemplate(host, msg.templateId).then((profiles) => {
-          return this.transform.send(msg, profiles, 'Yo ' + msg.message.user.name + ', I just finished deploying those profiles.  Now there ' + this.transform.isAre(profiles.length, 'profile') + ' using ' + this.transform.hyperlink(template.hyperlink, template.name));
-        });
-      }).catch((err) => {
-        return this.transform.error(msg, err);
       });
+    }).then((targets) => {
+      if (targets && targets.length > 0) {
+        this.transform.text(msg, "Ok " + msg.message.user.name + " I am going to deploy a new profile from " + template.name +
+          ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
+
+        dialog.addChoice(/yes/i, (msg2) => {
+          let profileName = null;
+          this.transform.text(msg, 'Profile name?\n' + this.BULLET + "@" + this.robot.name + ' my profile name');
+          dialog.addChoice(/\s(.*)$/i, (msg3) => {
+            profileName = msg3.match[1].replace(/\.$/, ""); //remove trailing .
+            let targetChoices = targetNames.join(', ');
+            this.transform.text(msg, 'Choose a target server from this list: ' + targetChoices + '\n' + this.BULLET + "@" + this.robot.name + ' my target choice');
+
+            dialog.addChoice(/\s(.*)$/i, (msg4) => {
+              let desiredTarget = msg4.match[1];
+              let re = new RegExp(host,"g");
+              let targetUri = desiredTarget.replace(re, "").replace(/\.$/, ""); //remove trailing .
+              return this.transform.send(msg, targets, 'Alright, I am going to increase the capacity of ' + this.transform.hyperlink(template.hyperlink, template.name) + ' by 1 profile.\n' +
+                'I will perform the following operations:\n' +
+                this.transform.list('Create a profile using this template\n' +
+                'Power on the profile') + "\n" +
+                'I will let you know when I\'m finished.').then(() => {
+                  return this.client.ServerProfileTemplates.deployProfile(host, template.uri, targetUri, profileName).feedback((res) => {
+                    this.robot.logger.debug(res);
+                  }).then((profile) => {
+                    msg4.host = host;
+                    msg4.serverId = profile.serverHardwareUri;
+                    return this.serverHardware.PowerOnHardware(msg4);
+                  }).then(() => {
+                    return this.client.ServerProfileTemplates.getProfilesUsingTemplate(host, msg.templateId).then((profiles) => {
+                      return this.transform.send(msg, profiles, 'Yo ' + msg.message.user.name + ', I just finished deploying the profile. Now there ' + this.transform.isAre(profiles.length, 'profile') + ' using ' + this.transform.hyperlink(template.hyperlink, template.name));
+                    });
+                  }).catch((err) => {
+                    return this.transform.error(msg, err);
+                  });
+              });
+            });
+          });
+        });
+      } else {
+        throw new UserException('Oops there are no servers available for ' + template.name + '. It appears there are no matching servers that are powered off or do not already have profiles.', 'Try checking the power state of the matching servers.');
+      }
+    }).catch((err) => {
+      return this.transform.error(msg, err);
     });
 
     dialog.addChoice(/no/i, () => {
-      return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't deploy the " + this.transform.makePlural(msg.count, 'profile'));
+      return this.transform.text(msg, "Ok " + msg.message.user.name + " I won't deploy the profile");
     });
   }
 
@@ -182,7 +198,7 @@ class ServerProfileTemplateListener extends Listener {
           'For each profile listed below, I will perform the following operations:\n' +
           this.transform.list('Power off the profile\n' +
             'Remove the profile') + "\n" +
-          'I will notify you when I am finished.  Grab a snack.  This is going to take a bit.').then(() => {
+          'I will notify you when I am finished.').then(() => {
           return Promise.allSettled(profiles.map((profile) => {
             if (profile.serverHardwareUri) {
               return this.PowerOffHardware(host, profile.serverHardwareUri, msg).then(() => {

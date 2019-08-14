@@ -211,7 +211,7 @@ Server Profile help (e.g. sp help).\n\t\u2022 Server Profile Template help \
 'Server Profile Template commands:\n\t\u2022 Show all (server) profile templates (e.g. show all templates).\
 \n\t\u2022 Show available targets for a server profile template (e.g. show available targets for docker swarm).\
 \n\t\u2022 Show profile(s) using a server profile template (e.g. show profiles using docker swarm).\
-\n\t\u2022 Create profile(s) using a server profile template (e.g. create 1 profile from docker swarm).\
+\n\t\u2022 Create a profile using a server profile template (e.g. create a profile from docker swarm).\
 \n\t\u2022 Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).\
 \n\t\u2022 Remove a number of profiles/servers from a profile template (e.g. remove 2 profiles from docker swarm).\
 \n\t\u2022 Fix compliance for a profile template (e.g. fix compliance for docker swarm).'.should.equal(msg.send.args[0][0]);
@@ -243,8 +243,8 @@ Server Profile help (e.g. sp help).\n\t\u2022 Server Profile Template help \
 \n\t\u2022 Power on/off a specific (server) profile (e.g. turn on hadoop cluster).\n\t\u2022 List all critical/warning/ok/disabled (server) \
 profiles (e.g. list all critical profiles).\nServer Profile Template commands:\n\t\u2022 Show all (server) profile templates (e.g. show all \
 templates).\n\t\u2022 Show available targets for a server profile template (e.g. show available targets for docker swarm).\n\t\u2022 Show \
-profile(s) using a server profile template (e.g. show profiles using docker swarm).\n\t\u2022 Create profile(s) using a server profile template \
-(e.g. create 1 profile from docker swarm).\n\t\u2022 Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).\
+profile(s) using a server profile template (e.g. show profiles using docker swarm).\n\t\u2022 Create a profile using a server profile template \
+(e.g. create a profile from docker swarm).\n\t\u2022 Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).\
 \n\t\u2022 Remove a number of profiles/servers from a profile template (e.g. remove 2 profiles from docker swarm).\n\t\u2022 Fix compliance \
 for a profile template (e.g. fix compliance for docker swarm).\nServer hardware commands:\n\t\u2022 Power on/off a specific (server) hardware \
 (e.g. turn on Encl1, bay 1).\n\t• List all (server) hardware (e.g. list all hardware).\n\t\u2022 List server hardware utilization (e.g. list \
@@ -279,8 +279,8 @@ List all powered on/off (server) hardware.\n.'.should.equal(msg.send.args[0][0])
 \n\t\u2022 Power on/off a specific (server) profile (e.g. turn on hadoop cluster).\n\t\u2022 List all critical/warning/ok/disabled (server) \
 profiles (e.g. list all critical profiles).\nServer Profile Template commands:\n\t\u2022 Show all (server) profile templates (e.g. show all \
 templates).\n\t\u2022 Show available targets for a server profile template (e.g. show available targets for docker swarm).\n\t\u2022 Show \
-profile(s) using a server profile template (e.g. show profiles using docker swarm).\n\t\u2022 Create profile(s) using a server profile template \
-(e.g. create 1 profile from docker swarm).\n\t\u2022 Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).\
+profile(s) using a server profile template (e.g. show profiles using docker swarm).\n\t\u2022 Create a profile using a server profile template \
+(e.g. create a profile from docker swarm).\n\t\u2022 Flex/grow a server profile template by a given amount (e.g. grow docker swarm by 4 profiles).\
 \n\t\u2022 Remove a number of profiles/servers from a profile template (e.g. remove 2 profiles from docker swarm).\n\t\u2022 Fix compliance \
 for a profile template (e.g. fix compliance for docker swarm).\nServer hardware commands:\n\t\u2022 Power on/off a specific (server) hardware \
 (e.g. turn on Encl1, bay 1).\n\t• List all (server) hardware (e.g. list all hardware).\n\t\u2022 List server hardware utilization (e.g. list \
