@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -68,6 +68,65 @@ describe('ServerProfileTemplateListener', () => {
     members: [profileResponse]
   };
 
+  const serverHardwareResponse = [
+    {
+      type: "server-hardware",
+      name: "0000A6610EE, bay 5",
+      powerState: "Off",
+      status: "Ok",
+      uri: "/rest/server-hardware/eb13eab8-adsf",
+      model: "BL460c Gen8 1",
+      serialNumber: "1234",
+      hyperlink: "https://localhost/#/server-hardware/show/overview/r/rest/server-hardware/eb13eab8-adsf?s_sid=LTE"
+    },
+    {
+      type: "server-hardware",
+      name: "0000A6610EE, bay 6",
+      powerState: "Off",
+      status: "Ok",
+      uri: "/rest/server-hardware/eb13eab8-adse",
+      model: "BL460c Gen8 1",
+      serialNumber: "5678",
+      hyperlink: "https://localhost/#/server-hardware/show/overview/r/rest/server-hardware/eb13eab8-adse?s_sid=LTE"
+    }
+  ];
+
+  const availableTargetsResponse =
+  [
+    {
+        "enclosureGroupName": "dcs",
+        "enclosureName": "0000A66103",
+        "enclosureUri": "/rest/enclosures/0000000000A66103",
+        "enclosureBay": 3,
+        "serverHardwareName": "0000A66103, bay 3",
+        "serverHardwareUri": "/rest/server-hardware/30373737-3237-4D32-3230-313531354752",
+        "serverHardwareTypeName": "SY 660 Gen9 1",
+        "serverHardwareTypeUri": "/rest/server-hardware-types/32BE6070-73AB-47B9-9F5D-511928264251",
+        "enclosureGroupUri": "/rest/enclosure-groups/68bf776d-d2e5-438a-a86e-6c655f6ded97",
+        "powerState": "On",
+        "formFactor": [
+            "FullHeight"
+        ],
+        "serverHardwareStatus": "OK"
+    },
+    {
+        "enclosureGroupName": "dcs",
+        "enclosureName": "0000A66102",
+        "enclosureUri": "/rest/enclosures/0000000000A66102",
+        "enclosureBay": 3,
+        "serverHardwareName": "0000A66102, bay 3",
+        "serverHardwareUri": "/rest/server-hardware/30373737-3237-4D32-3230-313530384752",
+        "serverHardwareTypeName": "SY 660 Gen9 1",
+        "serverHardwareTypeUri": "/rest/server-hardware-types/32BE6070-73AB-47B9-9F5D-511928264251",
+        "enclosureGroupUri": "/rest/enclosure-groups/68bf776d-d2e5-438a-a86e-6c655f6ded97",
+        "powerState": "Off",
+        "formFactor": [
+            "FullHeight"
+        ],
+        "serverHardwareStatus": "OK"
+    }
+  ];
+
   let listeners = [];
   const robot = {
     name: 'bot',
@@ -86,13 +145,18 @@ describe('ServerProfileTemplateListener', () => {
   const client = new OVClient(oneviewConfig, robot);
 
   sinon.stub(client.ServerProfiles, 'getAllServerProfiles').returns(Bluebird.resolve(profilesResponse));
-  sinon.stub(client.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.resolve(templatesResponse));
+  let spStub = sinon.stub(client.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.resolve(templatesResponse));
 
   const brain = new OneViewBrain(client, robot, {});
   const transform = new ResourceTransforms(robot, brain);
 
   const sh = new ServerHardwareListener(robot, client, transform, brain);
   const serverProfilesListener = new ServerProfilesListener(robot, client, transform, sh, brain);
+
+  afterEach(() => {
+    spStub.restore();
+    listeners = [];
+  });
 
   it('constructor', (done) => {
     sinon.spy(robot, "respond");
@@ -174,7 +238,7 @@ describe('ServerProfileTemplateListener', () => {
     assert.isTrue(rgx5.test('@bot remove 1 profile from localhost/rest/server-profile-templates/1243.'));
     assert.isTrue(rgx6.test('@bot remove 1 server from localhost/rest/server-profile-templates/1243.'));
     assert.isTrue(rgx7.test('@bot fix compliance for localhost/rest/server-profile-templates/1243.'));
-        
+
     done();
   });
 
@@ -241,4 +305,292 @@ describe('ServerProfileTemplateListener', () => {
     sp1.restore();
     done();
   });
+
+  it('test ListServerProfileTemplates', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+    let spy1 = sinon.spy(serverProfileTemplateListener, 'ListServerProfileTemplates');
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.resolve(templatesResponse));
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {}
+    };
+    let spy2 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.ListServerProfileTemplates(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      templatesResponse.should.deep.equal(JSON.parse(msg.send.args[0][0]));
+      spy1.restore();
+      spy2.restore();
+      stub1.restore();
+      done();
+    }, 10);
+  });
+
+  it('test ListServerProfileTemplates no templates', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+    let spy1 = sinon.spy(serverProfileTemplateListener, 'ListServerProfileTemplates');
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.resolve({members: []}));
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {}
+    };
+    let spy2 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.ListServerProfileTemplates(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      'There are no server templates deployed.'.should.equal(msg.send.args[0][0]);
+      spy1.restore();
+      spy2.restore();
+      stub1.restore();
+      done();
+    }, 10);
+  });
+
+  it('test ListServerProfileTemplates error', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    let err = {error: {message: 'Oops', errorCode: 'Oops'}};
+
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getAllServerProfileTemplates').returns(Bluebird.reject(err));
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {}
+    };
+    let spy1 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.ListServerProfileTemplates(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      'Oops there was a problem.\n\nOneView error code: Oops\nOops\n'.should.equal(msg.send.args[0][0]);
+      stub1.restore();
+      spy1.restore();
+      done();
+    }, 10);
+  });
+
+  it('test GetAvailableTargets', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+    let spy1 = sinon.spy(serverProfileTemplateListener, 'GetAvailableTargets');
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getAvailableTargets').returns(Bluebird.resolve(availableTargetsResponse));
+    let stub2 = sinon.stub(client.ServerHardware, 'getServerHardware').returns(Bluebird.resolve(serverHardwareResponse));
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {}
+    };
+    let spy2 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.GetAvailableTargets(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      spy1.restore();
+      stub1.restore();
+      stub2.restore();
+      done();
+    }, 10);
+  });
+
+  it('test GetAvailableTargets empty', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+    let spy1 = sinon.spy(serverProfileTemplateListener, 'GetAvailableTargets');
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getAvailableTargets').returns(Bluebird.resolve([]));
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {}
+    };
+    let spy2 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.GetAvailableTargets(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      spy1.restore();
+      spy2.restore();
+      stub1.restore();
+      done();
+    }, 10);
+  });
+
+  it('test GetAvailableTargets error', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    let err = {error: {message: 'Oops', errorCode: 'Oops'}};
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+    let spy1 = sinon.spy(serverProfileTemplateListener, 'GetAvailableTargets');
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getAvailableTargets').returns(Bluebird.reject(err));
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {}
+    };
+    let spy2 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.GetAvailableTargets(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      'Oops there was a problem.\n\nOneView error code: Oops\nOops\n'.should.equal(msg.send.args[0][0]);
+      stub1.restore();
+      spy1.restore();
+      spy2.restore();
+      done();
+    }, 10);
+  });
+
+  it('test GetDeployedProfiles', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+    let spy1 = sinon.spy(serverProfileTemplateListener, 'GetDeployedProfiles');
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getProfilesUsingTemplate').returns(Bluebird.resolve(profilesResponse));
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {}
+    };
+    let spy2 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.GetDeployedProfiles(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      spy1.restore();
+      spy2.restore();
+      stub1.restore();
+      done();
+    }, 10);
+  });
+
+  it('test FixCompliance', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+    let spy1 = sinon.spy(serverProfileTemplateListener, 'FixCompliance');
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getNonCompliantProfiles').returns(Bluebird.resolve([profileResponse]));
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {},
+      reply: function() {},
+      message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},
+    };
+    let spy2 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.FixCompliance(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      'name I am going to fix the compliance issues for the profile template .  Are you sure you want to do this?\n\t• @bot yes\n\t• @bot no.'.should.equal(msg.send.args[0][0]);
+      spy1.restore();
+      spy2.restore();
+      stub1.restore();
+      done();
+    }, 10);
+  });
+
+  it('test FixCompliance no', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+    let spy1 = sinon.spy(serverProfileTemplateListener, 'FixCompliance');
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getNonCompliantProfiles').returns(Bluebird.resolve([profileResponse]));
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {},
+      reply: function() {},
+      message: {text: '@bot no.', user: {name: 'name', id: '1234'}, room: 'room'},
+    };
+    let spy2 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.FixCompliance(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      'name I am going to fix the compliance issues for the profile template .  Are you sure you want to do this?\n\t• @bot yes\n\t• @bot no.'.should.equal(msg.send.args[0][0]);
+      'OK name I won\'t fix the compliance issues.'.should.equal(msg.send.args[1][0]);
+      spy1.restore();
+      spy2.restore();
+      stub1.restore();
+      done();
+    }, 10);
+  });
+
+  it('test DeployProfile', (done) => {
+    profileResponse.serverHardwareUri = "/rest/server-profiles/1a94be5c";
+
+    let shR =
+    {
+      type: "server-hardware",
+      name: "0000A6610EE, bay 5",
+      powerState: "Off",
+      status: "Ok",
+      uri: "/rest/server-hardware/eb13eab8-adsf",
+      model: "BL460c Gen8 1",
+      serialNumber: "1234",
+      hyperlink: "https://localhost/#/server-hardware/show/overview/r/rest/server-hardware/eb13eab8-adsf?s_sid=LTE"
+    };
+
+    const serverProfileTemplateListener = new ServerProfileTemplateListener(robot, client, transform, sh, serverProfilesListener, brain);
+    let spy1 = sinon.spy(serverProfileTemplateListener, 'DeployProfile');
+    let stub1 = sinon.stub(client.ServerProfileTemplates, 'getAvailableTargets').returns(Bluebird.resolve(availableTargetsResponse));
+    let stub2 = sinon.stub(client.ServerHardware, 'getServerHardware').returns(Bluebird.resolve(shR));
+
+    let msg = {
+      host: {},
+      serverId: 1,
+      send: function() {},
+      reply: function() {},
+      message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},
+    };
+    let spy2 = sinon.spy(msg, "send");
+
+    serverProfileTemplateListener.DeployProfile(msg);
+
+    listeners[1](msg); //call the dialog listener with the msg
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      spy1.restore();
+      spy2.restore();
+      stub1.restore();
+      stub2.restore();
+      done();
+    }, 10);
+  });
+
 });

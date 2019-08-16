@@ -111,14 +111,14 @@ class ServerProfileTemplateListener extends Listener {
 
     let dialog = this.switchBoard.startDialog(msg);
 
-    let template = null;
-    let targetNames = [];
+    let template = '';
+    let selectableTargets = new Map();
     __getAvailableTargets__(msg, (spt) => {
       template = spt;
     }, this.client).then((targets) => {
       return targets.filter((t) => {
         if (t.powerState === 'Off') {
-          targetNames.push(t.name);
+          selectableTargets.set(t.uri, t.name);
           return true;
         }
       });
@@ -128,17 +128,23 @@ class ServerProfileTemplateListener extends Listener {
           ".  Are you sure you want to do this?\n" + this.BULLET + "@" + this.robot.name + " yes\n" + this.BULLET + "@" + this.robot.name + " no");
 
         dialog.addChoice(/yes/i, (msg2) => {
-          let profileName = null;
+          let profileName = '';
           this.transform.text(msg, 'Profile name?\n' + this.BULLET + "@" + this.robot.name + ' my profile name');
           dialog.addChoice(/\s(.*)$/i, (msg3) => {
-            profileName = msg3.match[1].replace(/\.$/, ""); //remove trailing .
-            let targetChoices = targetNames.join(', ');
+            let re = new RegExp("@" + this.robot.name,"g");
+            profileName = msg3.message.text.replace(re, "").replace(/\.$/, ""); //remove bot name and trailing .
+            let targetChoices = Array.from(selectableTargets.values()).join(', ');
             this.transform.text(msg, 'Choose a target server from this list: ' + targetChoices + '\n' + this.BULLET + "@" + this.robot.name + ' my target choice');
 
             dialog.addChoice(/\s(.*)$/i, (msg4) => {
               let desiredTarget = msg4.match[1];
               let re = new RegExp(host,"g");
               let targetUri = desiredTarget.replace(re, "").replace(/\.$/, ""); //remove trailing .
+              if (!selectableTargets.has(targetUri)) {
+                let err = new UserException('Oops you need to pick a valid target.\n');
+                return this.transform.error(msg4, err);
+              }
+
               return this.transform.send(msg, targets, 'Alright, I am going to increase the capacity of ' + this.transform.hyperlink(template.hyperlink, template.name) + ' by 1 profile.\n' +
                 'I will perform the following operations:\n' +
                 this.transform.list('Create a profile using this template\n' +
