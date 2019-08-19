@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -189,6 +189,31 @@ describe('ServerHardware', () => {
     serverHardware.getHardwareByStatus("OK").then(function(data) {
       data.members.length.should.equal(1);
       data.members[0].status.should.equal("OK");
+    });
+
+    stub.restore();
+  });
+
+  it('get UUID on hardware', () => {
+    let serverHardwareResponse = {
+      "type": "server-hardware-list",
+      "category": "server-hardware",
+      "count": 1,
+      "members": [
+          {
+            "type": "server-hardware",
+            "name": "0000B6710EA, bay 7",
+            "powerState": "On",
+            "status": "OK",
+            "uuidState": "On"
+          }]
+    };
+
+    let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverHardwareResponse));
+
+    serverHardware.getHardwareByUuidLight("on").then(function(data) {
+      data.members.length.should.equal(1);
+      data.members[0].uuidState.should.equal("On");
     });
 
     stub.restore();

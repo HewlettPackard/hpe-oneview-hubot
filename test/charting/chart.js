@@ -33,7 +33,7 @@ function relative(relPath) {
 }
 
 describe('Chart', function() {
-  this.timeout(2500);
+  this.timeout(2700);
 
   let networkMetricList = [
     {metricName:'receiveKilobytesPerSec',metricSamples: [ '69', '69', '69']},

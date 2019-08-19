@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -89,6 +89,24 @@ class ServerHardware {
 
     for (let connection of this.connections.values()) {
       promises.push(connection.get(uri + "?filter=\"status=" + status + "\""));
+    }
+
+    return Promise.all(promises).then(response => {
+      for (let res of response) {
+        resObj.members.push(...res.members);
+      }
+      return new Promise((resolve) => {
+        resolve(resObj);
+      });
+    });
+  }
+
+  getHardwareByUuidLight(lightState) {
+    let promises = [];
+    let resObj = {'members': []};
+
+    for (let connection of this.connections.values()) {
+      promises.push(connection.get(uri + "?filter=\"uidState=" + lightState + "\""));
     }
 
     return Promise.all(promises).then(response => {

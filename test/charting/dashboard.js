@@ -33,7 +33,7 @@ function relative(relPath) {
 }
 
 describe('Dashboard', function() {
-  this.timeout(2500);
+  this.timeout(2700);
 
   let aggregatedAlerts = {
   	members: [{

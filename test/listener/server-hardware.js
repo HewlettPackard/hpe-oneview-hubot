@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,7 @@ describe('ServerHardware', function() {
     name: "0000A6610EE, bay 5",
     powerState: "Off",
     status: "Ok",
+    uuidState: "On",
     uri: "/rest/server-hardware/eb13eab8-adsf",
     model: "BL460c Gen8 1",
     serialNumber: "1234",
@@ -152,6 +153,7 @@ describe('ServerHardware', function() {
     let rgx5 = new NamedRegExp(serverHardwareListener.LIST);
     let rgx6 = new NamedRegExp(serverHardwareListener.LIST_STATUS);
     let rgx7 = new NamedRegExp(serverHardwareListener.LIST_POWER);
+    let rgx8 = new NamedRegExp(serverHardwareListener.LIST_UUID_LIGHT);
 
     let constructorArgs = robot.respond.getCalls();
 
@@ -195,6 +197,11 @@ describe('ServerHardware', function() {
     'bound ListHardwareByPowerState'.should.equal(constructorArgs[7].args[2].name);
     assert.isFalse(constructorArgs[7].args[2].hasOwnProperty('prototype'));
 
+    rgx8.should.deep.equal(constructorArgs[8].args[0]);
+    assert(typeof constructorArgs[7].args[2] === 'function');
+    'bound ListHardwareByUuidLight'.should.equal(constructorArgs[8].args[2].name);
+    assert.isFalse(constructorArgs[8].args[2].hasOwnProperty('prototype'));
+
     spy.restore();
     done();
   });
@@ -210,6 +217,7 @@ describe('ServerHardware', function() {
     let rgx5 = new NamedRegExp(serverHardwareListener.LIST);
     let rgx6 = new NamedRegExp(serverHardwareListener.LIST_STATUS);
     let rgx7 = new NamedRegExp(serverHardwareListener.LIST_POWER);
+    let rgx8 = new NamedRegExp(serverHardwareListener.LIST_UUID_LIGHT);
 
     assert.isTrue(rgx0.test('@bot power on /rest/server-hardware/eb13eab8-adsf.'));
     assert.isTrue(rgx1.test('@bot power off /rest/server-hardware/eb13eab8-adsf.'));
@@ -219,6 +227,7 @@ describe('ServerHardware', function() {
     assert.isTrue(rgx5.test('@bot list /rest/server-hardware/eb13eab8-adsf.'));
     assert.isTrue(rgx6.test('@bot list all critical hardware.'));
     assert.isTrue(rgx7.test('@bot list all powered on hardware.'));
+    assert.isTrue(rgx8.test('@bot show all hardware with uuid light off.'));
 
     done();
   });
@@ -817,6 +826,55 @@ describe('ServerHardware', function() {
       spy.restore();
       done();
     }, 9900);
+  });
+
+  it('list by uuid on', (done) => {
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareByUuidLight').returns(Bluebird.resolve(serverHardwaresResponseOk));
+    const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
+
+    let msg = {
+      robot: robot,
+      uuidlight: 'on',
+      message: {text: '@bot show all hardware with uuid light on.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, "send");
+
+    serverHardwareListener.ListHardwareByUuidLight(msg);
+
+    const expectedJsonResults = JSON.stringify(serverHardwaresResponseOk, null, '  ');
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Okay name, the following hardware have the UUID light ON.".should.equal(msg.send.args[0][0]);
+      expectedJsonResults.should.equal(msg.send.args[1][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('list by uuid no results', (done) => {
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareByUuidLight').returns(Bluebird.resolve({members: []}));
+    const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
+
+    let msg = {
+      robot: robot,
+      uuidlight: 'on',
+      message: {text: '@bot show all hardware with uuid light on.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, "send");
+
+    serverHardwareListener.ListHardwareByUuidLight(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      "name, I didn't find any hardware with the UUID light ON.".should.equal(msg.send.args[0][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
   });
 
 });

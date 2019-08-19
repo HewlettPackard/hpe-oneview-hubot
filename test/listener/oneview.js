@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,7 @@ describe('OVListener', () => {
     let spy = sinon.spy(robot, 'respond');
     listener(robot, client, brain);
 
-    assert(robot.respond.callCount === 31); // 31 listeners
+    assert(robot.respond.callCount === 32); // 32 listeners
     spy.restore();
     done();
   });
