@@ -211,7 +211,7 @@ describe('ServerHardware', () => {
 
     let stub = sinon.stub(oVClient.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve(serverHardwareResponse));
 
-    serverHardware.getHardwareByUuidLight("on").then(function(data) {
+    serverHardware.getHardwareWithFilter("uidState", "on").then(function(data) {
       data.members.length.should.equal(1);
       data.members[0].uuidState.should.equal("On");
     });

@@ -101,12 +101,12 @@ class ServerHardware {
     });
   }
 
-  getHardwareByUuidLight(lightState) {
+  getHardwareWithFilter(filter, attribute) {
     let promises = [];
     let resObj = {'members': []};
 
     for (let connection of this.connections.values()) {
-      promises.push(connection.get(uri + "?filter=\"uidState=" + lightState + "\""));
+      promises.push(connection.get(uri + "?filter=\"" + filter + "\"='" + attribute + "'\""));
     }
 
     return Promise.all(promises).then(response => {

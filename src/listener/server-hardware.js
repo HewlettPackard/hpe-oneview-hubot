@@ -43,6 +43,8 @@ class ServerHardwareListener extends Listener {
     this.LIST_STATUS=/(?:get|list|show) (?:all ){0,1}(:<status>critical|ok|disabled|warning*?) (?:server ){0,1}hardware\.$/i;
     this.LIST_POWER=/(?:get|list|show) (?:all ){0,1}(:<powerState>powered on|powered off*?) (?:server ){0,1}hardware\.$/i;
     this.LIST_UUID_LIGHT=/(?:get|list|show) all (?:server ){0,1}hardware with uuid light (:<uuidlight>on|off*?)\.$/i;
+    this.LIST_ASSETTAG=/(?:get|list|show) (?:server ){0,1}hardware with asset tag (:<assettag>[a-zA-Z0-9_-]*?)\.$/i;
+    //TODO filter by model and sht
 
     this.switchBoard = new Conversation(robot);
 
@@ -70,6 +72,9 @@ class ServerHardwareListener extends Listener {
 
     this.respond(this.LIST_UUID_LIGHT, this.ListHardwareByUuidLight.bind(this));
     this.capabilities.push(this.BULLET + "List all (server) hardware by UUID light state (e.g. list all hardware with UUID light on).");
+
+    this.respond(this.LIST_ASSETTAG, this.ListHardwareByAssetTag.bind(this));
+    this.capabilities.push(this.BULLET + "List (server) hardware by asset tag (e.g. show hardware with asset tag cluster1).");
   }
 
   PowerOnHardware(msg) {
@@ -199,7 +204,7 @@ class ServerHardwareListener extends Listener {
 
   ListHardwareByUuidLight(msg) {
     let uuidlight = msg.uuidlight.toLowerCase();
-    this.client.ServerHardware.getHardwareByUuidLight(uuidlight).then((res) => {
+    this.client.ServerHardware.getHardwareWithFilter('uidState', uuidlight).then((res) => {
       if (res.members.length === 0) {
         return this.transform.text(msg, msg.message.user.name + ", I didn't find any hardware with the UUID light " + uuidlight.toUpperCase());
       } else {
@@ -210,6 +215,18 @@ class ServerHardwareListener extends Listener {
     });
   }
 
+  ListHardwareByAssetTag(msg) {
+    let assetTag = msg.assettag;
+    this.client.ServerHardware.getHardwareWithFilter('assetTag', assetTag).then((res) => {
+      if (res.members.length === 0) {
+        return this.transform.text(msg, msg.message.user.name + ", I didn't find any hardware with the asset tag " + assetTag);
+      } else {
+        return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following hardware have the asset tag " + assetTag);
+      }
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
+  }
 
   ListServerHardwareUtilization(msg) {
     this.transform.send(msg, "Ok " + msg.message.user.name + " I'm going to create the CPU and network utilization charts. This can take quite some time.");

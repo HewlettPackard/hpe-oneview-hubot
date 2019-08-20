@@ -53,8 +53,7 @@ describe('OVListener', () => {
   it('constructor', (done) => {
     let spy = sinon.spy(robot, 'respond');
     listener(robot, client, brain);
-
-    assert(robot.respond.callCount === 32); // 32 listeners
+    assert(robot.respond.callCount === 33); // 33 listeners
     spy.restore();
     done();
   });

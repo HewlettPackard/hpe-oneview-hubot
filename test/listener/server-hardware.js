@@ -789,7 +789,7 @@ describe('ServerHardware', function() {
       stub4.restore();
       spy.restore();
       done();
-    }, 5900);
+    }, 7000);
   });
 
   it('list all hardware utilization', (done) => {
@@ -829,7 +829,7 @@ describe('ServerHardware', function() {
   });
 
   it('list by uuid on', (done) => {
-    let stub = sinon.stub(client.ServerHardware, 'getHardwareByUuidLight').returns(Bluebird.resolve(serverHardwaresResponseOk));
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareWithFilter').returns(Bluebird.resolve(serverHardwaresResponseOk));
     const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
 
     let msg = {
@@ -855,7 +855,7 @@ describe('ServerHardware', function() {
   });
 
   it('list by uuid no results', (done) => {
-    let stub = sinon.stub(client.ServerHardware, 'getHardwareByUuidLight').returns(Bluebird.resolve({members: []}));
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareWithFilter').returns(Bluebird.resolve({members: []}));
     const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
 
     let msg = {

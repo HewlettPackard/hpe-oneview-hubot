@@ -1,5 +1,5 @@
 /*
-(c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+(c) Copyright 2016-2019 Hewlett Packard Enterprise Development LP
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,21 +21,70 @@ THE SOFTWARE.
 */
 const OVClient = require('../../src/oneview-sdk/ov-client');
 const Notifications = require('../../src/oneview-sdk/notifications');
-const Connection = require('../../src/oneview-sdk/connection');
-
+const MessageEmitter = require('../../src/oneview-sdk/notifications');
 const chai = require('chai');
 const sinon = require('sinon');
 const assert = chai.assert;
+const amqp = require('amqp');
+const Bluebird = require('bluebird');
 
 chai.should();
 
+const robot = {adapterName: 'shell', on: function () { }, logger: {debug: function () {}, error: function () {}, info: function () {}}};
+
 describe('Notifications', () => {
-  let robot = {adapterName: 'shell', on: function () { }, logger: {debug: function () {}, error: function () {}, info: function () {}}};
 
   it('constructor', () => {
     client = new OVClient({hosts: []}, robot);
     let notifications = new Notifications(client, robot);
     assert(notifications instanceof Notifications);
+  });
+
+  it('connect ', (done) => {
+    const oneviewConfig = {
+      hosts: [{
+          applianceIp: "localhost",
+          apiVersion: 300,
+          userName: "admin",
+          password: "password",
+          doProxy: false,
+          proxyHost: "0.0.0.0",
+          proxyPort: 0
+        }]
+    };
+
+    client = new OVClient(oneviewConfig, robot);
+
+    let connection = {
+      on: function () {}
+    };
+    let spy = sinon.spy(connection, "on");
+
+    let stub1 = sinon.stub(client.getConnections().get('localhost'), '__http__').returns(Bluebird.resolve({}));
+    let stub2 = sinon.stub(amqp, 'createConnection').returns(connection);
+
+    let notifications = new Notifications(client, robot);
+    assert(notifications instanceof Notifications);
+
+    notifications.connect('localhost');
+
+    setTimeout(() => {
+      assert(connection.on.callCount === 2);
+      spy.restore();
+      stub1.restore();
+      stub2.restore();
+      done();
+    }, 10);
+  });
+
+});
+
+describe('MessageEmitter', () => {
+
+  it('constructor', () => {
+    client = new OVClient({hosts: []}, robot);
+    let emitter = new MessageEmitter(robot, 'queue', 'localhost');
+    assert(emitter instanceof MessageEmitter);
   });
 
 });
