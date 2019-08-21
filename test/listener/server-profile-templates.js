@@ -572,7 +572,6 @@ describe('ServerProfileTemplateListener', () => {
 
     let msg = {
       host: {},
-      serverId: 1,
       send: function() {},
       reply: function() {},
       message: {text: '@bot yes.', user: {name: 'name', id: '1234'}, room: 'room'},

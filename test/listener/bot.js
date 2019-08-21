@@ -159,7 +159,10 @@ Server Profile help (e.g. sp help).\n\t\u2022 Server Profile Template help \
 \n\t\u2022 List all critical/warning/ok/disabled (server) hardware (e.g. list all critical hardware).\
 \n\t\u2022 List all powered on/off (server) hardware.\
 \n\t\u2022 List all (server) hardware by UUID light state (e.g. list all hardware with UUID light on).\
-\n\t\u2022 List (server) hardware by asset tag (e.g. show hardware with asset tag cluster1).'.should.equal(msg.send.args[0][0]);
+\n\t\u2022 List (server) hardware by asset tag (e.g. show hardware with asset tag cluster1).\
+\n\t\u2022 List (server) hardware with profiles (e.g. show hardware with profiles).\
+\n\t\u2022 Show (server) hardware without profiles (e.g. list hardware with no profiles).'
+.should.equal(msg.send.args[0][0]);
       spy.restore();
       done();
     }, 100);
@@ -253,7 +256,10 @@ for a profile template (e.g. fix compliance for docker swarm).\nServer hardware 
 Encl1, bay 1 utilization).\n\t\u2022 List server hardware utilization (e.g. list Encl1, bay 1 utilization).\n\t\u2022 List server hardware by \
 name (e.g. list Encl1, bay 1).\n\t\u2022 List all critical/warning/ok/disabled (server) hardware (e.g. list all critical hardware).\n\t\u2022 \
 List all powered on/off (server) hardware.\n\t\u2022 List all (server) hardware by UUID light state (e.g. list all hardware with UUID light on).\n\t\u2022 \
-List (server) hardware by asset tag (e.g. show hardware with asset tag cluster1).\n.'.should.equal(msg.send.args[0][0]);
+List (server) hardware by asset tag (e.g. show hardware with asset tag cluster1).\n\t\u2022 \
+List (server) hardware with profiles (e.g. show hardware with profiles).\n\t\u2022 \
+Show (server) hardware without profiles (e.g. list hardware with no profiles).\n.'
+.should.equal(msg.send.args[0][0]);
       spy.restore();
       done();
     }, 100);
@@ -290,7 +296,9 @@ for a profile template (e.g. fix compliance for docker swarm).\nServer hardware 
 Encl1, bay 1 utilization).\n\t\u2022 List server hardware utilization (e.g. list Encl1, bay 1 utilization).\n\t\u2022 List server hardware by \
 name (e.g. list Encl1, bay 1).\n\t\u2022 List all critical/warning/ok/disabled (server) hardware (e.g. list all critical hardware).\n\t\u2022 \
 List all powered on/off (server) hardware.\n\t\u2022 List all (server) hardware by UUID light state (e.g. list all hardware with UUID light on).\n\t\u2022 \
-List (server) hardware by asset tag (e.g. show hardware with asset tag cluster1).\n.'.should.equal(msg.send.args[0][0]);
+List (server) hardware by asset tag (e.g. show hardware with asset tag cluster1).\n\t\u2022 \
+List (server) hardware with profiles (e.g. show hardware with profiles).\n\t\u2022 \
+Show (server) hardware without profiles (e.g. list hardware with no profiles).\n.'.should.equal(msg.send.args[0][0]);
       spy.restore();
       done();
     }, 100);

@@ -25,7 +25,6 @@ const OVClient = require('../../src/oneview-sdk/ov-client');
 
 const chai = require('chai');
 const sinon = require('sinon');
-const Bluebird = require('bluebird');
 
 chai.should();
 const assert = chai.assert;
@@ -53,7 +52,8 @@ describe('OVListener', () => {
   it('constructor', (done) => {
     let spy = sinon.spy(robot, 'respond');
     listener(robot, client, brain);
-    assert(robot.respond.callCount === 33); // 33 listeners
+
+    assert(robot.respond.callCount === 35); // 35 listeners
     spy.restore();
     done();
   });

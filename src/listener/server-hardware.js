@@ -44,6 +44,8 @@ class ServerHardwareListener extends Listener {
     this.LIST_POWER=/(?:get|list|show) (?:all ){0,1}(:<powerState>powered on|powered off*?) (?:server ){0,1}hardware\.$/i;
     this.LIST_UUID_LIGHT=/(?:get|list|show) all (?:server ){0,1}hardware with uuid light (:<uuidlight>on|off*?)\.$/i;
     this.LIST_ASSETTAG=/(?:get|list|show) (?:server ){0,1}hardware with asset tag (:<assettag>[a-zA-Z0-9_-]*?)\.$/i;
+    this.LIST_PROFILE_APPLIED=/(?:get|list|show) (?:server ){0,1}hardware with profiles\.$/i;
+    this.LIST_NO_PROFILE_APPLIED=/(?:get|list|show) (?:server ){0,1}hardware (?:without|with no) profiles\.$/i;
     //TODO filter by model and sht
 
     this.switchBoard = new Conversation(robot);
@@ -75,6 +77,12 @@ class ServerHardwareListener extends Listener {
 
     this.respond(this.LIST_ASSETTAG, this.ListHardwareByAssetTag.bind(this));
     this.capabilities.push(this.BULLET + "List (server) hardware by asset tag (e.g. show hardware with asset tag cluster1).");
+
+    this.respond(this.LIST_PROFILE_APPLIED, this.ListHardwareWithProfiles.bind(this));
+    this.capabilities.push(this.BULLET + "List (server) hardware with profiles (e.g. show hardware with profiles).");
+
+    this.respond(this.LIST_NO_PROFILE_APPLIED, this.ListHardwareWithNoProfiles.bind(this));
+    this.capabilities.push(this.BULLET + "Show (server) hardware without profiles (e.g. list hardware with no profiles).");
   }
 
   PowerOnHardware(msg) {
@@ -222,6 +230,30 @@ class ServerHardwareListener extends Listener {
         return this.transform.text(msg, msg.message.user.name + ", I didn't find any hardware with the asset tag " + assetTag);
       } else {
         return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following hardware have the asset tag " + assetTag);
+      }
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
+  }
+
+  ListHardwareWithProfiles(msg) {
+    this.client.ServerHardware.getHardwareWithFilter('state', 'ProfileApplied').then((res) => {
+      if (res.members.length === 0) {
+        return this.transform.text(msg, msg.message.user.name + ", I didn't find any hardware with profiles");
+      } else {
+        return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following hardware have profiles");
+      }
+    }).catch((err) => {
+      return this.transform.error(msg, err);
+    });
+  }
+
+  ListHardwareWithNoProfiles(msg) {
+    this.client.ServerHardware.getHardwareWithFilter('state', 'NoProfileApplied').then((res) => {
+      if (res.members.length === 0) {
+        return this.transform.text(msg, msg.message.user.name + ", I didn't find any hardware without profiles");
+      } else {
+        return this.pagination(msg, res, "Okay " + msg.message.user.name + ", the following hardware have no profiles applied");
       }
     }).catch((err) => {
       return this.transform.error(msg, err);

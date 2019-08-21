@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 const FuzzySet = require('fuzzyset.js');
 const space = /\s+/;
-const bladeName = /^(\D*)(.*?), bay (\d+)$/;
+const bladeName = /^(\D*)(.*?) bay (\d+)$/;
 const maxNgram = 10;
 const minNgram = 3;
 const fuzzySetThreshold = 0.83;//A fuzzy match that is less than this value is not considered a good enough match to replace

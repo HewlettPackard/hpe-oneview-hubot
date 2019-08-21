@@ -70,10 +70,6 @@ RUN npm install -g minimatch@^3.0.4;      \
 RUN npm install gulp;                     \
     npm install gulp-task-listing@^1.1.0;
 
-# To install avoid cross-device link not permitted...
-#RUN cd /usr/lib/node_modules/npm; npm install fs-extra;
-#RUN cd /usr/lib/node_modules/npm; sed -i -e s/graceful-fs/fs-extra/ -e s/fs.rename/fs.move/ ./lib/utils/rename.js;
-
 ###############################################################################
 USER docker
 
@@ -101,10 +97,6 @@ WORKDIR /home/docker/hubot-core-org
 # Avoid warnings for deprecated dependencies:
 RUN npm install -g minimatch@^3.0.4;   \
     npm install -g graceful-fs@^4.2.2;
-
-# To install avoid cross-device link not permitted...
-#RUN cd /usr/lib/node_modules/npm; npm install fs-extra;
-#RUN cd /usr/lib/node_modules/npm; sed -i -e s/graceful-fs/fs-extra/ -e s/fs.rename/fs.move/ ./lib/utils/rename.js;
 
 RUN npm install -g gulp;                  \
     npm install;                          \

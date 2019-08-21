@@ -32,7 +32,8 @@ const Bluebird = require('bluebird');
 chai.should();
 const assert = chai.assert;
 
-describe('DashboardListener', () => {
+describe('DashboardListener', function() {
+  this.timeout(10000);
 
   const robot = {adapterName: 'shell', on: function () { }, listen: function () {}, respond: function () {}, listenerMiddleware: function() {}, logger: {debug: function () {}, error: function () {}, info: function () {}}};
 
@@ -132,7 +133,7 @@ describe('DashboardListener', () => {
       stub3.restore();
       stub4.restore();
       done();
-    }, 100);
+    }, 2100);
   });
 
   it('show error', (done) => {

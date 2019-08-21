@@ -24,8 +24,6 @@ const Lexer = require('../../../src/middleware/utils/lexer');
 
 const lex = new Lexer(nlp);
 const chai = require('chai');
-const sinon = require('sinon');
-const assert = chai.assert;
 
 chai.should();
 
@@ -37,6 +35,7 @@ describe('Lexer', () => {
   lex.addNamedDevice('Profile3hadoop', '/rest/server-profiles/eb13eab7', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab7?s_sid=LTE', undefined);
   lex.addNamedDevice('Hadoop, profile1', '/rest/server-profiles/eb13eab17', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab17?s_sid=LTE', undefined);
   lex.addNamedDevice('Hadoop', '/rest/server-profile-templates/eb13eab27', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profile-templates/eb13eab27?s_sid=LTE', undefined);
+  lex.addNamedDevice('0000A66101, bay 4', '/rest/server-hardware/eb13eab13', 'name', 'https://10.1.1.1/#/server-hardware/show/overview/r/rest/server-hardware/eb13eab13?s_sid=LTE', undefined);
   //TODO make this pass (need to escape special characters in resource names)
   // lex.addNamedDevice('*Profile3hadoop?', '/rest/server-profiles/eb13eab8', 'name', 'https://10.1.1.1/#/profiles/show/overview/r/rest/server-profiles/eb13eab8?s_sid=LTE', undefined);
 
@@ -68,6 +67,11 @@ describe('Lexer', () => {
   it('resolveDevices complex name 5', () => {
     const result = lex.resolveDevices('@hubot show Hadoop');
     result.should.equal('@hubot show /rest/server-profile-templates/eb13eab27.');
+  });
+
+  it('resolveDevices hardware name', () => {
+    const result = lex.resolveDevices('@hubot show 0000A66101, bay 4');
+    result.should.equal('@hubot show /rest/server-hardware/eb13eab13.');
   });
 
   it('updateNamedDevice', () => {

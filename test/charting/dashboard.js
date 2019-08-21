@@ -28,12 +28,8 @@ const chai = require('chai');
 
 chai.should();
 
-function relative(relPath) {
-    return path.resolve(__dirname, relPath);
-}
-
 describe('Dashboard', function() {
-  this.timeout(2700);
+  this.timeout(2900);
 
   let aggregatedAlerts = {
   	members: [{

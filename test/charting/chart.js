@@ -28,12 +28,8 @@ const chai = require('chai');
 
 chai.should();
 
-function relative(relPath) {
-    return path.resolve(__dirname, relPath);
-}
-
 describe('Chart', function() {
-  this.timeout(2700);
+  this.timeout(2900);
 
   let networkMetricList = [
     {metricName:'receiveKilobytesPerSec',metricSamples: [ '69', '69', '69']},

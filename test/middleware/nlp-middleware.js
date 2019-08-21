@@ -23,17 +23,31 @@ const nlp_compromise = require('compromise');
 const Lexer = require('../../src/middleware/utils/lexer');
 const runNLP = require('../../src/middleware/nlp-middleware').runNLP;
 const lex = new Lexer(nlp_compromise);
+const nlp = require('../../src/middleware/nlp-middleware').nlp;
 
-const chai = require('chai');
 const sinon = require('sinon');
-const Bluebird = require('bluebird');
+const chai = require('chai');
 
 chai.should();
+const assert = chai.assert;
 
 describe('NLP Middleware', () => {
 
   const logger = {
     debug: function(params) {}
+  };
+
+  const robot = {
+    name: 'bot',
+    adapterName: 'shell',
+    receive: function () {},
+    on: function () {},
+    listen: function () {},
+    respond: function () {},
+    listenerMiddleware: function () {},
+    logger: {debug: function () {}, error: function () {}, info: function () {}},
+    catchAll: function () {},
+    receiveMiddleware : function () {}
   };
 
   //add a template
@@ -121,4 +135,42 @@ describe('NLP Middleware', () => {
     Message.original_text.should.equal('@hubot show profile1 - 0000A661, bay 2');
     Message.nlp.out('text').should.equal('@hubot show /rest/server-profiles/eb13eab2.');
   });
+
+  it('runNLP hardware with IP name', () => {
+    const Message = {
+      user: { id: '1', name: 'Shell', room: 'Shell' },
+      text: '@hubot show 172.18.1.1',
+      id: 'messageId',
+      done: false,
+      room: 'Shell'
+    };
+
+    runNLP(Message, logger, lex);
+    Message.text.should.equal('@hubot show 172.18.1.1.');
+    Message.original_text.should.equal('@hubot show 172.18.1.1');
+    Message.nlp.out('text').should.equal('@hubot show 172.18.1.1.');
+  });
+
+  it('runNLP no message text', () => {
+    const Message = {
+      user: { id: '1', name: 'Shell', room: 'Shell' },
+      text: undefined,
+      id: 'messageId',
+      done: false,
+      room: 'Shell'
+    };
+
+    runNLP(Message, logger, lex);
+    assert.equal(Message.text, undefined);
+  });
+
+  it('nlp receiveMiddleware', () => {
+    let spy = sinon.spy(robot, "receiveMiddleware");
+
+    nlp(robot);
+
+    assert(robot.receiveMiddleware.callCount === 1);
+    spy.restore();
+  });
+
 });

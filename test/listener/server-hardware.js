@@ -34,7 +34,7 @@ chai.should();
 const assert = chai.assert;
 
 describe('ServerHardware', function() {
-  this.timeout(10000);
+  this.timeout(19000);
 
   let serverHardwareResponseCritical = {
     type: "server-hardware",
@@ -52,6 +52,7 @@ describe('ServerHardware', function() {
     name: "0000A6610EE, bay 5",
     powerState: "Off",
     status: "Ok",
+    assetTag: "1234",
     uuidState: "On",
     uri: "/rest/server-hardware/eb13eab8-adsf",
     model: "BL460c Gen8 1",
@@ -154,6 +155,9 @@ describe('ServerHardware', function() {
     let rgx6 = new NamedRegExp(serverHardwareListener.LIST_STATUS);
     let rgx7 = new NamedRegExp(serverHardwareListener.LIST_POWER);
     let rgx8 = new NamedRegExp(serverHardwareListener.LIST_UUID_LIGHT);
+    let rgx9 = new NamedRegExp(serverHardwareListener.LIST_ASSETTAG);
+    let rgx10 = new NamedRegExp(serverHardwareListener.LIST_PROFILE_APPLIED);
+    let rgx11 = new NamedRegExp(serverHardwareListener.LIST_NO_PROFILE_APPLIED);
 
     let constructorArgs = robot.respond.getCalls();
 
@@ -198,9 +202,24 @@ describe('ServerHardware', function() {
     assert.isFalse(constructorArgs[7].args[2].hasOwnProperty('prototype'));
 
     rgx8.should.deep.equal(constructorArgs[8].args[0]);
-    assert(typeof constructorArgs[7].args[2] === 'function');
+    assert(typeof constructorArgs[8].args[2] === 'function');
     'bound ListHardwareByUuidLight'.should.equal(constructorArgs[8].args[2].name);
     assert.isFalse(constructorArgs[8].args[2].hasOwnProperty('prototype'));
+
+    rgx9.should.deep.equal(constructorArgs[9].args[0]);
+    assert(typeof constructorArgs[9].args[2] === 'function');
+    'bound ListHardwareByAssetTag'.should.equal(constructorArgs[9].args[2].name);
+    assert.isFalse(constructorArgs[9].args[2].hasOwnProperty('prototype'));
+
+    rgx10.should.deep.equal(constructorArgs[10].args[0]);
+    assert(typeof constructorArgs[10].args[2] === 'function');
+    'bound ListHardwareWithProfiles'.should.equal(constructorArgs[10].args[2].name);
+    assert.isFalse(constructorArgs[10].args[2].hasOwnProperty('prototype'));
+
+    rgx11.should.deep.equal(constructorArgs[11].args[0]);
+    assert(typeof constructorArgs[11].args[2] === 'function');
+    'bound ListHardwareWithNoProfiles'.should.equal(constructorArgs[11].args[2].name);
+    assert.isFalse(constructorArgs[11].args[2].hasOwnProperty('prototype'));
 
     spy.restore();
     done();
@@ -218,6 +237,9 @@ describe('ServerHardware', function() {
     let rgx6 = new NamedRegExp(serverHardwareListener.LIST_STATUS);
     let rgx7 = new NamedRegExp(serverHardwareListener.LIST_POWER);
     let rgx8 = new NamedRegExp(serverHardwareListener.LIST_UUID_LIGHT);
+    let rgx9 = new NamedRegExp(serverHardwareListener.LIST_ASSETTAG);
+    let rgx10 = new NamedRegExp(serverHardwareListener.LIST_PROFILE_APPLIED);
+    let rgx11 = new NamedRegExp(serverHardwareListener.LIST_NO_PROFILE_APPLIED);
 
     assert.isTrue(rgx0.test('@bot power on /rest/server-hardware/eb13eab8-adsf.'));
     assert.isTrue(rgx1.test('@bot power off /rest/server-hardware/eb13eab8-adsf.'));
@@ -228,6 +250,9 @@ describe('ServerHardware', function() {
     assert.isTrue(rgx6.test('@bot list all critical hardware.'));
     assert.isTrue(rgx7.test('@bot list all powered on hardware.'));
     assert.isTrue(rgx8.test('@bot show all hardware with uuid light off.'));
+    assert.isTrue(rgx9.test('@bot show hardware with asset tag 1234P.'));
+    assert.isTrue(rgx10.test('@bot show hardware with profiles.'));
+    assert.isTrue(rgx11.test('@bot show hardware with no profiles.'));
 
     done();
   });
@@ -789,7 +814,7 @@ describe('ServerHardware', function() {
       stub4.restore();
       spy.restore();
       done();
-    }, 7000);
+    }, 8500);
   });
 
   it('list all hardware utilization', (done) => {
@@ -825,7 +850,7 @@ describe('ServerHardware', function() {
       stub4.restore();
       spy.restore();
       done();
-    }, 9900);
+    }, 14000);
   });
 
   it('list by uuid on', (done) => {
@@ -871,6 +896,149 @@ describe('ServerHardware', function() {
     setTimeout(() => {
       assert(msg.send.callCount === 1);
       "name, I didn't find any hardware with the UUID light ON.".should.equal(msg.send.args[0][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('list by asset tag', (done) => {
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareWithFilter').returns(Bluebird.resolve(serverHardwaresResponseOk));
+    const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
+
+    let msg = {
+      robot: robot,
+      assettag: '1234',
+      message: {text: '@bot show all hardware with asset tag 1234.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, "send");
+
+    serverHardwareListener.ListHardwareByAssetTag(msg);
+
+    const expectedJsonResults = JSON.stringify(serverHardwaresResponseOk, null, '  ');
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Okay name, the following hardware have the asset tag 1234.".should.equal(msg.send.args[0][0]);
+      expectedJsonResults.should.equal(msg.send.args[1][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('list by asset tag no results', (done) => {
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareWithFilter').returns(Bluebird.resolve({members: []}));
+    const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
+
+    let msg = {
+      robot: robot,
+      assettag: '5678',
+      message: {text: '@bot show all hardware with asset tag 5678.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, "send");
+
+    serverHardwareListener.ListHardwareByAssetTag(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      "name, I didn't find any hardware with the asset tag 5678.".should.equal(msg.send.args[0][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('list with profiles', (done) => {
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareWithFilter').returns(Bluebird.resolve(serverHardwaresResponseOk));
+    const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot show all hardware with profiles.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, "send");
+
+    serverHardwareListener.ListHardwareWithProfiles(msg);
+
+    const expectedJsonResults = JSON.stringify(serverHardwaresResponseOk, null, '  ');
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Okay name, the following hardware have profiles.".should.equal(msg.send.args[0][0]);
+      expectedJsonResults.should.equal(msg.send.args[1][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('list with profiles no results', (done) => {
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareWithFilter').returns(Bluebird.resolve({members: []}));
+    const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot show all hardware with profiles.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, "send");
+
+    serverHardwareListener.ListHardwareWithProfiles(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      "name, I didn't find any hardware with profiles.".should.equal(msg.send.args[0][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('list with no profiles', (done) => {
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareWithFilter').returns(Bluebird.resolve(serverHardwaresResponseOk));
+    const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot show all hardware with no profiles.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, "send");
+
+    serverHardwareListener.ListHardwareWithNoProfiles(msg);
+
+    const expectedJsonResults = JSON.stringify(serverHardwaresResponseOk, null, '  ');
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 2);
+      "Okay name, the following hardware have no profiles applied.".should.equal(msg.send.args[0][0]);
+      expectedJsonResults.should.equal(msg.send.args[1][0]);
+      stub.restore();
+      spy.restore();
+      done();
+    }, 10);
+  });
+
+  it('list with no profiles no results', (done) => {
+    let stub = sinon.stub(client.ServerHardware, 'getHardwareWithFilter').returns(Bluebird.resolve({members: []}));
+    const serverHardwareListener = new ServerHardwareListener(robot, client, transform, brain);
+
+    let msg = {
+      robot: robot,
+      message: {text: '@bot show all hardware with profiles.', user: {name: 'name', id: '1234'}, room: 'room'},
+      send: function () {}
+    };
+    let spy = sinon.spy(msg, "send");
+
+    serverHardwareListener.ListHardwareWithNoProfiles(msg);
+
+    setTimeout(() => {
+      assert(msg.send.callCount === 1);
+      "name, I didn't find any hardware without profiles.".should.equal(msg.send.args[0][0]);
       stub.restore();
       spy.restore();
       done();
