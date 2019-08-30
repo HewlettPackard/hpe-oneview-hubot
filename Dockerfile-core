@@ -37,7 +37,9 @@ RUN apk --no-cache add \
 #RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 #RUN apk add --no-cache aptitude
 #RUN aptitude install -y
-RUN apk --no-cache add --update nodejs npm
+RUN apk --no-cache add --update \
+    jq                          \
+    nodejs npm
 
 RUN node -v
 
